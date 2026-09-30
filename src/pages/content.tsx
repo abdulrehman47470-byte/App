@@ -49,11 +49,11 @@ export function SessionsPage() {
                 <Link to={`/sessions/${s.id}`} className="group block overflow-hidden rounded-[20px] border border-line bg-surface transition-colors hover:border-line-strong">
                   <Thumb hue={s.hue} className="aspect-video">
                     <span className="absolute inset-0 grid place-items-center">
-                      <span className="grid size-11 place-items-center rounded-full bg-bg/60 backdrop-blur transition-transform group-hover:scale-110">
+                      <span className="grid size-11 place-items-center rounded-full bg-bg/80 transition-transform group-hover:scale-110">
                         <Play className="ml-0.5 size-5 fill-gold text-gold" />
                       </span>
                     </span>
-                    <span className="absolute bottom-1.5 right-2 rounded bg-bg/70 px-1.5 text-[10px] text-text">{s.durationMin} min</span>
+                    <span className="absolute bottom-1.5 right-2 rounded bg-bg/80 px-1.5 text-[10px] text-text">{s.durationMin} min</span>
                   </Thumb>
                   <p className="line-clamp-2 p-3 text-sm font-medium leading-snug text-text">{s.title}</p>
                 </Link>
@@ -82,7 +82,7 @@ export function SessionDetailPage() {
           <Thumb hue={s.hue} className="aspect-video">
             <div className="absolute inset-0 grid place-items-center">
               <div className="text-center">
-                <span className="mx-auto grid size-16 place-items-center rounded-full bg-bg/60 backdrop-blur">
+                <span className="mx-auto grid size-16 place-items-center rounded-full bg-bg/80">
                   <Play className="ml-1 size-7 fill-gold text-gold" />
                 </span>
                 <p className="mt-3 text-xs text-muted">Vimeo player placeholder</p>

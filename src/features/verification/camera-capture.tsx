@@ -161,7 +161,7 @@ export function CameraCapture({
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="rounded-full bg-bg/80 px-3.5 py-1.5 text-xs font-medium text-text backdrop-blur"
+                className="rounded-full bg-bg/80 px-3.5 py-1.5 text-xs font-medium text-text"
               >
                 {prompts[prompt]}
               </m.span>

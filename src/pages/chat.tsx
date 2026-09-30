@@ -72,7 +72,7 @@ export default function Chat() {
   let lastDay = '';
   return (
     <div className="flex h-[calc(100dvh-76px-env(safe-area-inset-bottom))] flex-col lg:h-dvh">
-      <header className="flex items-center gap-2 border-b border-line bg-bg/95 px-3 pb-2 pt-[max(8px,env(safe-area-inset-top))] backdrop-blur">
+      <header className="flex items-center gap-2 border-b border-line bg-bg/95 px-3 pb-2 pt-[max(8px,env(safe-area-inset-top))]">
         <BackButton to="/messages" />
         {m ? (
           <Link to={`/member/${m.id}`} className="flex min-w-0 flex-1 items-center gap-3">
@@ -116,7 +116,7 @@ export default function Chat() {
                 lastDay = day;
                 const nextSame = messages[i + 1]?.fromMe === msg.fromMe;
                 return (
-                  <M.li key={msg.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+                  <M.li key={msg.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
                     {showDay && <p className="my-3 text-center text-[11px] uppercase tracking-wider text-faint">{day}</p>}
                     <Bubble msg={msg} tail={!nextSame} />
                   </M.li>

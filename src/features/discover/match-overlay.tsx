@@ -37,7 +37,7 @@ export function MatchOverlay({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[70] flex flex-col items-center justify-center overflow-hidden bg-bg/95 px-6 backdrop-blur-md"
+          className="fixed inset-0 z-[70] flex flex-col items-center justify-center overflow-hidden bg-bg/95 px-6"
         >
           <div aria-hidden className="absolute inset-0 bg-[radial-gradient(50%_40%_at_50%_42%,rgba(217,164,65,0.25),transparent_70%)]" />
           {!reduce && (

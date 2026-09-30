@@ -42,7 +42,7 @@ export default function Welcome() {
             <Button size="lg" block onClick={() => navigate('/signin?mode=signup')}>
               <UserPlus className="size-5" /> Sign up
             </Button>
-            <Button size="lg" variant="outline" block onClick={() => navigate('/signin')} className="bg-bg/40 backdrop-blur-sm">
+            <Button size="lg" variant="outline" block onClick={() => navigate('/signin')} className="bg-bg/80">
               <LogIn className="size-5" /> Log in
             </Button>
           </div>

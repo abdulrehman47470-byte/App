@@ -25,7 +25,7 @@ export default function Admin() {
 
   return (
     <Frame wide>
-      <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-line bg-bg/95 px-5 py-3 backdrop-blur">
+      <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-line bg-bg/95 px-5 py-3">
         <LogoMark className="size-8" />
         <div className="flex-1">
           <h1 className="font-serif text-xl text-text">Admin Panel</h1>

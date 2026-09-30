@@ -106,8 +106,8 @@ export function CheckoutSheet({
   return (
     <Dialog.Root open={open} onOpenChange={(v) => step !== 'processing' && onOpenChange(v)}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-[80] bg-black/70 backdrop-blur-[2px]" />
-        <Dialog.Content className="surface fixed inset-x-0 bottom-0 z-[80] mx-auto flex max-h-[94dvh] w-full max-w-[460px] flex-col overflow-hidden rounded-t-[24px] focus:outline-none sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 sm:rounded-[24px]">
+        <Dialog.Overlay className="sheet-overlay fixed inset-0 z-[80] bg-black/75" />
+        <Dialog.Content className="sheet-content surface fixed inset-x-0 bottom-0 z-[80] mx-auto flex max-h-[94dvh] w-full max-w-[460px] flex-col overflow-hidden rounded-t-[24px] focus:outline-none sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 sm:rounded-[24px]">
           {/* Order summary header */}
           <div className="flex items-center gap-3 border-b border-line px-5 py-4">
             <LogoMark className="size-10" />

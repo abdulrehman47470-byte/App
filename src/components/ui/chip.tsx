@@ -1,4 +1,3 @@
-import { m } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -16,14 +15,13 @@ export function Chip({
   size?: 'sm' | 'md';
 }) {
   return (
-    <m.button
+    <button
       type="button"
       role={role}
       aria-checked={selected}
-      whileTap={{ scale: 0.94 }}
       onClick={onToggle}
       className={cn(
-        'inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 text-sm transition-colors',
+        'inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 text-sm transition-[color,background-color,border-color,transform] duration-150 active:scale-[0.94]',
         size === 'sm' && 'min-h-9 px-3 text-[13px]',
         selected
           ? 'border-gold bg-gold-fill text-text shadow-[0_0_14px_-4px_rgba(217,164,65,0.55)]'
@@ -32,7 +30,7 @@ export function Chip({
     >
       {selected && <Check className="size-3.5 text-gold" strokeWidth={2.5} aria-hidden />}
       {label}
-    </m.button>
+    </button>
   );
 }
 

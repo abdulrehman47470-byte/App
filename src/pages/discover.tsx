@@ -1,13 +1,12 @@
 import { animate, AnimatePresence, m, useMotionValue, useTransform, type MotionValue, type PanInfo } from 'framer-motion';
-import { Heart, RotateCcw, SlidersHorizontal, X } from 'lucide-react';
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { Heart, RotateCcw, X } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DiscoverTabs } from '@/features/discover/discover-tabs';
 import { EmptyState } from '@/components/brand/empty-state';
 import { PageHeader } from '@/components/layout/page';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/misc';
-import { activeFilterCount, DEFAULT_FILTERS, FilterSheet } from '@/features/discover/filter-sheet';
+import { DEFAULT_FILTERS, FiltersButton } from '@/features/discover/filter-sheet';
 import { MemberCardFace } from '@/features/discover/member-card';
 import { useLikeFlow } from '@/features/discover/use-like';
 import { useDiscover, useMe } from '@/features/queries';
@@ -21,7 +20,6 @@ const THRESHOLD = 110;
 
 export default function Discover() {
   const [filters, setFilters] = useState<DiscoverFilters>(() => storage.get(STORAGE_KEYS.filters) ?? DEFAULT_FILTERS);
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const { data, isLoading } = useDiscover(filters);
   const { data: me } = useMe();
   const { like, overlay } = useLikeFlow();
@@ -88,11 +86,10 @@ export default function Discover() {
     return () => window.removeEventListener('keydown', onKey);
   });
 
-  const applyFilters = (f: DiscoverFilters) => {
+  const applyFilters = useCallback((f: DiscoverFilters) => {
     setFilters(f);
     storage.set(STORAGE_KEYS.filters, f);
-  };
-  const nFilters = activeFilterCount(filters);
+  }, []);
 
   return (
     <>
@@ -101,10 +98,7 @@ export default function Discover() {
         large
         subtitle={me?.city ? `Near ${me.city}` : undefined}
         action={
-          <Button variant="secondary" size="sm" onClick={() => setFiltersOpen(true)} aria-label={`Filters${nFilters ? `, ${nFilters} active` : ''}`}>
-            <SlidersHorizontal className="size-4" strokeWidth={1.5} /> Filters
-            {nFilters > 0 && <span className="gold-gradient grid size-5 place-items-center rounded-full text-[11px] font-bold text-gold-ink">{nFilters}</span>}
-          </Button>
+          <FiltersButton value={filters} onApply={applyFilters} />
         }
       />
       <DiscoverTabs />
@@ -113,7 +107,7 @@ export default function Discover() {
       </p>
 
       <section aria-label="Member cards. Use the left and right arrow keys to pass or like, U to undo." className="px-4 pt-4">
-        <div className="relative mx-auto h-[min(64dvh,560px)] min-h-[420px]">
+        <div className="relative mx-auto h-[clamp(340px,calc(100dvh-330px),560px)]">
           {isLoading || !data ? (
             <Skeleton className="absolute inset-0 rounded-[24px]" />
           ) : !top ? (
@@ -123,9 +117,7 @@ export default function Discover() {
                 title="You're all caught up"
                 body="No more members match your filters right now. Widen your filters or check back soon."
                 action={
-                  <Button variant="outline" onClick={() => setFiltersOpen(true)}>
-                    Adjust filters
-                  </Button>
+                  <FiltersButton value={filters} onApply={applyFilters} variant="empty" />
                 }
               />
             </div>
@@ -154,7 +146,6 @@ export default function Discover() {
         <p className="mt-3 hidden text-center text-xs text-faint sm:block">Tip: use ← and → to pass or like</p>
       </section>
 
-      <FilterSheet open={filtersOpen} onOpenChange={setFiltersOpen} value={filters} onApply={applyFilters} />
       {safetyFor && (
         <SafetySheet
           memberId={safetyFor.member.id}
@@ -185,8 +176,11 @@ function TopCard({
   const rotate = useTransform(x, [-300, 300], [-14, 14]);
   const likeOpacity = useTransform(x, [30, 120], [0, 1]);
   const passOpacity = useTransform(x, [-120, -30], [1, 0]);
+  // A drag that is released (swipe not completed) must never count as a tap that opens the profile.
+  const dragged = useRef(false);
 
   const onDragEnd = async (_: unknown, info: PanInfo) => {
+    setTimeout(() => (dragged.current = false), 0);
     const dx = info.offset.x;
     const v = info.velocity.x;
     if (dx > THRESHOLD || v > 600) {
@@ -202,12 +196,14 @@ function TopCard({
 
   return (
     <m.div
-      className="absolute inset-0 cursor-grab touch-pan-y active:cursor-grabbing"
+      className="absolute inset-0 cursor-grab touch-pan-y will-change-transform active:cursor-grabbing"
       style={{ x, rotate, zIndex: 3 }}
       drag="x"
       dragMomentum={false}
       onDragEnd={onDragEnd}
-      onTap={onOpen}
+      onPointerDown={() => (dragged.current = false)}
+      onDragStart={() => (dragged.current = true)}
+      onTap={() => !dragged.current && onOpen()}
       initial={{ scale: 0.96, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       exit={{ opacity: 0, transition: { duration: 0.15 } }}
@@ -231,9 +227,11 @@ function BackCard({ card, depth, x }: { card: DiscoverCard; depth: number; x: Mo
   const scale = useTransform(x, [-250, 0, 250], depth === 1 ? [1, base, 1] : [base + 0.05, base, base + 0.05]);
   const y = useTransform(x, [-250, 0, 250], depth === 1 ? [0, depth * 14, 0] : [14, depth * 14, 14]);
   return (
-    <m.div className="pointer-events-none absolute inset-0" style={{ scale, y, zIndex: 3 - depth }} aria-hidden>
-      <div className={cn('size-full transition-[filter]', depth === 2 && 'brightness-50', depth === 1 && 'brightness-75')}>
+    <m.div className="pointer-events-none absolute inset-0 will-change-transform" style={{ scale, y, zIndex: 3 - depth }} aria-hidden>
+      <div className="relative size-full">
         <MemberCardFace card={card} />
+        {/* dim cards further back with a plain overlay (a CSS filter would repaint every frame) */}
+        <div className={cn('absolute inset-0 rounded-[24px] bg-black', depth === 1 ? 'opacity-25' : 'opacity-50')} />
       </div>
     </m.div>
   );

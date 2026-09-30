@@ -11,7 +11,7 @@ export function MatchRing({ pct, size = 56, className }: { pct: number; size?: n
   const c = 2 * Math.PI * r;
   return (
     <div
-      className={cn('relative grid place-items-center rounded-full bg-bg/70 backdrop-blur-sm', className)}
+      className={cn('relative grid place-items-center rounded-full bg-bg/80', className)}
       style={{ width: size, height: size }}
       aria-label={`${pct}% match`}
       role="img"
@@ -83,7 +83,7 @@ export function UserTypeBadge({ type, className }: { type?: UserType; className?
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full border border-gold/50 bg-bg/60 px-2.5 py-0.5 text-xs font-semibold text-gold-light backdrop-blur-sm',
+        'inline-flex items-center gap-1 rounded-full border border-gold/50 bg-bg/80 px-2.5 py-0.5 text-xs font-semibold text-gold-light',
         className,
       )}
     >

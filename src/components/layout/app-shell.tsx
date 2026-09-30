@@ -1,6 +1,8 @@
 import { Compass, GraduationCap, Heart, House, Map as MapIcon, MessageCircle, UserRound } from 'lucide-react';
-import { Suspense, useEffect } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
+import { KeepAliveOutlet } from './keep-alive';
+import { TAB_ELEMENTS } from '@/pages/tab-pages';
 import { useQueryClient } from '@tanstack/react-query';
 import { LogoMark, Wordmark } from '@/components/brand/logo';
 import { FEATURES } from '@/config/features';
@@ -32,13 +34,17 @@ export function AppShell() {
     <Frame>
       <SideRail unread={unread} />
       <main className="pb-[calc(76px+env(safe-area-inset-bottom))] lg:pb-6">
-        <Suspense fallback={<PageSkeleton />}>
-          <Outlet />
-        </Suspense>
+        <KeepAliveOutlet
+          tabs={TABS.map((t) => t.to)}
+          elements={TAB_ELEMENTS}
+          cssOnly={['/map']}
+          prebuild={['/feed', '/discover', '/messages', '/profile', '/mentors', '/matches']}
+          fallback={<PageSkeleton />}
+        />
       </main>
       <nav
         aria-label="Main"
-        className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-[430px] border-t border-line bg-bg-elevated/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-[430px] border-t border-line bg-bg-elevated/[0.98] pb-[env(safe-area-inset-bottom)] lg:hidden"
       >
         <ul className="grid grid-cols-5">
           {TABS.map((t) => (
@@ -86,7 +92,7 @@ function SideRail({ unread }: { unread: number }) {
   return (
     <nav
       aria-label="Main"
-      className="fixed top-0 z-40 hidden h-dvh w-[200px] flex-col gap-1 border-r border-line bg-bg-elevated/80 p-4 backdrop-blur lg:flex"
+      className="fixed top-0 z-40 hidden h-dvh w-[200px] flex-col gap-1 border-r border-line bg-bg-elevated p-4 lg:flex"
       style={{ right: 'calc(50% + 215px)' }}
     >
       <div className="mb-6 flex items-center gap-2 px-2 pt-2">

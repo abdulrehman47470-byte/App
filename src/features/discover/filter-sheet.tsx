@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
+import { SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
 import { Sheet } from '@/components/ui/sheet';
@@ -92,3 +93,35 @@ export function FilterSheet({
     </Sheet>
   );
 }
+
+/**
+ * Filters button that owns its sheet's open state, so opening the sheet re-renders only this
+ * button and the sheet (not the whole Discover screen and its card stack).
+ */
+export const FiltersButton = memo(function FiltersButton({
+  value,
+  onApply,
+  variant = 'header',
+}: {
+  value: DiscoverFilters;
+  onApply: (f: DiscoverFilters) => void;
+  variant?: 'header' | 'empty';
+}) {
+  const [open, setOpen] = useState(false);
+  const n = activeFilterCount(value);
+  return (
+    <>
+      {variant === 'header' ? (
+        <Button variant="secondary" size="sm" onClick={() => setOpen(true)} aria-label={`Filters${n ? `, ${n} active` : ''}`}>
+          <SlidersHorizontal className="size-4" strokeWidth={1.5} /> Filters
+          {n > 0 && <span className="gold-gradient grid size-5 place-items-center rounded-full text-[11px] font-bold text-gold-ink">{n}</span>}
+        </Button>
+      ) : (
+        <Button variant="outline" onClick={() => setOpen(true)}>
+          Adjust filters
+        </Button>
+      )}
+      <FilterSheet open={open} onOpenChange={setOpen} value={value} onApply={onApply} />
+    </>
+  );
+});

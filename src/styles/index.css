@@ -72,8 +72,23 @@
   #root {
     min-height: 100%;
   }
+  html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+  /* no 300 ms double-tap-zoom delay on taps */
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  label,
+  [role='button'] {
+    touch-action: manipulation;
+  }
   body {
     background-color: var(--bg);
+    overscroll-behavior-y: none;
     color: var(--text);
     font-family: var(--font-sans);
     line-height: 1.5;
@@ -210,8 +225,9 @@
   font-family: var(--font-sans);
 }
 /* warm the dark tiles toward the lounge palette */
-.ds-map .leaflet-tile-pane {
-  /* invert the light OSM tiles into a dark map, then warm them toward the lounge palette */
+.ds-map .leaflet-tile {
+  /* invert the light OSM tiles into a dark map, then warm them toward the lounge palette.
+     Applied per tile (filtered once) rather than to the whole pane (re-filtered on every pan frame). */
   filter: invert(1) hue-rotate(180deg) brightness(0.8) contrast(0.9) sepia(0.45) saturate(0.8);
 }
 .ds-map .leaflet-control-attribution {
@@ -479,3 +495,67 @@
   }
 }
 
+
+/* ---------- Sheets: smooth slide/fade (transform + opacity only) ---------- */
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes sheet-down {
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes sheet-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-46%) scale(0.97);
+  }
+}
+@keyframes sheet-pop-out {
+  to {
+    opacity: 0;
+    transform: translateY(-46%) scale(0.97);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+.sheet-overlay[data-state='open'] {
+  animation: fade-in 0.2s ease-out;
+}
+.sheet-overlay[data-state='closed'] {
+  animation: fade-out 0.16s ease-in forwards;
+}
+.sheet-content {
+  will-change: transform;
+  overscroll-behavior: contain;
+}
+.sheet-content[data-state='open'] {
+  animation: sheet-up 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.sheet-content[data-state='closed'] {
+  animation: sheet-down 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+@media (min-width: 640px) {
+  .sheet-content[data-state='open'] {
+    animation: sheet-pop 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .sheet-content[data-state='closed'] {
+    animation: sheet-pop-out 0.15s ease-in forwards;
+  }
+}
+
+/* Long lists: skip rendering work for posts that are off screen */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 520px;
+}

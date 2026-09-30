@@ -8,7 +8,7 @@ import type { DiscoverCard } from '@/types';
 export function MemberCardFace({ card, onMore }: { card: DiscoverCard; onMore?: () => void }) {
   const { member: m, matchPct, shared } = card;
   return (
-    <div className="relative size-full overflow-hidden rounded-[24px] border border-line bg-surface shadow-[var(--shadow-card)]">
+    <div className="relative size-full overflow-hidden rounded-[24px] border border-line bg-surface shadow-[var(--shadow-card)] [contain:layout_paint]">
       <PortraitArt name={m.name} hue={m.photoHue} />
       <div className="photo-fade absolute inset-0" aria-hidden />
       <div className="absolute inset-x-0 top-0 flex items-start justify-between p-3">
@@ -21,7 +21,7 @@ export function MemberCardFace({ card, onMore }: { card: DiscoverCard; onMore?: 
             }}
             onPointerDown={(e) => e.stopPropagation()}
             aria-label={`Report or block ${m.name}`}
-            className="grid size-11 place-items-center rounded-full bg-bg/60 text-text backdrop-blur-sm hover:bg-bg/80"
+            className="grid size-11 place-items-center rounded-full bg-bg/80 text-text hover:bg-bg/80"
           >
             <MoreHorizontal className="size-5" />
           </button>

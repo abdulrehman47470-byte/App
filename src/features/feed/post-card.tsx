@@ -365,7 +365,7 @@ function FeedVideo({ id, author }: { id: string; author: string }) {
             type="button"
             onClick={() => setMuted((m) => !m)}
             aria-label={muted ? 'Turn sound on' : 'Mute'}
-            className="absolute right-3 top-3 grid size-10 place-items-center rounded-full bg-bg/70 text-text backdrop-blur"
+            className="absolute right-3 top-3 grid size-10 place-items-center rounded-full bg-bg/80 text-text"
           >
             {muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
           </button>

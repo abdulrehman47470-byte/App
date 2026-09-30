@@ -27,6 +27,7 @@ through the whole sign-up flow.
 | `npm run smoke` | Click through sign-up → match → message automatically (needs `npm run dev` running) |
 | `npm run setup:check` | Show which keys are missing, in plain English |
 | `npm run preview` then `npm run perf` | Measure load and tab-switch speed on the production build (simulated phone on 4G) |
+| `npm run preview` then `npm run smooth` | Measure smoothness (frames per second, stutters) while scrolling, swiping, opening sheets, panning the map |
 | `npm run icons` | Regenerate the app icons from `public/icon.svg` |
 
 ## Where things live
@@ -82,3 +83,30 @@ How:
 
 The mock data no longer adds a fake delay. Set `VITE_MOCK_LATENCY=true` in `.env` to bring it back when
 checking loading states.
+
+## Smoothness
+
+Measured with `npm run smooth` (production build, CPU slowed 4x like a mid-range phone; 60 fps is perfect):
+
+| Action | Before | Now |
+|---|---|---|
+| Drag a Discover card | 37 fps, 76 stutters | 59–60 fps, 1 stutter |
+| Open a sheet (worst frame) | 333 ms freeze | ~130–150 ms, once, on first open |
+| Switch tabs (worst frame) | 200 ms | ~80 ms |
+| Pan the map | 59 fps | 59–60 fps |
+| Scroll the Home feed | 57 fps, 10 stutters | 55–58 fps, short stutters only (33–67 ms) |
+| Welcome animations | 60 fps | 60 fps |
+
+How:
+- No background-blur effects (`backdrop-filter`) anywhere: they are recomputed on every scroll frame on phones.
+- Portraits and post art are cached images instead of complex inline graphics, and use gradients
+  instead of blur filters, so the browser draws them once.
+- Swipe cards run on their own GPU layer; the cards behind are dimmed with an overlay instead of a filter.
+- The main tabs stay alive after the first visit (React `<Activity>`) and are pre-built while you are idle,
+  so switching tabs rebuilds nothing and each tab keeps its scroll position.
+- Preloaded screens render straight away (no ~300 ms Suspense reveal delay), and background preloading
+  pauses while you are touching, scrolling or typing.
+- Sheets slide in with GPU-only animations and fill in their contents one frame later.
+- Taps respond immediately (no double-tap-zoom delay); off-screen posts are skipped by the browser.
+
+Also fixed: releasing a card without completing the swipe no longer opens that member's profile.

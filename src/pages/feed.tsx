@@ -67,7 +67,7 @@ export default function Feed() {
         ) : (
           <ul className="space-y-4">
             {data.map((p) => (
-              <li key={p.id}>
+              <li key={p.id} className="cv-auto">
                 <PostCard post={p} />
               </li>
             ))}

@@ -54,7 +54,7 @@ for (let round = 0; round < 2; round++) {
           const start = performance.now();
           link.click();
           const check = () => {
-            const ready = document.querySelector('main h1')?.textContent === heading && !document.querySelector('main .skeleton');
+            const ready = [...document.querySelectorAll('main h1')].some((e) => e.offsetParent && e.textContent === heading) && ![...document.querySelectorAll('main .skeleton')].some((e) => e.offsetParent);
             if (ready) resolve(Math.round(performance.now() - start));
             else requestAnimationFrame(check);
           };
@@ -77,7 +77,7 @@ await cdp.send('Network.emulateNetworkConditions', { offline: false, latency: 0,
 await page.waitForTimeout(1500);
 const t1 = Date.now();
 await page.goto(BASE + '/feed', { waitUntil: 'commit' });
-await page.waitForFunction(() => document.querySelector('main h1')?.textContent === 'The Lounge' && !document.querySelector('main .skeleton'));
+await page.waitForFunction(() => [...document.querySelectorAll('main h1')].some((e) => e.offsetParent && e.textContent === 'The Lounge') && ![...document.querySelectorAll('main .skeleton')].some((e) => e.offsetParent));
 const sw = await page.evaluate(() => !!navigator.serviceWorker?.controller);
 console.log(`
 Repeat visit (reload the app): ${Date.now() - t1} ms to full Home feed${sw ? ' (served by the service worker cache)' : ' (no service worker)'}`);

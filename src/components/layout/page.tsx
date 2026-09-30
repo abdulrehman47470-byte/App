@@ -34,7 +34,7 @@ export function PageHeader({
   large?: boolean;
 }) {
   return (
-    <header className="sticky top-0 z-30 border-b border-line/60 bg-bg/90 px-4 pb-3 pt-[max(12px,env(safe-area-inset-top))] backdrop-blur-md">
+    <header className="sticky top-0 z-30 border-b border-line/60 bg-bg/[0.97] px-4 pb-3 pt-[max(12px,env(safe-area-inset-top))]">
       <div className="flex min-h-11 items-center gap-1">
         {back || backTo ? <BackButton to={backTo} /> : null}
         <div className={cn('min-w-0 flex-1', (back || backTo) && !large && 'text-center')}>
@@ -68,7 +68,7 @@ export function OnboardingHeader({
   backTo?: string;
 }) {
   return (
-    <header className="sticky top-0 z-30 bg-bg/90 px-4 pb-3 pt-[max(12px,env(safe-area-inset-top))] backdrop-blur-md">
+    <header className="sticky top-0 z-30 bg-bg/[0.97] px-4 pb-3 pt-[max(12px,env(safe-area-inset-top))]">
       <div className="flex min-h-11 items-center">
         <BackButton to={backTo} />
         <h1 className="flex-1 text-center font-serif text-xl text-text">{title}</h1>
@@ -86,7 +86,7 @@ export function OnboardingHeader({
 /** Sticky footer for primary actions on long forms. */
 export function StickyFooter({ children }: { children: ReactNode }) {
   return (
-    <div className="sticky bottom-0 z-20 -mx-4 mt-6 border-t border-line/60 bg-bg/95 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3 backdrop-blur-md">
+    <div className="sticky bottom-0 z-20 -mx-4 mt-6 border-t border-line/60 bg-bg/95 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">
       {children}
     </div>
   );

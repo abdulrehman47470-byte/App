@@ -60,10 +60,10 @@ export default function MemberProfile() {
         <PortraitArt name={m.name} hue={m.photoHue} />
         <div className="photo-fade absolute inset-0" aria-hidden />
         <div className="absolute inset-x-0 top-0 flex items-center justify-between p-3 pt-[max(12px,env(safe-area-inset-top))]">
-          <button type="button" onClick={() => navigate(-1)} aria-label="Back" className="grid size-11 place-items-center rounded-full bg-bg/60 backdrop-blur-sm">
+          <button type="button" onClick={() => navigate(-1)} aria-label="Back" className="grid size-11 place-items-center rounded-full bg-bg/80">
             <ChevronLeft className="size-6" strokeWidth={1.5} />
           </button>
-          <button type="button" onClick={() => setSafety(true)} aria-label={`Report or block ${m.name}`} className="grid size-11 place-items-center rounded-full bg-bg/60 backdrop-blur-sm">
+          <button type="button" onClick={() => setSafety(true)} aria-label={`Report or block ${m.name}`} className="grid size-11 place-items-center rounded-full bg-bg/80">
             <MoreHorizontal className="size-5" />
           </button>
         </div>

@@ -2,6 +2,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useEffect, useMemo } from 'react';
 import { Circle, MapContainer, Marker, TileLayer, useMap } from 'react-leaflet';
+import { useTabActive } from '@/components/layout/keep-alive';
 import { cn, initials } from '@/lib/utils';
 
 // Free OpenStreetMap tiles (no API key), turned dark and warm with a CSS filter (see .ds-map in
@@ -54,6 +55,16 @@ function FitBounds({ markers, fit }: { markers: MapMarker[]; fit: boolean }) {
     else map.fitBounds(L.latLngBounds(markers.map((m) => [m.lat, m.lng])), { padding: [40, 40], maxZoom: 12 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, fit, map]);
+  return null;
+}
+
+/** When a kept-alive map tab becomes visible again, Leaflet must re-measure its container. */
+function ResizeOnShow() {
+  const map = useMap();
+  const active = useTabActive();
+  useEffect(() => {
+    if (active) requestAnimationFrame(() => map.invalidateSize());
+  }, [active, map]);
   return null;
 }
 
@@ -129,6 +140,7 @@ export function MapView({
         ))}
         <FitBounds markers={markers} fit={fit && !area} />
         <FlyTo target={flyTo} />
+        <ResizeOnShow />
       </MapContainer>
     </div>
   );
