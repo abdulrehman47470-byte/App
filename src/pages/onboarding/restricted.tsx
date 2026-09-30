@@ -1,5 +1,5 @@
 import { Lock } from 'lucide-react';
-import { Frame } from '@/components/layout/app-shell';
+import { Frame } from '@/components/layout/frame';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/misc';
 import { useSession } from '@/lib/session';

@@ -1,41 +1,61 @@
-import { lazy, Suspense, type ReactNode } from 'react';
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
-import { AppShell, Frame } from '@/components/layout/app-shell';
-import { FEATURES, HOME } from '@/config/features';
+import { lazy, Suspense, useEffect, type ReactNode } from 'react';
+import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
+import { Frame } from '@/components/layout/frame';
 import { Skeleton } from '@/components/ui/misc';
+import { FEATURES, HOME } from '@/config/features';
 import { nextStep, useSession } from '@/lib/session';
-
 import Welcome from '@/pages/onboarding/welcome';
-import SignIn from '@/pages/onboarding/sign-in';
-import VerifyAge from '@/pages/onboarding/verify-age';
-import VerifyFace from '@/pages/onboarding/verify-face';
-import Restricted from '@/pages/onboarding/restricted';
-import Ethics from '@/pages/onboarding/ethics';
-import PhotoUpload from '@/pages/onboarding/photo-upload';
-import Paywall from '@/pages/onboarding/paywall';
-import ProfileSetup from '@/pages/profile-setup';
-import Discover from '@/pages/discover';
+import { pages, prefetchWhenIdle } from '@/routes';
 
-const MemberProfile = lazy(() => import('@/pages/member-profile'));
-const Feed = lazy(() => import('@/pages/feed'));
-const PostPage = lazy(() => import('@/pages/feed').then((m) => ({ default: m.PostPage })));
-const MemberMap = lazy(() => import('@/pages/member-map'));
-const Mentors = lazy(() => import('@/pages/mentors'));
-const Matches = lazy(() => import('@/pages/matches'));
-const Messages = lazy(() => import('@/pages/messages'));
-const Chat = lazy(() => import('@/pages/chat'));
-const MyProfile = lazy(() => import('@/pages/my-profile'));
-const StogieSearch = lazy(() => import('@/pages/stogie-search'));
-const Admin = lazy(() => import('@/pages/admin'));
-const Settings = lazy(() => import('@/pages/settings').then((m) => ({ default: m.SettingsPage })));
-const Subscription = lazy(() => import('@/pages/settings').then((m) => ({ default: m.SubscriptionPage })));
-const Refer = lazy(() => import('@/pages/settings').then((m) => ({ default: m.ReferPage })));
-const DeleteAccount = lazy(() => import('@/pages/settings').then((m) => ({ default: m.DeleteAccountPage })));
-const Sessions = lazy(() => import('@/pages/content').then((m) => ({ default: m.SessionsPage })));
-const SessionDetail = lazy(() => import('@/pages/content').then((m) => ({ default: m.SessionDetailPage })));
-const Blog = lazy(() => import('@/pages/content').then((m) => ({ default: m.BlogPage })));
-const BlogPost = lazy(() => import('@/pages/content').then((m) => ({ default: m.BlogPostPage })));
-const Legal = lazy(() => import('@/pages/content').then((m) => ({ default: m.LegalPage })));
+// Only the Welcome screen ships in the first download; everything else is split out and
+// preloaded in the background (see src/routes.ts).
+const named = <K extends string>(load: () => Promise<Record<K, React.ComponentType>>, name: K) =>
+  lazy(() => load().then((m) => ({ default: m[name] })));
+
+const AppShell = named(pages.shell, 'AppShell');
+const SignIn = lazy(pages.signIn);
+const VerifyAge = lazy(pages.verifyAge);
+const VerifyFace = lazy(pages.verifyFace);
+const Restricted = lazy(pages.restricted);
+const Ethics = lazy(pages.ethics);
+const PhotoUpload = lazy(pages.photo);
+const Paywall = lazy(pages.paywall);
+const ProfileSetup = lazy(pages.setup);
+const Discover = lazy(pages.discover);
+const MemberProfile = lazy(pages.memberProfile);
+const Feed = lazy(pages.feed);
+const PostPage = named(pages.feed, 'PostPage');
+const MemberMap = lazy(pages.map);
+const Mentors = lazy(pages.mentors);
+const Matches = lazy(pages.matches);
+const Messages = lazy(pages.messages);
+const Chat = lazy(pages.chat);
+const MyProfile = lazy(pages.myProfile);
+const StogieSearch = lazy(pages.search);
+const Admin = lazy(pages.admin);
+const Settings = named(pages.settings, 'SettingsPage');
+const Subscription = named(pages.settings, 'SubscriptionPage');
+const Refer = named(pages.settings, 'ReferPage');
+const DeleteAccount = named(pages.settings, 'DeleteAccountPage');
+const Sessions = named(pages.content, 'SessionsPage');
+const SessionDetail = named(pages.content, 'SessionDetailPage');
+const Blog = named(pages.content, 'BlogPage');
+const BlogPost = named(pages.content, 'BlogPostPage');
+const Legal = named(pages.content, 'LegalPage');
+
+const TAB_ROUTES = [HOME, '/discover', FEATURES.memberMap ? '/map' : '/matches', '/messages', '/profile', '/member/x', '/messages/x', '/mentors', '/matches'];
+
+/** Preload the screens the member is most likely to open next. */
+function Prefetcher() {
+  const { session, isComplete } = useSession();
+  const { pathname } = useLocation();
+  useEffect(() => {
+    if (isComplete) prefetchWhenIdle(TAB_ROUTES);
+    else if (!session.signedIn) prefetchWhenIdle(['/signin']);
+    else prefetchWhenIdle([nextStep(session)]);
+  }, [isComplete, session, pathname]);
+  return null;
+}
 
 /** Sign-up steps need a signed-in (mock) account. */
 function RequireSignedIn({ children }: { children?: ReactNode }) {
@@ -61,6 +81,8 @@ const PageFallback = () => (
 
 export default function App() {
   return (
+    <>
+    <Prefetcher />
     <Suspense
       fallback={
         <Frame>
@@ -110,5 +132,6 @@ export default function App() {
         <Route path="*" element={<Navigate to={HOME} replace />} />
       </Routes>
     </Suspense>
+    </>
   );
 }

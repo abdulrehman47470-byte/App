@@ -1,4 +1,6 @@
 // localStorage wrapper that never throws (private mode, blocked storage, SSR).
+
+export const STORAGE_KEYS = { session: 'ds.session', me: 'ds.me', mock: 'ds.mock', filters: 'ds.filters' } as const;
 export const storage = {
   get<T>(key: string): T | null {
     try {

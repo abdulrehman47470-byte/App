@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -21,7 +21,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       >
         <AnimatePresence>
           {toasts.map((t) => (
-            <motion.div
+            <m.div
               key={t.id}
               initial={{ opacity: 0, y: -12, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -29,7 +29,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               className={cn('surface rounded-full px-4 py-2.5 text-sm', t.tone === 'danger' ? 'text-danger' : 'text-text')}
             >
               {t.text}
-            </motion.div>
+            </m.div>
           ))}
         </AnimatePresence>
       </div>

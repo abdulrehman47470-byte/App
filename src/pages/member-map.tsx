@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { EyeOff, Heart, LocateFixed, MapPin, MessageCircle, Navigation, Phone, ShieldCheck, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -97,7 +97,7 @@ export default function MemberMap() {
 
         <AnimatePresence mode="wait">
           {selMember && (
-            <motion.div key={selMember.member.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}>
+            <m.div key={selMember.member.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}>
               <Card className="relative p-4">
                 <CloseButton onClick={() => setSelected(undefined)} />
                 <div className="flex items-center gap-4 pr-8">
@@ -138,10 +138,10 @@ export default function MemberMap() {
                   )}
                 </div>
               </Card>
-            </motion.div>
+            </m.div>
           )}
           {selLounge && (
-            <motion.div key={selLounge.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}>
+            <m.div key={selLounge.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}>
               <Card className="relative p-4">
                 <CloseButton onClick={() => setSelected(undefined)} />
                 <p className="micro-label !text-ember">Cigar lounge</p>
@@ -167,7 +167,7 @@ export default function MemberMap() {
                   </Button>
                 </div>
               </Card>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
 

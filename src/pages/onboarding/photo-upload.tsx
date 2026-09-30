@@ -1,7 +1,7 @@
 import { Camera, Check, ImagePlus, Images } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Frame } from '@/components/layout/app-shell';
+import { Frame } from '@/components/layout/frame';
 import { OnboardingHeader } from '@/components/layout/page';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/misc';

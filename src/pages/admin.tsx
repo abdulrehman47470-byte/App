@@ -4,7 +4,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { LogoMark } from '@/components/brand/logo';
 import { UserTypeBadge, VerifiedBadge } from '@/components/brand/ornaments';
 import { Avatar, PortraitArt } from '@/components/brand/portrait';
-import { Frame } from '@/components/layout/app-shell';
+import { Frame } from '@/components/layout/frame';
 import { Button } from '@/components/ui/button';
 import { Field, Input, Textarea } from '@/components/ui/field';
 import { Badge, Card, SearchInput, Segmented, Skeleton } from '@/components/ui/misc';

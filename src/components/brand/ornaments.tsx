@@ -1,6 +1,6 @@
 import { BadgeCheck, ShieldAlert } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { userTypeLabel } from '@/data/options';
+import { userTypeLabel } from '@/data/user-types';
 import { cn } from '@/lib/utils';
 import type { UserType } from '@/types';
 import { Avatar } from './portrait';

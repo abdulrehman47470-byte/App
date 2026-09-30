@@ -10,3 +10,6 @@ export const FEATURES = {
 
 /** Where members land after sign-up and sign-in. */
 export const HOME = FEATURES.feed ? '/feed' : '/discover';
+
+/** "Explore with a demo member" shortcut: on while the app runs on mock data, off with the real backend. */
+export const DEMO_ENABLED = import.meta.env.DEV || import.meta.env.VITE_DATA_PROVIDER !== 'supabase';

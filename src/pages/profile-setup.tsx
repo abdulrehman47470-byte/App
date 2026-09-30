@@ -1,8 +1,8 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { Frame } from '@/components/layout/app-shell';
+import { Frame } from '@/components/layout/frame';
 import { OnboardingHeader, StickyFooter } from '@/components/layout/page';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/misc';
@@ -66,7 +66,7 @@ export default function ProfileSetup({ mode = 'onboarding' }: { mode?: 'onboardi
           </div>
         ) : (
           <AnimatePresence mode="wait">
-            <motion.div key={step} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -24 }} transition={{ duration: 0.22 }}>
+            <m.div key={step} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -24 }} transition={{ duration: 0.22 }}>
               {step === 1 && <StepDemographics d={draft} patch={patch} showErrors={showErrors} />}
               {step === 2 && <StepPreferences prefs={draft.preferences} onChange={(preferences) => patch({ preferences })} />}
               {step === 3 && (
@@ -77,7 +77,7 @@ export default function ProfileSetup({ mode = 'onboarding' }: { mode?: 'onboardi
                   onVisibility={(visibility) => patch({ visibility })}
                 />
               )}
-            </motion.div>
+            </m.div>
           </AnimatePresence>
         )}
         <StickyFooter>

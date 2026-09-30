@@ -4,11 +4,13 @@ import { MOCK_FEED } from '@/data/mock/feed';
 import { MOCK_MEMBERS, findMember } from '@/data/mock/members';
 import { MOCK_LOUNGES, MOCK_POSTS, MOCK_REPORT_REASONS, MOCK_SESSIONS, MOCK_THREADS } from '@/data/mock/content';
 import { scoreMatch } from '@/lib/matching';
-import { storage } from '@/lib/storage';
+import { STORAGE_KEYS, storage } from '@/lib/storage';
 import type { Comment, DiscoverCard, Match, Member, Message, MyProfile, PendingPhoto, Post, PostAuthor, Report } from '@/types';
 import type { DataProvider } from './types';
 
-const wait = (ms = 250) => new Promise((r) => setTimeout(r, ms));
+// Set VITE_MOCK_LATENCY=true in .env to simulate network delay (useful for checking loading states).
+const SIMULATE_LATENCY = import.meta.env.VITE_MOCK_LATENCY === 'true';
+const wait = (ms = 250): Promise<void> => (SIMULATE_LATENCY ? new Promise((r) => setTimeout(r, ms)) : Promise.resolve());
 const minsAgo = (m: number) => new Date(Date.now() - m * 60_000).toISOString();
 
 export const EMPTY_PROFILE: MyProfile = {
@@ -35,9 +37,8 @@ export const DEMO_PROFILE: MyProfile = {
   about: { industry: ['Technology'], hobbies: ['Watches', 'Travel'], sports: ['Golf'], languages: ['English'], music: ['Jazz'] },
 };
 
-const ME_KEY = 'ds.me';
-
-export const MOCK_STATE_KEY = 'ds.mock';
+const ME_KEY = STORAGE_KEYS.me;
+const MOCK_STATE_KEY = STORAGE_KEYS.mock;
 
 const authorOf = (m: Member): PostAuthor => ({
   id: m.id, name: m.name, hue: m.photoHue, userType: m.userType, city: m.city, state: m.state, verified: m.photoVerified,

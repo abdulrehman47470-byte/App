@@ -2,7 +2,7 @@ import { CalendarDays, ScanFace } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TrustNote } from '@/components/brand/ornaments';
-import { Frame } from '@/components/layout/app-shell';
+import { Frame } from '@/components/layout/frame';
 import { OnboardingHeader } from '@/components/layout/page';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/field';

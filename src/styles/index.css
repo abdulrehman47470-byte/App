@@ -288,3 +288,23 @@
   border: 3px solid var(--text);
   animation: ds-pulse 1.8s ease-out infinite;
 }
+
+/* Fast, CSS-only entrance animations (no JavaScript needed before content appears). */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+.rise {
+  animation: rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes page-enter {
+  from {
+    opacity: 0.4;
+    transform: translateY(4px);
+  }
+}
+.page-enter {
+  animation: page-enter 0.18s ease-out both;
+}

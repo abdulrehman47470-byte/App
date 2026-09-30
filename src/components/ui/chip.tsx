@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -16,7 +16,7 @@ export function Chip({
   size?: 'sm' | 'md';
 }) {
   return (
-    <motion.button
+    <m.button
       type="button"
       role={role}
       aria-checked={selected}
@@ -32,7 +32,7 @@ export function Chip({
     >
       {selected && <Check className="size-3.5 text-gold" strokeWidth={2.5} aria-hidden />}
       {label}
-    </motion.button>
+    </m.button>
   );
 }
 

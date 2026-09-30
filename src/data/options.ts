@@ -5,17 +5,10 @@
 // move into Supabase lookup tables; this file then becomes the seed source + fallback.
 // Single vs multi select is a best reading of the prompt; confirm against the doc.
 
-import type { Mentorship, UserType } from '@/types';
+import type { Mentorship } from '@/types';
 
-export const USER_TYPES: { id: UserType; label: string }[] = [
-  { id: 'beginner', label: 'Beginner' },
-  { id: 'intermediate', label: 'Intermediate' },
-  { id: 'advanced', label: 'Advanced' },
-  { id: 'aficionado', label: 'Aficionado' },
-  { id: 'collector', label: 'Collector' },
-];
-
-export const userTypeLabel = (t?: UserType) => USER_TYPES.find((u) => u.id === t)?.label ?? '';
+// Kept in a tiny module so badges do not pull this whole file into the first download.
+export { USER_TYPES, userTypeLabel } from './user-types';
 
 // ---- Profile #1: Demographics ----
 // TODO(needs-client): gender, pronoun, ethnicity and country lists were not provided

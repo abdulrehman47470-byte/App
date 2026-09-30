@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, m, useReducedMotion } from 'framer-motion';
 import { MessageCircle } from 'lucide-react';
 import { useMemo } from 'react';
 import { Avatar } from '@/components/brand/portrait';
@@ -30,7 +30,7 @@ export function MatchOverlay({
   return (
     <AnimatePresence>
       {member && (
-        <motion.div
+        <m.div
           role="alertdialog"
           aria-modal="true"
           aria-labelledby="match-title"
@@ -43,7 +43,7 @@ export function MatchOverlay({
           {!reduce && (
             <div aria-hidden className="absolute left-1/2 top-[42%]">
               {particles.map((p, i) => (
-                <motion.span
+                <m.span
                   key={i}
                   className="absolute rounded-full bg-gold-light"
                   style={{ width: p.s, height: p.s }}
@@ -56,31 +56,31 @@ export function MatchOverlay({
           )}
 
           <div className="relative flex items-center">
-            <motion.div initial={{ x: -120, rotate: -14, opacity: 0 }} animate={{ x: 14, rotate: -8, opacity: 1 }} transition={{ type: 'spring', stiffness: 160, damping: 14 }}>
+            <m.div initial={{ x: -120, rotate: -14, opacity: 0 }} animate={{ x: 14, rotate: -8, opacity: 1 }} transition={{ type: 'spring', stiffness: 160, damping: 14 }}>
               <Avatar name={me?.name || 'You'} hue={me?.photoHue ?? 30} src={me?.photoUrl} size={128} ring className="border-2 shadow-[var(--shadow-glow)]" />
-            </motion.div>
-            <motion.div initial={{ x: 120, rotate: 14, opacity: 0 }} animate={{ x: -14, rotate: 8, opacity: 1 }} transition={{ type: 'spring', stiffness: 160, damping: 14 }}>
+            </m.div>
+            <m.div initial={{ x: 120, rotate: 14, opacity: 0 }} animate={{ x: -14, rotate: 8, opacity: 1 }} transition={{ type: 'spring', stiffness: 160, damping: 14 }}>
               <Avatar name={member.name} hue={member.photoHue} size={128} ring className="border-2 shadow-[var(--shadow-glow)]" />
-            </motion.div>
+            </m.div>
           </div>
 
-          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.35 }} className="relative mt-10 text-center">
+          <m.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.35 }} className="relative mt-10 text-center">
             <p className="micro-label !text-gold">Mutual like</p>
             <h2 id="match-title" className="gold-text mt-2 font-serif text-[44px] italic leading-tight">
               It’s a match!
             </h2>
             <p className="mt-2 text-[15px] text-muted">You and {member.name} liked each other.</p>
-          </motion.div>
+          </m.div>
 
-          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }} className="relative mt-10 w-full max-w-sm space-y-3">
+          <m.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }} className="relative mt-10 w-full max-w-sm space-y-3">
             <Button size="lg" block onClick={onMessage} autoFocus>
               <MessageCircle className="size-5" /> Say hello
             </Button>
             <Button size="lg" variant="ghost" block onClick={onClose}>
               Keep browsing
             </Button>
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

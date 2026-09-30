@@ -3,7 +3,7 @@ import { useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { EmptyState } from '@/components/brand/empty-state';
 import { CigarBand } from '@/components/brand/ornaments';
-import { Frame } from '@/components/layout/app-shell';
+import { Frame } from '@/components/layout/frame';
 import { PageBody, PageHeader } from '@/components/layout/page';
 import { Card, Segmented, Skeleton } from '@/components/ui/misc';
 import { EFFECTIVE_DATE, ETHICS_SUMMARY, LEGAL_DOCS, PHOTO_RULES } from '@/content/legal';

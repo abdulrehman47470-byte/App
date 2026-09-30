@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m as M } from 'framer-motion';
 import { Check, CheckCheck, Clock, MoreVertical, SendHorizontal } from 'lucide-react';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -116,10 +116,10 @@ export default function Chat() {
                 lastDay = day;
                 const nextSame = messages[i + 1]?.fromMe === msg.fromMe;
                 return (
-                  <motion.li key={msg.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+                  <M.li key={msg.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
                     {showDay && <p className="my-3 text-center text-[11px] uppercase tracking-wider text-faint">{day}</p>}
                     <Bubble msg={msg} tail={!nextSame} />
-                  </motion.li>
+                  </M.li>
                 );
               })}
             </AnimatePresence>

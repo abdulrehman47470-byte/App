@@ -1,8 +1,8 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { Camera, CheckCircle2, Clock, IdCard, Info, ScanFace, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Frame } from '@/components/layout/app-shell';
+import { Frame } from '@/components/layout/frame';
 import { OnboardingHeader } from '@/components/layout/page';
 import { Button } from '@/components/ui/button';
 import { CheckboxRow } from '@/components/ui/checkbox';
@@ -75,7 +75,7 @@ export default function VerifyFace() {
                 <ellipse cx="100" cy="100" rx="70" ry="88" fill="var(--surface)" stroke="var(--line-strong)" strokeWidth="2" />
                 {selfie && <image href={selfie} x="30" y="12" width="140" height="176" preserveAspectRatio="xMidYMid slice" clipPath="url(#face-clip)" />}
                 {step === 'checking' && (
-                  <motion.ellipse
+                  <m.ellipse
                     cx="100" cy="100" rx="70" ry="88" fill="none" stroke="var(--gold)" strokeWidth="3" strokeLinecap="round"
                     initial={{ pathLength: 0 }}
                     animate={{ pathLength: 1 }}
@@ -86,7 +86,7 @@ export default function VerifyFace() {
                 {step === 'failed' && <ellipse cx="100" cy="100" rx="70" ry="88" fill="none" stroke="var(--danger)" strokeWidth="3" />}
               </svg>
               {step === 'checking' && (
-                <motion.div
+                <m.div
                   aria-hidden
                   className="absolute inset-x-12 h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent"
                   animate={{ top: ['18%', '82%', '18%'] }}
@@ -100,12 +100,12 @@ export default function VerifyFace() {
 
             <div aria-live="polite" className="min-h-14 text-center">
               <AnimatePresence mode="wait">
-                <motion.p key={step} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="font-serif text-xl text-text">
+                <m.p key={step} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="font-serif text-xl text-text">
                   {step === 'consent' && 'Take a quick live selfie'}
                   {step === 'checking' && 'Comparing with your photo…'}
                   {step === 'verified' && 'Photo verified'}
                   {step === 'failed' && 'We could not confirm the match'}
-                </motion.p>
+                </m.p>
               </AnimatePresence>
               <p className="mt-1 text-sm text-muted">
                 {step === 'consent' && 'We compare it with your profile photo to confirm it is really you.'}

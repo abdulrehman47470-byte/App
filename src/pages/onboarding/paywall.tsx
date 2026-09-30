@@ -1,9 +1,9 @@
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { Check, Lock, RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogoMark } from '@/components/brand/logo';
-import { Frame } from '@/components/layout/app-shell';
+import { Frame } from '@/components/layout/frame';
 import { OnboardingHeader } from '@/components/layout/page';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/misc';
@@ -23,7 +23,7 @@ export function PlanPicker({ value, onChange }: { value: Plan; onChange: (p: Pla
       {PLANS.map((p) => {
         const sel = value === p.id;
         return (
-          <motion.button
+          <m.button
             key={p.id}
             type="button"
             role="radio"
@@ -47,7 +47,7 @@ export function PlanPicker({ value, onChange }: { value: Plan; onChange: (p: Pla
             <span className={cn('mx-auto mt-3 grid size-6 place-items-center rounded-full border', sel ? 'border-gold bg-gold text-gold-ink' : 'border-line-strong')}>
               {sel && <Check className="size-3.5" strokeWidth={3} />}
             </span>
-          </motion.button>
+          </m.button>
         );
       })}
     </div>

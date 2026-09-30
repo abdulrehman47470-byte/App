@@ -2,9 +2,7 @@
 // below is re-enforced in the database (RLS / checks), not only in these route guards.
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import { HOME } from '@/config/features';
-import { api } from '@/lib/api';
-import { DEMO_PROFILE, MOCK_STATE_KEY } from '@/lib/api/mock';
-import { storage } from '@/lib/storage';
+import { STORAGE_KEYS, storage } from '@/lib/storage';
 import type { VerificationState } from '@/types';
 
 export type Plan = 'monthly' | 'yearly';
@@ -24,7 +22,7 @@ export interface Onboarding {
   role: 'member' | 'admin';
 }
 
-const KEY = 'ds.session';
+const KEY = STORAGE_KEYS.session;
 const INITIAL: Onboarding = {
   signedIn: false,
   photoCheck: 'idle',
@@ -72,14 +70,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(() => {
     storage.remove(KEY);
-    storage.remove('ds.me');
-    storage.remove(MOCK_STATE_KEY);
+    storage.remove(STORAGE_KEYS.me);
+    storage.remove(STORAGE_KEYS.mock);
     // Reload so the in-memory mock backend starts fresh too.
     window.location.assign('/');
   }, []);
 
   // Dev shortcut: a fully onboarded demo member, so every screen can be explored quickly.
   const loadDemo = useCallback(async () => {
+    const [{ api }, { DEMO_PROFILE }] = await Promise.all([import('@/lib/api'), import('@/lib/api/mock')]);
     await api.saveMe(DEMO_PROFILE);
     update({
       signedIn: true, method: 'email', dob: DEMO_PROFILE.dob, photoCheck: 'verified', biometricConsent: true,

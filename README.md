@@ -26,6 +26,8 @@ through the whole sign-up flow.
 | `npm run screens` | Screenshot every screen into `docs/screens/` (needs `npm run dev` running) |
 | `npm run smoke` | Click through sign-up → match → message automatically (needs `npm run dev` running) |
 | `npm run setup:check` | Show which keys are missing, in plain English |
+| `npm run preview` then `npm run perf` | Measure load and tab-switch speed on the production build (simulated phone on 4G) |
+| `npm run icons` | Regenerate the app icons from `public/icon.svg` |
 
 ## Where things live
 
@@ -43,3 +45,28 @@ through the whole sign-up flow.
 Mock state (likes, matches, messages, blocks) is kept in your browser's localStorage so reloads keep it.
 **Sign Out** resets everything. Marcus, Hannah and Darnell have already "liked" you, so liking them back
 shows the "It's a match" screen.
+
+## Performance
+
+Measured with `npm run perf` (production build, simulated mid-range phone on 4G, CPU slowed 2x):
+
+| | Before optimising | Now |
+|---|---|---|
+| JavaScript downloaded to show the Welcome screen | 215 KB | 126 KB |
+| Welcome screen visible | ~0.6 s | ~0.5 s (mostly network round trips) |
+| Opening a tab for the first time | 0.2–0.7 s | 20–80 ms |
+| Returning to a tab | 60–140 ms | 10–45 ms |
+| Reopening the app (service worker cache) | full download | ~90 ms once the browser has cached compiled code |
+
+How:
+- Every screen is its own small file, loaded on demand (`src/routes.ts`).
+- While you are idle, the app quietly preloads the other tabs' code and data, and it starts loading a
+  tab the moment your finger touches it, so tabs open with no loading skeleton.
+- Data is cached for a minute and reused when you come back to a screen.
+- Animation code is loaded after the first paint; page entrances use plain CSS.
+- Only Latin font files are loaded, and the three used on the first screen are preloaded.
+- A service worker (PWA) keeps the app on the device, so repeat visits skip the network and it can be
+  installed to the home screen. Hosting on Vercel adds long-lived caching for the hashed files (`vercel.json`).
+
+The mock data no longer adds a fake delay. Set `VITE_MOCK_LATENCY=true` in `.env` to bring it back when
+checking loading states.

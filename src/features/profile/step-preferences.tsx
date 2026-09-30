@@ -1,5 +1,5 @@
 import * as Collapsible from '@radix-ui/react-collapsible';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { ChevronDown, Plus, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Chip } from '@/components/ui/chip';
@@ -196,7 +196,7 @@ function Wishlist({ prefs, onChange }: { prefs: Preferences; onChange: (p: Prefe
       <ul className="mt-3 space-y-2">
         <AnimatePresence initial={false}>
           {list.map((w) => (
-            <motion.li
+            <m.li
               key={w}
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
@@ -207,7 +207,7 @@ function Wishlist({ prefs, onChange }: { prefs: Preferences; onChange: (p: Prefe
               <button type="button" aria-label={`Remove ${w}`} onClick={() => onChange({ ...prefs, wishlist: list.filter((x) => x !== w) })} className="grid size-11 place-items-center text-muted hover:text-danger">
                 <X className="size-4" />
               </button>
-            </motion.li>
+            </m.li>
           ))}
         </AnimatePresence>
       </ul>

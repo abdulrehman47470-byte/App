@@ -6,3 +6,4 @@ dist
 !.env.example
 docs/screens/
 .DS_Store
+dev-dist

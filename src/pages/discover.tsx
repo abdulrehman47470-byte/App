@@ -1,4 +1,4 @@
-import { animate, AnimatePresence, motion, useMotionValue, useTransform, type MotionValue, type PanInfo } from 'framer-motion';
+import { animate, AnimatePresence, m, useMotionValue, useTransform, type MotionValue, type PanInfo } from 'framer-motion';
 import { Heart, RotateCcw, SlidersHorizontal, X } from 'lucide-react';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -13,14 +13,14 @@ import { useLikeFlow } from '@/features/discover/use-like';
 import { useDiscover, useMe } from '@/features/queries';
 import { SafetySheet } from '@/features/safety/safety-sheet';
 import { api } from '@/lib/api';
-import { storage } from '@/lib/storage';
+import { STORAGE_KEYS, storage } from '@/lib/storage';
 import { cn } from '@/lib/utils';
 import type { DiscoverCard, DiscoverFilters } from '@/types';
 
 const THRESHOLD = 110;
 
 export default function Discover() {
-  const [filters, setFilters] = useState<DiscoverFilters>(() => storage.get('ds.filters') ?? DEFAULT_FILTERS);
+  const [filters, setFilters] = useState<DiscoverFilters>(() => storage.get(STORAGE_KEYS.filters) ?? DEFAULT_FILTERS);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const { data, isLoading } = useDiscover(filters);
   const { data: me } = useMe();
@@ -90,7 +90,7 @@ export default function Discover() {
 
   const applyFilters = (f: DiscoverFilters) => {
     setFilters(f);
-    storage.set('ds.filters', f);
+    storage.set(STORAGE_KEYS.filters, f);
   };
   const nFilters = activeFilterCount(filters);
 
@@ -201,7 +201,7 @@ function TopCard({
   };
 
   return (
-    <motion.div
+    <m.div
       className="absolute inset-0 cursor-grab touch-pan-y active:cursor-grabbing"
       style={{ x, rotate, zIndex: 3 }}
       drag="x"
@@ -216,13 +216,13 @@ function TopCard({
       aria-label={`${card.member.name}, ${card.member.age}, ${card.matchPct}% match. Tap to view profile.`}
     >
       <MemberCardFace card={card} onMore={onMore} />
-      <motion.div style={{ opacity: likeOpacity }} className="pointer-events-none absolute left-6 top-24 -rotate-12 rounded-[10px] border-4 border-success px-3 py-1 font-serif text-3xl font-bold tracking-widest text-success" aria-hidden>
+      <m.div style={{ opacity: likeOpacity }} className="pointer-events-none absolute left-6 top-24 -rotate-12 rounded-[10px] border-4 border-success px-3 py-1 font-serif text-3xl font-bold tracking-widest text-success" aria-hidden>
         LIKE
-      </motion.div>
-      <motion.div style={{ opacity: passOpacity }} className="pointer-events-none absolute right-6 top-24 rotate-12 rounded-[10px] border-4 border-danger px-3 py-1 font-serif text-3xl font-bold tracking-widest text-danger" aria-hidden>
+      </m.div>
+      <m.div style={{ opacity: passOpacity }} className="pointer-events-none absolute right-6 top-24 rotate-12 rounded-[10px] border-4 border-danger px-3 py-1 font-serif text-3xl font-bold tracking-widest text-danger" aria-hidden>
         PASS
-      </motion.div>
-    </motion.div>
+      </m.div>
+    </m.div>
   );
 }
 
@@ -231,11 +231,11 @@ function BackCard({ card, depth, x }: { card: DiscoverCard; depth: number; x: Mo
   const scale = useTransform(x, [-250, 0, 250], depth === 1 ? [1, base, 1] : [base + 0.05, base, base + 0.05]);
   const y = useTransform(x, [-250, 0, 250], depth === 1 ? [0, depth * 14, 0] : [14, depth * 14, 14]);
   return (
-    <motion.div className="pointer-events-none absolute inset-0" style={{ scale, y, zIndex: 3 - depth }} aria-hidden>
+    <m.div className="pointer-events-none absolute inset-0" style={{ scale, y, zIndex: 3 - depth }} aria-hidden>
       <div className={cn('size-full transition-[filter]', depth === 2 && 'brightness-50', depth === 1 && 'brightness-75')}>
         <MemberCardFace card={card} />
       </div>
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -256,7 +256,7 @@ function ActionButton({
 }) {
   return (
     <div className="flex flex-col items-center gap-1.5">
-      <motion.button
+      <m.button
         type="button"
         whileTap={{ scale: 0.88 }}
         whileHover={{ scale: 1.05 }}
@@ -271,7 +271,7 @@ function ActionButton({
         )}
       >
         {children}
-      </motion.button>
+      </m.button>
       <span className="text-xs text-muted">{label === 'Undo last pass' ? 'Undo' : label}</span>
     </div>
   );

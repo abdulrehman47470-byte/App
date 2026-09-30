@@ -1,10 +1,9 @@
-import { motion } from 'framer-motion';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Logo } from '@/components/brand/logo';
 import { CigarBand, TrustNote } from '@/components/brand/ornaments';
-import { Frame } from '@/components/layout/app-shell';
+import { Frame } from '@/components/layout/frame';
 import { Button } from '@/components/ui/button';
-import { HOME } from '@/config/features';
+import { DEMO_ENABLED, HOME } from '@/config/features';
 import { nextStep, useSession } from '@/lib/session';
 
 export default function Welcome() {
@@ -20,23 +19,13 @@ export default function Welcome() {
         <div aria-hidden className="smoke" />
         <div aria-hidden className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-bg via-bg/80 to-transparent" />
 
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="relative flex flex-1 flex-col items-center justify-center text-center"
-        >
+        <div className="rise relative flex flex-1 flex-col items-center justify-center text-center">
           <Logo size="lg" />
           <p className="mt-6 font-serif text-lg italic text-text/90">Find your circle. Share the smoke.</p>
           <CigarBand label="Members only" className="mt-8 w-56" />
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="relative space-y-3"
-        >
+        <div className="rise relative space-y-3" style={{ animationDelay: '120ms' }}>
           <Button size="lg" block onClick={() => navigate('/signin?mode=signup')}>
             Sign up
           </Button>
@@ -45,9 +34,9 @@ export default function Welcome() {
           </Button>
           <TrustNote className="pt-3">Adults 21+ only</TrustNote>
           <p className="text-center font-serif text-sm italic text-faint">Good Cigars. Better Company.</p>
-          {import.meta.env.DEV && (
+          {DEMO_ENABLED && (
             <p className="pt-1 text-center text-xs text-faint">
-              Dev:{' '}
+              Try it:{" "}
               <button
                 type="button"
                 className="underline decoration-dotted underline-offset-4 hover:text-gold"
@@ -64,7 +53,7 @@ export default function Welcome() {
               </Link>
             </p>
           )}
-        </motion.div>
+        </div>
       </div>
     </Frame>
   );

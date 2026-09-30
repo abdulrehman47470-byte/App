@@ -3,7 +3,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { LogoMark } from '@/components/brand/logo';
 import { TrustNote } from '@/components/brand/ornaments';
-import { Frame } from '@/components/layout/app-shell';
+import { Frame } from '@/components/layout/frame';
 import { BackButton } from '@/components/layout/page';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/field';

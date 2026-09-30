@@ -1,10 +1,18 @@
 import { Compass, GraduationCap, Heart, House, Map as MapIcon, MessageCircle, UserRound } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { Suspense, useEffect } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { LogoMark, Wordmark } from '@/components/brand/logo';
 import { FEATURES } from '@/config/features';
 import { useConversations } from '@/features/queries';
+import { Skeleton } from '@/components/ui/misc';
+import { api } from '@/lib/api';
+import { STORAGE_KEYS, storage } from '@/lib/storage';
+import { prefetchRoute, whenIdle } from '@/routes';
+import { DEFAULT_FILTERS } from '@/features/discover/filter-sheet';
+import type { DiscoverFilters } from '@/types';
 import { cn } from '@/lib/utils';
+import { Frame } from './frame';
 
 // Five destinations. With the feed on, Mentors lives inside Discover; with the map on,
 // Matches lives at the top of Messages.
@@ -16,30 +24,17 @@ export const TABS = [
   { to: '/profile', label: 'Profile', icon: UserRound },
 ];
 
-/** Centered 430px column over the textured background; bottom tabs on mobile, side rail on desktop. */
-export function Frame({ children, wide }: { children: ReactNode; wide?: boolean }) {
-  return (
-    <div className="texture min-h-dvh">
-      <div
-        className={cn(
-          'relative mx-auto min-h-dvh w-full bg-bg lg:border-x lg:border-line lg:shadow-[0_0_80px_rgba(0,0,0,0.6)]',
-          wide ? 'max-w-[1100px]' : 'max-w-[430px]',
-        )}
-      >
-        {children}
-      </div>
-    </div>
-  );
-}
-
 export function AppShell() {
   const { data: convos } = useConversations();
   const unread = convos?.reduce((n, c) => n + c.unread, 0) ?? 0;
+  useWarmCache();
   return (
     <Frame>
       <SideRail unread={unread} />
       <main className="pb-[calc(76px+env(safe-area-inset-bottom))] lg:pb-6">
-        <Outlet />
+        <Suspense fallback={<PageSkeleton />}>
+          <Outlet />
+        </Suspense>
       </main>
       <nav
         aria-label="Main"
@@ -61,6 +56,7 @@ function TabLink({ to, label, icon: Icon, badge }: (typeof TABS)[number] & { bad
   return (
     <NavLink
       to={to}
+      {...prefetchProps(to)}
       className={({ isActive }) =>
         cn(
           'relative flex h-[64px] flex-col items-center justify-center gap-1 text-[11px] transition-colors',
@@ -101,6 +97,7 @@ function SideRail({ unread }: { unread: number }) {
         <NavLink
           key={to}
           to={to}
+          {...prefetchProps(to)}
           className={({ isActive }) =>
             cn(
               'flex h-11 items-center gap-3 rounded-[12px] px-3 text-sm transition-colors',
@@ -117,5 +114,39 @@ function SideRail({ unread }: { unread: number }) {
       ))}
       <p className="mt-auto px-2 font-serif text-sm italic text-faint">Good Cigars. Better Company.</p>
     </nav>
+  );
+}
+
+/** Start loading a screen as soon as the finger or pointer is on its tab. */
+const prefetchProps = (to: string) => ({
+  onPointerEnter: () => prefetchRoute(to),
+  onTouchStart: () => prefetchRoute(to),
+  onFocus: () => prefetchRoute(to),
+});
+
+/** Fetch the data every tab needs while the member is idle, so each tab opens with no spinner. */
+function useWarmCache() {
+  const qc = useQueryClient();
+  useEffect(() => {
+    whenIdle(() => {
+      const filters = storage.get<DiscoverFilters>(STORAGE_KEYS.filters) ?? DEFAULT_FILTERS;
+      qc.prefetchQuery({ queryKey: ['me'], queryFn: api.getMe });
+      qc.prefetchQuery({ queryKey: ['feed', 'all'], queryFn: () => api.getFeed('all') });
+      qc.prefetchQuery({ queryKey: ['discover', filters], queryFn: () => api.getDiscover(filters), staleTime: Infinity });
+      qc.prefetchQuery({ queryKey: ['matches'], queryFn: api.getMatches });
+      qc.prefetchQuery({ queryKey: ['conversations'], queryFn: api.getConversations });
+      qc.prefetchQuery({ queryKey: ['map-members'], queryFn: api.getMapMembers });
+      qc.prefetchQuery({ queryKey: ['feed', 'member', 'me'], queryFn: () => api.getMemberPosts('me') });
+    });
+  }, [qc]);
+}
+
+function PageSkeleton() {
+  return (
+    <div className="space-y-3 p-4" aria-busy="true">
+      <Skeleton className="h-10 w-1/2" />
+      <Skeleton className="h-40" />
+      <Skeleton className="h-24" />
+    </div>
   );
 }

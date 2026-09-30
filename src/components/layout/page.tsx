@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { ChevronLeft } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -51,14 +50,8 @@ export function PageHeader({
 /** Page body with a gentle enter transition. */
 export function PageBody({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: 'easeOut' }}
-      className={cn('px-4 py-5', className)}
-    >
-      {children}
-    </motion.div>
+    // Plain CSS animation: content is visible immediately, even before animation code loads.
+    <div className={cn('page-enter px-4 py-5', className)}>{children}</div>
   );
 }
 

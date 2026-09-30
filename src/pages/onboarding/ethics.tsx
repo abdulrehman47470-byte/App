@@ -2,7 +2,7 @@ import { ScrollText } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CigarBand } from '@/components/brand/ornaments';
-import { Frame } from '@/components/layout/app-shell';
+import { Frame } from '@/components/layout/frame';
 import { OnboardingHeader } from '@/components/layout/page';
 import { Button } from '@/components/ui/button';
 import { CheckboxRow } from '@/components/ui/checkbox';

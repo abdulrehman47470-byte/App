@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { Flame, Heart, HelpCircle, MapPin, MessageCircle, MoreHorizontal, Send, Share2, Trash2 } from 'lucide-react';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
@@ -133,9 +133,9 @@ export function PostCard({ post, defaultOpen = false }: { post: Post; defaultOpe
 
         <div className="grid grid-cols-3 border-t border-line/60">
           <ActionButton active={post.likedByMe} onClick={() => like.mutate(post.id)} label={post.likedByMe ? 'Liked' : 'Like'} pressed={post.likedByMe}>
-            <motion.span key={String(post.likedByMe)} initial={{ scale: post.likedByMe ? 0.4 : 1 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 15 }}>
+            <m.span key={String(post.likedByMe)} initial={{ scale: post.likedByMe ? 0.4 : 1 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 15 }}>
               <Heart className={cn('size-5', post.likedByMe && 'fill-gold text-gold')} strokeWidth={1.75} />
-            </motion.span>
+            </m.span>
           </ActionButton>
           <ActionButton onClick={() => setShowComments((v) => !v)} label="Comment" expanded={showComments}>
             <MessageCircle className="size-5" strokeWidth={1.75} />
@@ -147,9 +147,9 @@ export function PostCard({ post, defaultOpen = false }: { post: Post; defaultOpe
 
         <AnimatePresence initial={false}>
           {showComments && (
-            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden border-t border-line/60 bg-bg-elevated/60">
+            <m.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden border-t border-line/60 bg-bg-elevated/60">
               <Comments postId={post.id} />
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
       </article>

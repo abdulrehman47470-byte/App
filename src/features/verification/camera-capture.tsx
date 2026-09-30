@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { Camera, CameraOff, RefreshCw, RotateCcw, SwitchCamera } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -156,7 +156,7 @@ export function CameraCapture({
         {state === 'live' && prompts?.length ? (
           <div aria-live="polite" className="absolute inset-x-0 bottom-3 flex justify-center">
             <AnimatePresence mode="wait">
-              <motion.span
+              <m.span
                 key={prompt}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -164,14 +164,14 @@ export function CameraCapture({
                 className="rounded-full bg-bg/80 px-3.5 py-1.5 text-xs font-medium text-text backdrop-blur"
               >
                 {prompts[prompt]}
-              </motion.span>
+              </m.span>
             </AnimatePresence>
           </div>
         ) : null}
 
         <AnimatePresence>
           {flash && (
-            <motion.div initial={{ opacity: 0.95 }} animate={{ opacity: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} className="absolute inset-0 bg-white" aria-hidden />
+            <m.div initial={{ opacity: 0.95 }} animate={{ opacity: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} className="absolute inset-0 bg-white" aria-hidden />
           )}
         </AnimatePresence>
       </div>
@@ -204,7 +204,7 @@ export function CameraCapture({
               {onCancel ? 'Cancel' : ''}
             </button>
             {/* Shutter button */}
-            <motion.button
+            <m.button
               type="button"
               whileTap={{ scale: 0.88 }}
               onClick={capture}
@@ -215,7 +215,7 @@ export function CameraCapture({
               <span className="gold-gradient grid size-[58px] place-items-center rounded-full shadow-[var(--shadow-glow)]">
                 <Camera className="size-6 text-gold-ink" />
               </span>
-            </motion.button>
+            </m.button>
             <button
               type="button"
               onClick={() => setFacing((f) => (f === 'user' ? 'environment' : 'user'))}

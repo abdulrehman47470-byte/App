@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { Search } from 'lucide-react';
 import type { InputHTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
@@ -47,7 +47,7 @@ export function ProgressBar({ value, label }: { value: number; label: string }) 
       aria-valuemax={100}
       className="h-1.5 w-full overflow-hidden rounded-full bg-surface-2"
     >
-      <motion.div
+      <m.div
         className="gold-gradient h-full rounded-full"
         initial={false}
         animate={{ width: `${Math.max(4, value * 100)}%` }}
@@ -102,7 +102,7 @@ export function Segmented<T extends string>({
             )}
           >
             {active && (
-              <motion.span
+              <m.span
                 layoutId={`seg-${label}`}
                 className="gold-gradient absolute inset-0 rounded-[10px]"
                 transition={{ type: 'spring', stiffness: 380, damping: 32 }}
