@@ -21,7 +21,13 @@ export interface Preferences {
 /** Answers from Profile #3 (About You). Keys match ABOUT_YOU_FIELDS ids. */
 export type AboutYou = Partial<Record<string, string[]>>;
 
-export type Visibility = { ethnicity: boolean; religion: boolean; political: boolean };
+export type Visibility = {
+  ethnicity: boolean;
+  religion: boolean;
+  political: boolean;
+  /** Show me (approximately, city level) on the member map. */
+  map?: boolean;
+};
 
 export interface Member {
   id: string;
@@ -41,6 +47,9 @@ export interface Member {
   mentorTopics: string[];
   meetup: string[];
   distanceMi: number;
+  /** Approximate (city-level) position for the member map. Never an exact address. */
+  lat: number;
+  lng: number;
 }
 
 export interface DiscoverCard {
@@ -157,3 +166,44 @@ export interface DiscoverFilters {
   meetup: string[];
   mentorship: Mentorship[];
 }
+
+/** Who wrote a post or comment. `id: 'me'` is the signed-in member. */
+export interface PostAuthor {
+  id: string;
+  name: string;
+  hue: number;
+  photoUrl?: string;
+  userType?: UserType;
+  city: string;
+  state: string;
+  verified: boolean;
+}
+
+export type PostKind = 'update' | 'checkin' | 'question' | 'smoking';
+
+export interface Post {
+  id: string;
+  author: PostAuthor;
+  kind: PostKind;
+  body: string;
+  /** Data URL in Phase 0; Supabase Storage in the backend phases. */
+  imageUrl?: string;
+  /** Generated placeholder art for mock posts (no stock photos). */
+  imageHue?: number;
+  loungeId?: string;
+  cigar?: string;
+  createdAt: string;
+  likes: number;
+  likedByMe: boolean;
+  commentCount: number;
+}
+
+export interface Comment {
+  id: string;
+  postId: string;
+  author: PostAuthor;
+  body: string;
+  createdAt: string;
+}
+
+export type FeedFilter = 'all' | 'near' | 'checkin' | 'question';

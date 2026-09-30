@@ -1,10 +1,11 @@
-// In-memory mock backend with small artificial latency. The member's own profile is kept in
-// localStorage so reloads keep wizard progress. Everything else resets on reload.
+// Mock backend with small artificial latency. The member's own profile and the mock state
+// (likes, matches, messages, posts, comments, blocks) are kept in localStorage so reloads keep them.
+import { MOCK_FEED } from '@/data/mock/feed';
 import { MOCK_MEMBERS, findMember } from '@/data/mock/members';
 import { MOCK_LOUNGES, MOCK_POSTS, MOCK_REPORT_REASONS, MOCK_SESSIONS, MOCK_THREADS } from '@/data/mock/content';
 import { scoreMatch } from '@/lib/matching';
 import { storage } from '@/lib/storage';
-import type { DiscoverCard, Match, Member, Message, MyProfile, PendingPhoto, Report } from '@/types';
+import type { Comment, DiscoverCard, Match, Member, Message, MyProfile, PendingPhoto, Post, PostAuthor, Report } from '@/types';
 import type { DataProvider } from './types';
 
 const wait = (ms = 250) => new Promise((r) => setTimeout(r, ms));
@@ -13,7 +14,8 @@ const minsAgo = (m: number) => new Date(Date.now() - m * 60_000).toISOString();
 export const EMPTY_PROFILE: MyProfile = {
   name: '', dob: '', age: 0, country: 'United States', state: '', city: '', zip: '', bio: '',
   website: '', instagram: '', facebook: '', linkedin: '', preferences: {}, about: {},
-  visibility: { ethnicity: false, religion: false, political: false },
+  // Private by default: members opt in to appearing on the member map.
+  visibility: { ethnicity: false, religion: false, political: false, map: false },
   photoHue: 30, photoStatus: 'pending', photoVerified: false,
 };
 
@@ -22,7 +24,7 @@ export const DEMO_PROFILE: MyProfile = {
   ...EMPTY_PROFILE,
   name: 'Alex Morgan', dob: '1989-04-18', age: 37, pronouns: 'they/them', city: 'Chicago', state: 'Illinois', zip: '60614',
   userType: 'intermediate', bio: 'Weekend lounge regular. Nicaraguan puros, bourbon and long conversations.',
-  instagram: '@alex.smokes', photoHue: 2, photoStatus: 'approved', photoVerified: true,
+  instagram: '@alex.smokes', visibility: { ethnicity: false, religion: false, political: false, map: true }, photoHue: 2, photoStatus: 'approved', photoVerified: true,
   preferences: {
     strength: ['Medium', 'Medium-Full'], flavors: ['Leather', 'Coffee', 'Cocoa', 'Cedar'], wrapper: ['Maduro', 'Habano'],
     origin: ['Nicaragua'], vitola: ['Robusto', 'Toro'], brands: ['Padrón', 'Liga Privada', 'My Father'],
@@ -37,6 +39,28 @@ const ME_KEY = 'ds.me';
 
 export const MOCK_STATE_KEY = 'ds.mock';
 
+const authorOf = (m: Member): PostAuthor => ({
+  id: m.id, name: m.name, hue: m.photoHue, userType: m.userType, city: m.city, state: m.state, verified: m.photoVerified,
+});
+
+function initialFeed() {
+  const posts: Post[] = [];
+  const comments = new Map<string, Comment[]>();
+  for (const f of MOCK_FEED) {
+    const author = findMember(f.authorId);
+    if (!author) continue;
+    const list = f.comments.map((c, i) => ({
+      id: `${f.id}-c${i}`, postId: f.id, author: authorOf(findMember(c.authorId)!), body: c.body, createdAt: minsAgo(c.minsAgo),
+    }));
+    comments.set(f.id, list);
+    posts.push({
+      id: f.id, author: authorOf(author), kind: f.kind, body: f.body, imageHue: f.imageHue, loungeId: f.loungeId, cigar: f.cigar,
+      createdAt: minsAgo(f.minsAgo), likes: f.likes, likedByMe: false, commentCount: list.length,
+    });
+  }
+  return { posts, comments };
+}
+
 function initialState() {
   const messages = new Map<string, Message[]>();
   for (const [memberId, thread] of Object.entries(MOCK_THREADS)) {
@@ -48,7 +72,10 @@ function initialState() {
       })),
     );
   }
+  const feed = initialFeed();
   return {
+    posts: feed.posts,
+    comments: feed.comments,
     liked: new Set<string>(),
     passed: [] as string[],
     blocked: new Set<string>(),
@@ -75,6 +102,7 @@ function initialState() {
 type Saved = {
   liked: string[]; passed: string[]; blocked: string[]; unread: string[];
   matches: [string, string][]; messages: [string, Message[]][]; pendingPhotos: PendingPhoto[]; reports: Report[];
+  posts?: Post[]; comments?: [string, Comment[]][];
 };
 
 /** Mock state survives page reloads (localStorage) so manual testing is realistic. Sign-out clears it. */
@@ -86,6 +114,7 @@ function hydrate() {
     ...base,
     liked: new Set(saved.liked), passed: saved.passed, blocked: new Set(saved.blocked), unread: new Set(saved.unread),
     matches: new Map(saved.matches), messages: new Map(saved.messages), pendingPhotos: saved.pendingPhotos, reports: saved.reports,
+    posts: saved.posts ?? base.posts, comments: saved.comments ? new Map(saved.comments) : base.comments,
   };
 }
 
@@ -95,6 +124,7 @@ function persist() {
   const saved: Saved = {
     liked: [...state.liked], passed: state.passed, blocked: [...state.blocked], unread: [...state.unread],
     matches: [...state.matches], messages: [...state.messages], pendingPhotos: state.pendingPhotos, reports: state.reports,
+    posts: state.posts, comments: [...state.comments],
   };
   storage.set(MOCK_STATE_KEY, saved);
 }
@@ -109,6 +139,23 @@ function card(me: MyProfile, m: Member): DiscoverCard {
 }
 
 const visible = (m: Member) => !state.blocked.has(m.id);
+
+function myAuthor(): PostAuthor {
+  const me = loadMe();
+  return { id: 'me', name: me.name || 'You', hue: me.photoHue, photoUrl: me.photoUrl, userType: me.userType, city: me.city, state: me.state, verified: me.photoVerified };
+}
+
+/** Posts and comments are text with limits (Phase 1: app_config + database check). */
+export const POST_MAX = 1000;
+export const COMMENT_MAX = 500;
+
+function sameArea(me: MyProfile, a: PostAuthor) {
+  if (a.id === 'me') return true;
+  if (me.city && a.city.toLowerCase() === me.city.toLowerCase()) return true;
+  // Mock members store state codes (IL); the wizard stores names (Illinois).
+  return !!me.state && (a.state === me.state || US_CODES[me.state] === a.state);
+}
+const US_CODES: Record<string, string> = { Illinois: 'IL', Wisconsin: 'WI', Florida: 'FL', 'New York': 'NY', Tennessee: 'TN', Texas: 'TX' };
 
 export const mockProvider: DataProvider = {
   async getMe() {
@@ -130,7 +177,7 @@ export const mockProvider: DataProvider = {
         !state.liked.has(m.id) &&
         !state.passed.includes(m.id) &&
         !state.matches.has(m.id) &&
-        m.distanceMi <= f.maxDistance &&
+        (f.maxDistance >= 100 || m.distanceMi <= f.maxDistance) &&
         m.age >= f.ageMin &&
         m.age <= f.ageMax &&
         (!f.userTypes.length || f.userTypes.includes(m.userType)) &&
@@ -249,6 +296,71 @@ export const mockProvider: DataProvider = {
   async getPost(slug) {
     await wait(150);
     return MOCK_POSTS.find((p) => p.slug === slug) ?? null;
+  },
+
+  async getFeed(filter) {
+    await wait(350);
+    const me = loadMe();
+    return state.posts
+      .filter((p) => !state.blocked.has(p.author.id))
+      .filter((p) =>
+        filter === 'near' ? sameArea(me, p.author) : filter === 'checkin' ? p.kind === 'checkin' : filter === 'question' ? p.kind === 'question' : true,
+      )
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  },
+  async getFeedPost(id) {
+    await wait(150);
+    const p = state.posts.find((x) => x.id === id);
+    return p && !state.blocked.has(p.author.id) ? p : null;
+  },
+  async getMemberPosts(memberId) {
+    await wait(200);
+    return state.posts.filter((p) => p.author.id === memberId).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  },
+  async createPost(input) {
+    await wait(300);
+    const body = input.body.trim();
+    if (!body && !input.imageUrl) throw new Error('Write something or add a photo.');
+    if (body.length > POST_MAX) throw new Error(`Posts can be up to ${POST_MAX} characters.`);
+    const post: Post = {
+      id: crypto.randomUUID(), author: myAuthor(), kind: input.kind, body, imageUrl: input.imageUrl, loungeId: input.loungeId,
+      cigar: input.cigar?.trim() || undefined, createdAt: new Date().toISOString(), likes: 0, likedByMe: false, commentCount: 0,
+    };
+    state.posts = [post, ...state.posts];
+    persist();
+    return post;
+  },
+  async deletePost(id) {
+    await wait(150);
+    state.posts = state.posts.filter((p) => !(p.id === id && p.author.id === 'me'));
+    persist();
+  },
+  async togglePostLike(id) {
+    await wait(120);
+    state.posts = state.posts.map((p) => (p.id === id ? { ...p, likedByMe: !p.likedByMe, likes: p.likes + (p.likedByMe ? -1 : 1) } : p));
+    persist();
+    return state.posts.find((p) => p.id === id)!;
+  },
+  async getComments(postId) {
+    await wait(200);
+    return (state.comments.get(postId) ?? []).filter((c) => !state.blocked.has(c.author.id));
+  },
+  async addComment(postId, body) {
+    await wait(200);
+    const text = body.trim();
+    if (!text) throw new Error('Comment is empty.');
+    if (text.length > COMMENT_MAX) throw new Error(`Comments can be up to ${COMMENT_MAX} characters.`);
+    const c: Comment = { id: crypto.randomUUID(), postId, author: myAuthor(), body: text, createdAt: new Date().toISOString() };
+    state.comments.set(postId, [...(state.comments.get(postId) ?? []), c]);
+    state.posts = state.posts.map((p) => (p.id === postId ? { ...p, commentCount: p.commentCount + 1 } : p));
+    persist();
+    return c;
+  },
+  async getMapMembers() {
+    await wait(300);
+    const me = loadMe();
+    // Phase 4: only members who opted in (visibility.map) are returned, with city-level coordinates.
+    return MOCK_MEMBERS.filter(visible).map((m) => card(me, m));
   },
 
   admin: {

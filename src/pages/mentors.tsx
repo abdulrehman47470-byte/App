@@ -12,6 +12,8 @@ import { MENTOR_TOPICS } from '@/data/options';
 import { useLikeFlow } from '@/features/discover/use-like';
 import { useMatches, useMentors } from '@/features/queries';
 import type { MentorSegment } from '@/lib/api';
+import { DiscoverTabs } from '@/features/discover/discover-tabs';
+import { FEATURES } from '@/config/features';
 
 export default function Mentors() {
   const [segment, setSegment] = useState<MentorSegment>('find');
@@ -23,7 +25,8 @@ export default function Mentors() {
 
   return (
     <>
-      <PageHeader title="Mentors" large subtitle="Learn the leaf, or pass it on" />
+      <PageHeader title={FEATURES.feed ? 'Discover' : 'Mentors'} large subtitle="Learn the leaf, or pass it on" />
+      <DiscoverTabs />
       <PageBody className="space-y-4">
         <Segmented
           label="Mentor mode"

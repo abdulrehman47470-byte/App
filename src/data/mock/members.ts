@@ -4,7 +4,7 @@ import type { Member } from '@/types';
 export const MOCK_MEMBERS: Member[] = [
   {
     id: 'm1', name: 'Marcus', age: 34, pronouns: 'he/him', city: 'Chicago', state: 'IL', country: 'United States',
-    userType: 'intermediate', photoHue: 28, photoVerified: true, distanceMi: 3,
+    userType: 'intermediate', photoHue: 28, photoVerified: true, lat: 41.8721, lng: -87.6648, distanceMi: 3,
     bio: 'Love a slow Saturday with a Nicaraguan toro and good bourbon. Always up for a new lounge and good conversation.',
     preferences: {
       strength: ['Medium', 'Medium-Full'], flavors: ['Leather', 'Cedar', 'Coffee', 'Black Pepper'], wrapper: ['Maduro', 'Habano'],
@@ -18,7 +18,7 @@ export const MOCK_MEMBERS: Member[] = [
   },
   {
     id: 'm2', name: 'Elena', age: 41, pronouns: 'she/her', city: 'Chicago', state: 'IL', country: 'United States',
-    userType: 'aficionado', photoHue: 12, photoVerified: true, distanceMi: 6,
+    userType: 'aficionado', photoHue: 12, photoVerified: true, lat: 41.8961, lng: -87.6578, distanceMi: 6,
     bio: 'Maduro devotee, cognac in hand. I host a small monthly tasting and love introducing new people to the leaf.',
     preferences: {
       strength: ['Medium-Full', 'Full'], flavors: ['Dark Chocolate', 'Espresso', 'Leather', 'Dried Fruit'], wrapper: ['Maduro', 'Oscuro'],
@@ -32,7 +32,7 @@ export const MOCK_MEMBERS: Member[] = [
   },
   {
     id: 'm3', name: 'Darnell', age: 29, pronouns: 'he/him', city: 'Evanston', state: 'IL', country: 'United States',
-    userType: 'beginner', photoHue: 38, photoVerified: false, distanceMi: 11,
+    userType: 'beginner', photoHue: 38, photoVerified: false, lat: 42.0211, lng: -87.7087, distanceMi: 11,
     bio: 'New to cigars after a trip to the Dominican Republic. Looking for someone to show me the ropes (and the humidor).',
     preferences: {
       strength: ['Mild', 'Mild-Medium'], flavors: ['Cream', 'Vanilla', 'Cedar', 'Coffee'], wrapper: ['Connecticut Shade', 'Ecuador Connecticut'],
@@ -46,7 +46,7 @@ export const MOCK_MEMBERS: Member[] = [
   },
   {
     id: 'm4', name: 'Victor', age: 52, pronouns: 'he/him', city: 'Oak Park', state: 'IL', country: 'United States',
-    userType: 'collector', photoHue: 20, photoVerified: true, distanceMi: 9,
+    userType: 'collector', photoHue: 20, photoVerified: true, lat: 41.8850, lng: -87.7985, distanceMi: 9,
     bio: 'Thirty years in the leaf. Cabinet humidor, too many boxes, and a soft spot for well-aged Dominicans.',
     preferences: {
       strength: ['Medium', 'Medium-Full'], flavors: ['Cedar', 'Toast', 'Honey', 'Baking Spice'], wrapper: ['Cameroon', 'Corojo', 'Habano'],
@@ -60,7 +60,7 @@ export const MOCK_MEMBERS: Member[] = [
   },
   {
     id: 'm5', name: 'Priya', age: 36, pronouns: 'she/her', city: 'Chicago', state: 'IL', country: 'United States',
-    userType: 'advanced', photoHue: 32, photoVerified: true, distanceMi: 2,
+    userType: 'advanced', photoHue: 32, photoVerified: true, lat: 41.9021, lng: -87.6368, distanceMi: 2,
     bio: 'Boutique hunter. If it is small-batch and a little strange, I want to try it. Rye on the side, always.',
     preferences: {
       strength: ['Medium', 'Medium-Full'], flavors: ['Black Pepper', 'Baking Spice', 'Cherry', 'Cocoa'], wrapper: ['Mexican San Andrés', 'Sumatra', 'Habano'],
@@ -74,7 +74,7 @@ export const MOCK_MEMBERS: Member[] = [
   },
   {
     id: 'm6', name: 'James', age: 45, pronouns: 'he/him', city: 'Naperville', state: 'IL', country: 'United States',
-    userType: 'intermediate', photoHue: 24, photoVerified: true, distanceMi: 24,
+    userType: 'intermediate', photoHue: 24, photoVerified: true, lat: 41.7328, lng: -88.1535, distanceMi: 24,
     bio: 'Golf, a Fuente, and the back nine. Weekend lounge regular and fan of a good sports-night crowd.',
     preferences: {
       strength: ['Mild-Medium', 'Medium'], flavors: ['Cedar', 'Walnut', 'Cream', 'Toast'], wrapper: ['Connecticut Shade', 'Cameroon'],
@@ -88,7 +88,7 @@ export const MOCK_MEMBERS: Member[] = [
   },
   {
     id: 'm7', name: 'Rafael', age: 38, pronouns: 'he/him', city: 'Chicago', state: 'IL', country: 'United States',
-    userType: 'aficionado', photoHue: 16, photoVerified: true, distanceMi: 4,
+    userType: 'aficionado', photoHue: 16, photoVerified: true, lat: 41.8841, lng: -87.6228, distanceMi: 4,
     bio: 'Grew up around tobacco fields in Estelí. Happy to talk wrappers, fermentation and the perfect rum pairing.',
     preferences: {
       strength: ['Full', 'Medium-Full'], flavors: ['Earth', 'Leather', 'Espresso', 'Black Pepper'], wrapper: ['Nicaraguan Habano', 'Corojo', 'Maduro'],
@@ -102,7 +102,7 @@ export const MOCK_MEMBERS: Member[] = [
   },
   {
     id: 'm8', name: 'Hannah', age: 31, pronouns: 'she/her', city: 'Chicago', state: 'IL', country: 'United States',
-    userType: 'beginner', photoHue: 36, photoVerified: true, distanceMi: 5,
+    userType: 'beginner', photoHue: 36, photoVerified: true, lat: 41.9081, lng: -87.6158, distanceMi: 5,
     bio: 'Started with a Connecticut on a rooftop last summer and I have been curious ever since. Teach me your ways.',
     preferences: {
       strength: ['Mild', 'Mild-Medium'], flavors: ['Vanilla', 'Honey', 'Cream', 'Almond'], wrapper: ['Connecticut Shade'],
@@ -116,7 +116,7 @@ export const MOCK_MEMBERS: Member[] = [
   },
   {
     id: 'm9', name: 'Tomás', age: 47, pronouns: 'he/him', city: 'Milwaukee', state: 'WI', country: 'United States',
-    userType: 'advanced', photoHue: 26, photoVerified: false, distanceMi: 82,
+    userType: 'advanced', photoHue: 26, photoVerified: false, lat: 43.0269, lng: -87.8855, distanceMi: 82,
     bio: 'Box-split organizer and limited-release chaser. I travel for the good events and will drive for a great lounge.',
     preferences: {
       strength: ['Medium-Full'], flavors: ['Cocoa', 'Coffee', 'Raisin', 'Cedar'], wrapper: ['Ecuador Habano', 'Pennsylvania Broadleaf'],
@@ -130,7 +130,7 @@ export const MOCK_MEMBERS: Member[] = [
   },
   {
     id: 'm10', name: 'Grace', age: 44, pronouns: 'she/her', city: 'Chicago', state: 'IL', country: 'United States',
-    userType: 'collector', photoHue: 8, photoVerified: true, distanceMi: 7,
+    userType: 'collector', photoHue: 8, photoVerified: true, lat: 41.8901, lng: -87.6018, distanceMi: 7,
     bio: 'Vintage Cameroon wrappers and a cedar-lined cabinet I built myself. Quiet lounges, long conversations.',
     preferences: {
       strength: ['Medium'], flavors: ['Cedar', 'Floral', 'Tea', 'Honey'], wrapper: ['Cameroon', 'Sumatra'],
@@ -141,6 +141,76 @@ export const MOCK_MEMBERS: Member[] = [
     },
     about: { industry: ['Architecture'], sports: ['Golf'], hobbies: ['Woodworking', 'Reading'], languages: ['English'], music: ['Classical'] },
     mentorship: 'guide', mentorTopics: ['Aging', 'Humidor Management'], meetup: ['Friends/Established Groups Only'],
+  },
+  {
+    id: 'm11', name: 'Luis', age: 39, pronouns: 'he/him', city: 'Miami', state: 'FL', country: 'United States',
+    userType: 'aficionado', photoHue: 22, photoVerified: true, lat: 25.7617, lng: -80.1918, distanceMi: 1190,
+    bio: 'Little Havana regular. Corojo, café cubano and dominoes on a Sunday afternoon.',
+    preferences: {
+      strength: ['Medium-Full', 'Full'], flavors: ['Espresso', 'Leather', 'Black Pepper', 'Cocoa'], wrapper: ['Corojo', 'Maduro'],
+      origin: ['Nicaragua', 'Dominican Republic'], vitola: ['Toro', 'Robusto'], brands: ['My Father', 'Padrón', 'Perdomo'],
+      pairing: ['Espresso', 'Rum'], venue: ['Cigar Lounge', 'Patio'], pace: ['Relaxed'],
+      socialStyle: ['Small Groups', 'Cigar Events'], atmosphere: ['Social', 'Lively'], collectionSize: ['101-300'],
+      aging: ['Rest Several Months'], priceMin: 10, priceMax: 30,
+    },
+    about: { industry: ['Hospitality'], sports: ['Baseball'], hobbies: ['Cooking', 'Poker'], languages: ['English', 'Spanish'], music: ['Salsa', 'Latin'] },
+    mentorship: 'guide', mentorTopics: ['Cigar Basics', 'Pairing'], meetup: ['Open to Local Meetups', 'Open to Cigar Events'],
+  },
+  {
+    id: 'm12', name: 'Nadia', age: 33, pronouns: 'she/her', city: 'New York', state: 'NY', country: 'United States',
+    userType: 'advanced', photoHue: 10, photoVerified: true, lat: 40.7228, lng: -73.9906, distanceMi: 710,
+    bio: 'Architect by day, lancero evangelist by night. Always hunting a quiet corner in a loud city.',
+    preferences: {
+      strength: ['Medium'], flavors: ['Cedar', 'Floral', 'Cream', 'Baking Spice'], wrapper: ['Ecuador Connecticut', 'Cameroon'],
+      origin: ['Dominican Republic', 'Honduras'], vitola: ['Lancero', 'Lonsdale'], brands: ['Davidoff', 'Illusione', 'Crowned Heads'],
+      pairing: ['Japanese Whisky', 'Tea'], venue: ['Cigar Bar', 'Private Club'], pace: ['Slow & Contemplative'],
+      socialStyle: ['One-on-One', 'Small Groups'], atmosphere: ['Quiet', 'Sophisticated'], collectionSize: ['51-100'],
+      aging: ['Age 1-2 Years'], priceMin: 15, priceMax: 40,
+    },
+    about: { industry: ['Architecture'], sports: ['Tennis'], hobbies: ['Photography', 'Travel'], languages: ['English', 'French'], music: ['Jazz', 'Classical'] },
+    mentorship: 'neither', mentorTopics: [], meetup: ['Open to Local Meetups'],
+  },
+  {
+    id: 'm13', name: 'Beau', age: 48, pronouns: 'he/him', city: 'Nashville', state: 'TN', country: 'United States',
+    userType: 'collector', photoHue: 34, photoVerified: true, lat: 36.1627, lng: -86.7816, distanceMi: 400,
+    bio: 'Bourbon country, Broadleaf in the humidor, and a front porch that has seen a lot of smoke.',
+    preferences: {
+      strength: ['Full', 'Medium-Full'], flavors: ['Molasses', 'Dark Chocolate', 'Earth', 'Leather'], wrapper: ['Connecticut Broadleaf', 'Pennsylvania Broadleaf', 'Maduro'],
+      origin: ['Nicaragua', 'United States'], vitola: ['Gordo', 'Toro'], brands: ['Liga Privada', 'Tatuaje', 'Arturo Fuente'],
+      pairing: ['Bourbon', 'Rye'], venue: ['Backyard', 'Home'], pace: ['Slow & Contemplative'],
+      socialStyle: ['Small Groups'], atmosphere: ['Relaxed', 'Music-Friendly'], collectionSize: ['500+'],
+      aging: ['Age 3-5 Years'], priceMin: 12, priceMax: 50,
+    },
+    about: { industry: ['Construction'], sports: ['Hunting', 'Fishing'], hobbies: ['BBQ & Smoking Meats', 'Woodworking'], languages: ['English'], music: ['Country', 'Blues'] },
+    mentorship: 'guide', mentorTopics: ['Aging', 'Humidor Management'], meetup: ['Open to Cigar Events', 'Open to Traveling for Events'],
+  },
+  {
+    id: 'm14', name: 'Oliver', age: 42, pronouns: 'he/him', city: 'London', state: 'England', country: 'United Kingdom',
+    userType: 'intermediate', photoHue: 18, photoVerified: false, lat: 51.5074, lng: -0.1278, distanceMi: 3950,
+    bio: 'Terrace smoker in a rainy city. Here to swap notes with friends across the pond.',
+    preferences: {
+      strength: ['Mild-Medium', 'Medium'], flavors: ['Cedar', 'Toast', 'Honey', 'Tea'], wrapper: ['Connecticut Shade', 'Habano'],
+      origin: ['Cuba', 'Dominican Republic'], vitola: ['Corona', 'Robusto'], brands: ['Cohiba', 'Montecristo', 'Davidoff'],
+      pairing: ['Scotch', 'Port', 'Tea'], venue: ['Cigar Lounge', 'Travel'], pace: ['Relaxed'],
+      socialStyle: ['Online Communities', 'One-on-One'], atmosphere: ['Quiet', 'Upscale'], collectionSize: ['25-50'],
+      aging: ['Rest a Few Weeks'], priceMin: 15, priceMax: 35,
+    },
+    about: { industry: ['Banking & Finance'], sports: ['Soccer'], hobbies: ['Reading', 'Watches'], languages: ['English'], music: ['Rock', 'Jazz'] },
+    mentorship: 'seeking', mentorTopics: ['Aging', 'Tasting'], meetup: ['Online Only'],
+  },
+  {
+    id: 'm15', name: 'Carmen', age: 37, pronouns: 'she/her', city: 'Austin', state: 'TX', country: 'United States',
+    userType: 'beginner', photoHue: 6, photoVerified: true, lat: 30.2672, lng: -97.7431, distanceMi: 980,
+    bio: 'Started on a patio at a friend’s wedding. Looking for easy-going smokes and good company.',
+    preferences: {
+      strength: ['Mild', 'Mild-Medium'], flavors: ['Vanilla', 'Caramel', 'Cream', 'Cedar'], wrapper: ['Connecticut Shade', 'Ecuador Connecticut'],
+      origin: ['Dominican Republic', 'Open to All'], vitola: ['Robusto', 'Corona'], brands: ['Macanudo', 'Rocky Patel'],
+      pairing: ['Wine', 'Tequila', 'Coffee'], venue: ['Patio', 'Events'], pace: ['Relaxed'],
+      socialStyle: ['Small Groups', 'Large Groups'], atmosphere: ['Lively', 'Music-Friendly'], collectionSize: ["I don't keep a collection"],
+      aging: ['No Preference'], priceMin: 5, priceMax: 15,
+    },
+    about: { industry: ['Education'], sports: ['Soccer'], hobbies: ['Travel', 'Cooking'], languages: ['English', 'Spanish'], music: ['Latin', 'Country'] },
+    mentorship: 'seeking', mentorTopics: ['Cigar Basics', 'Cutting & Lighting'], meetup: ['Open to Local Meetups', 'Open to Cigar Events'],
   },
 ];
 

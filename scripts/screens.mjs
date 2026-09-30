@@ -18,6 +18,8 @@ const SCREENS = [
   ['02b-sign-up', '/signin?mode=signup', null],
   ['03a-age', '/verify/age', base],
   ['03b-face', '/verify/face', { ...base, dob: '1989-04-18' }],
+  ['03d-face-camera', '/verify/face', { ...base, dob: '1989-04-18', biometricConsent: true }, async (p) => { await p.getByRole('button', { name: 'Open camera' }).click(); await p.waitForTimeout(1500); }],
+  ['03e-face-captured', '/verify/face', { ...base, dob: '1989-04-18', biometricConsent: true }, async (p) => { await p.getByRole('button', { name: 'Open camera' }).click(); await p.getByRole('button', { name: 'Take photo' }).click({ timeout: 8000 }); }],
   ['03c-restricted', '/restricted', { ...base, underage: true }],
   ['04-ethics', '/ethics', { ...base, dob: '1989-04-18', photoCheck: 'verified' }],
   ['05-photo', '/photo', { ...base, dob: '1989-04-18', photoCheck: 'verified', ethicsAgreed: true }],
@@ -25,6 +27,10 @@ const SCREENS = [
   ['07-setup-1', '/setup/1', 'demo'],
   ['08-setup-2', '/setup/2', 'demo'],
   ['09-setup-3', '/setup/3', 'demo'],
+  ['09b-feed', '/feed', 'demo'],
+  ['09c-feed-composer', '/feed', 'demo', async (p) => p.getByRole('button', { name: 'Start a post' }).click()],
+  ['09d-post-detail', '/post/f2', 'demo'],
+  ['09e-member-map', '/map', 'demo', async (p) => { await p.waitForTimeout(1500); await p.getByRole('button', { name: /Elena/ }).first().click(); await p.waitForTimeout(1500); }],
   ['10-discover', '/discover', 'demo'],
   ['10b-discover-filters', '/discover', 'demo', async (p) => p.getByRole('button', { name: /^Filters/ }).click()],
   ['10c-its-a-match', '/member/m1', 'demo', async (p) => { await p.getByRole('button', { name: /^Like$/ }).click(); await p.waitForTimeout(1600); }],
@@ -55,19 +61,20 @@ const sizes = [
   { tag: 'desktop', viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1 },
 ];
 
-const browser = await chromium.launch();
+// Fake camera flags let the camera screens render a test pattern headlessly.
+const browser = await chromium.launch({ args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'] });
 const errors = [];
 for (const size of sizes) {
   for (const [name, path, state, action] of SCREENS) {
     if (ONLY && !name.includes(ONLY)) continue;
-    const ctx = await browser.newContext({ viewport: size.viewport, deviceScaleFactor: size.deviceScaleFactor, reducedMotion: 'no-preference' });
+    const ctx = await browser.newContext({ viewport: size.viewport, deviceScaleFactor: size.deviceScaleFactor, reducedMotion: 'no-preference', permissions: ['camera'] });
     const page = await ctx.newPage();
     page.on('pageerror', (e) => errors.push(`${name}: ${e.message}`));
     page.on('console', (m) => m.type() === 'error' && errors.push(`${name}: ${m.text()}`));
     if (state === 'demo') {
       await page.goto(BASE + '/');
       await page.getByRole('button', { name: /explore with a demo member/ }).click();
-      await page.waitForURL('**/discover');
+      await page.waitForURL('**/feed');
       await page.evaluate((s) => localStorage.setItem('ds.session', JSON.stringify(s)), done);
     } else if (state) {
       await page.addInitScript((s) => localStorage.setItem('ds.session', JSON.stringify(s)), state);

@@ -10,6 +10,10 @@ import { MENTORSHIP_LABEL, userTypeLabel } from '@/data/options';
 import { useLikeFlow } from '@/features/discover/use-like';
 import { ProfileSections } from '@/features/profile/profile-sections';
 import { useMatches, useMemberCard } from '@/features/queries';
+import { ActivitySection } from '@/features/feed/activity-section';
+import { MapView } from '@/components/map/map-view';
+import { FEATURES } from '@/config/features';
+import { MapPin } from 'lucide-react';
 import { SafetySheet } from '@/features/safety/safety-sheet';
 import { api } from '@/lib/api';
 
@@ -123,6 +127,28 @@ export default function MemberProfile() {
           shared={shared}
           mentorship={{ label: MENTORSHIP_LABEL[m.mentorship], topics: m.mentorTopics }}
         />
+
+        {FEATURES.memberMap && (
+          <Card className="overflow-hidden">
+            <div className="flex items-center gap-2 p-5 pb-3">
+              <MapPin className="size-4 text-gold" />
+              <h2 className="micro-label">Location</h2>
+              <span className="ml-auto text-xs text-muted">
+                {m.city}, {m.state} · {m.distanceMi} mi away
+              </span>
+            </div>
+            <MapView
+              label={`Approximate area around ${m.city}`}
+              markers={[]}
+              area={{ lat: m.lat, lng: m.lng, radiusM: 6000 }}
+              interactive={false}
+              className="h-40 rounded-none border-x-0 border-b-0"
+            />
+            <p className="px-5 py-2 text-[11px] text-faint">Approximate area only. Exact locations are never shared.</p>
+          </Card>
+        )}
+
+        {FEATURES.feed && <ActivitySection memberId={m.id} name={m.name} />}
 
         <CigarBand label="Stay safe" />
         <SafetyBanner />

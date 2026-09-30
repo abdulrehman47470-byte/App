@@ -4,6 +4,7 @@ import { Logo } from '@/components/brand/logo';
 import { CigarBand, TrustNote } from '@/components/brand/ornaments';
 import { Frame } from '@/components/layout/app-shell';
 import { Button } from '@/components/ui/button';
+import { HOME } from '@/config/features';
 import { nextStep, useSession } from '@/lib/session';
 
 export default function Welcome() {
@@ -52,7 +53,7 @@ export default function Welcome() {
                 className="underline decoration-dotted underline-offset-4 hover:text-gold"
                 onClick={async () => {
                   await loadDemo();
-                  navigate('/discover');
+                  navigate(HOME);
                 }}
               >
                 explore with a demo member

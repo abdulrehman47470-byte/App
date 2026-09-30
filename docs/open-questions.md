@@ -28,6 +28,21 @@ build prompt and the concept board (`design-reference.png`).
 | 10 | Map provider/key, Vimeo account, Stripe account | Map and Vimeo placeholders | Phases 6–7 |
 | 11 | Enforce 21+ everywhere (Terms mention 18 or 21 by local law)? | 21+ everywhere | Phase 2 |
 
+## Scope change (2026-09-30): feed and member map
+
+Added at the product owner's request, although the client's original rules said "IM only: no public
+feed, posts or comments". **Confirm with the client.** Both can be switched off in one place:
+`src/config/features.ts` (`feed`, `memberMap`). With them off, the tabs go back to
+Discover / Mentors / Matches / Messages / Profile.
+
+- **Feed ("The Lounge")**: posts (update, smoking now, lounge check-in, question), photos from the
+  library or camera, likes, comments, share link, report/block, delete your own posts, Activity on profiles.
+- **Member map**: members at city level only (never addresses), opt-in "Show me on the map" switch
+  (off by default for new members), lounges layer, location card on each profile.
+- Map tiles: free OpenStreetMap tiles for development. Their usage policy does not allow production
+  traffic, so Mapbox (Phase 7) is required before launch.
+- New moderation needs for Phase 8: post and comment reports in the admin panel.
+
 ## Conflicts found (concept board vs. client rules)
 
 These are from the concept board. In each case Phase 0 followed the client rules, not the board.

@@ -1,7 +1,7 @@
 // TanStack Query hooks: the only place components reach the data layer.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api, type LoungeQuery, type MentorSegment } from '@/lib/api';
-import type { DiscoverFilters, Message, MyProfile } from '@/types';
+import { api, type LoungeQuery, type MentorSegment, type NewPost } from '@/lib/api';
+import type { DiscoverFilters, FeedFilter, Message, MyProfile, Post } from '@/types';
 
 export const useMe = () => useQuery({ queryKey: ['me'], queryFn: api.getMe });
 
@@ -87,3 +87,42 @@ export function useAdminActions() {
     }),
   };
 }
+
+// ---- Feed ----
+export const useFeed = (filter: FeedFilter) => useQuery({ queryKey: ['feed', filter], queryFn: () => api.getFeed(filter) });
+export const useFeedPost = (id: string) => useQuery({ queryKey: ['feed-post', id], queryFn: () => api.getFeedPost(id) });
+export const useMemberPosts = (memberId: string) =>
+  useQuery({ queryKey: ['feed', 'member', memberId], queryFn: () => api.getMemberPosts(memberId) });
+export const useComments = (postId: string, enabled = true) =>
+  useQuery({ queryKey: ['comments', postId], queryFn: () => api.getComments(postId), enabled });
+
+export function useFeedActions() {
+  const qc = useQueryClient();
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: ['feed'] });
+    qc.invalidateQueries({ queryKey: ['feed-post'] });
+  };
+  /** Update a post in every cached list that contains it (optimistic UI). */
+  const patchPost = (id: string, fn: (p: Post) => Post) => {
+    qc.setQueriesData<Post[]>({ queryKey: ['feed'] }, (list) => list?.map((p) => (p.id === id ? fn(p) : p)));
+    qc.setQueriesData<Post | null>({ queryKey: ['feed-post', id] }, (p) => (p ? fn(p) : p));
+  };
+  return {
+    create: useMutation({ mutationFn: (p: NewPost) => api.createPost(p), onSuccess: refresh }),
+    remove: useMutation({ mutationFn: (id: string) => api.deletePost(id), onSuccess: refresh }),
+    like: useMutation({
+      mutationFn: (id: string) => api.togglePostLike(id),
+      onMutate: (id) => patchPost(id, (p) => ({ ...p, likedByMe: !p.likedByMe, likes: p.likes + (p.likedByMe ? -1 : 1) })),
+      onError: refresh,
+    }),
+    comment: useMutation({
+      mutationFn: ({ postId, body }: { postId: string; body: string }) => api.addComment(postId, body),
+      onSuccess: (_c, { postId }) => {
+        qc.invalidateQueries({ queryKey: ['comments', postId] });
+        patchPost(postId, (p) => ({ ...p, commentCount: p.commentCount + 1 }));
+      },
+    }),
+  };
+}
+
+export const useMapMembers = () => useQuery({ queryKey: ['map-members'], queryFn: api.getMapMembers });

@@ -1,32 +1,16 @@
-import { Camera, Check, ImagePlus } from 'lucide-react';
+import { Camera, Check, ImagePlus, Images } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Frame } from '@/components/layout/app-shell';
 import { OnboardingHeader } from '@/components/layout/page';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/misc';
+import { Sheet } from '@/components/ui/sheet';
 import { PHOTO_RULES } from '@/content/legal';
 import { useSaveMe } from '@/features/queries';
+import { CameraCapture } from '@/features/verification/camera-capture';
+import { checkImageFile, compressImage } from '@/lib/media';
 import { nextStep, useSession } from '@/lib/session';
-
-const MAX_MB = 10;
-
-/** Client-side compression: longest side 640px, JPEG 80%. */
-function compress(src: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      const scale = Math.min(1, 640 / Math.max(img.width, img.height));
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.round(img.width * scale);
-      canvas.height = Math.round(img.height * scale);
-      canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
-      resolve(canvas.toDataURL('image/jpeg', 0.8));
-    };
-    img.onerror = reject;
-    img.src = src;
-  });
-}
 
 export default function PhotoUpload() {
   const { session, update } = useSession();
@@ -35,13 +19,14 @@ export default function PhotoUpload() {
   const input = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string>();
   const [error, setError] = useState<string>();
+  const [camera, setCamera] = useState(false);
 
-  useEffect(() => () => void (preview && URL.revokeObjectURL(preview)), [preview]);
+  useEffect(() => () => void (preview?.startsWith('blob:') && URL.revokeObjectURL(preview)), [preview]);
 
   const onFile = (f?: File) => {
     if (!f) return;
-    if (!/^image\/(jpeg|png|webp|heic|heif)$/.test(f.type)) return setError('Please choose a JPG, PNG, WebP or HEIC image.');
-    if (f.size > MAX_MB * 1024 * 1024) return setError(`Photo must be under ${MAX_MB} MB.`);
+    const problem = checkImageFile(f);
+    if (problem) return setError(problem);
     setError(undefined);
     setPreview(URL.createObjectURL(f));
   };
@@ -52,9 +37,9 @@ export default function PhotoUpload() {
       <div className="flex min-h-[calc(100dvh-90px)] flex-col px-5 pb-8 pt-2">
         <button
           type="button"
-          onClick={() => input.current?.click()}
+          onClick={() => setCamera(true)}
           className="group relative mx-auto mt-2 grid size-44 place-items-center overflow-hidden rounded-full border-2 border-dashed border-line-strong bg-surface transition-colors hover:border-gold"
-          aria-label={preview ? 'Change photo' : 'Choose a photo'}
+          aria-label={preview ? 'Retake photo with camera' : 'Take a photo with camera'}
         >
           {preview ? (
             <img src={preview} alt="Your selected profile photo" className="size-full object-cover" />
@@ -97,21 +82,39 @@ export default function PhotoUpload() {
             disabled={!preview || saveMe.isPending}
             onClick={async () => {
               // Phase 2: compress client-side, upload to a private Storage bucket, status = pending.
-              await saveMe.mutateAsync({ photoStatus: 'pending', photoUrl: await compress(preview!) });
+              await saveMe.mutateAsync({ photoStatus: 'pending', photoUrl: await compressImage(preview!) });
               update({ photoUploaded: true });
               navigate(nextStep({ ...session, photoUploaded: true }));
             }}
           >
             {preview ? 'Use this photo' : 'Upload photo'}
           </Button>
-          {!preview && (
-            <Button size="lg" variant="secondary" block onClick={() => input.current?.click()}>
-              Choose from library
+          <div className="grid grid-cols-2 gap-3">
+            <Button size="lg" variant="secondary" onClick={() => setCamera(true)}>
+              <Camera className="size-5" /> {preview ? 'Retake' : 'Take photo'}
             </Button>
-          )}
+            <Button size="lg" variant="secondary" onClick={() => input.current?.click()}>
+              <Images className="size-5" /> Library
+            </Button>
+          </div>
           <p className="text-center text-xs text-faint">A profile photo is required to use Daily Stogie.</p>
         </div>
       </div>
+      <Sheet open={camera} onOpenChange={setCamera} title="Take your profile photo" description="Face the camera in good light, then tap the shutter.">
+        {camera && (
+          <div className="pb-2">
+            <CameraCapture
+              confirmLabel="Use photo"
+              onCancel={() => setCamera(false)}
+              onCapture={(img) => {
+                setPreview(img);
+                setError(undefined);
+                setCamera(false);
+              }}
+            />
+          </div>
+        )}
+      </Sheet>
     </Frame>
   );
 }

@@ -8,6 +8,8 @@ import { userTypeLabel } from '@/data/options';
 import { ProfileSections } from '@/features/profile/profile-sections';
 import { useMe } from '@/features/queries';
 import { SettingsMenu } from '@/features/settings/settings-menu';
+import { ActivitySection } from '@/features/feed/activity-section';
+import { FEATURES } from '@/config/features';
 import { profileCompleteness } from '@/lib/completeness';
 
 export default function MyProfile() {
@@ -89,6 +91,8 @@ export default function MyProfile() {
           about={me.about}
           mentorship={mentorship ? { label: mentorship, topics: (me.preferences.mentorTopics as string[]) ?? [] } : undefined}
         />
+
+        {FEATURES.feed && <ActivitySection memberId="me" name="You" />}
 
         <CigarBand label="Settings" className="pt-2" />
         <SettingsMenu />

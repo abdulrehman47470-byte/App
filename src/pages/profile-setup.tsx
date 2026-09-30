@@ -10,6 +10,7 @@ import { StepAbout } from '@/features/profile/step-about';
 import { demographicsErrors, StepDemographics } from '@/features/profile/step-demographics';
 import { StepPreferences } from '@/features/profile/step-preferences';
 import { useProfileDraft } from '@/features/profile/use-draft';
+import { HOME } from '@/config/features';
 import { useSession } from '@/lib/session';
 
 const STEPS = [
@@ -40,7 +41,7 @@ export default function ProfileSetup({ mode = 'onboarding' }: { mode?: 'onboardi
     await flush();
     if (mode === 'onboarding') update({ profileStep: Math.max(session.profileStep, step) });
     if (step < 3) navigate(`${base}/${step + 1}`);
-    else navigate(mode === 'edit' ? '/profile' : '/discover');
+    else navigate(mode === 'edit' ? '/profile' : HOME);
   };
 
   const meta = STEPS[step - 1];

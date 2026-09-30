@@ -1,14 +1,17 @@
-import { Compass, GraduationCap, Heart, MessageCircle, UserRound } from 'lucide-react';
+import { Compass, GraduationCap, Heart, House, Map as MapIcon, MessageCircle, UserRound } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { LogoMark, Wordmark } from '@/components/brand/logo';
+import { FEATURES } from '@/config/features';
 import { useConversations } from '@/features/queries';
 import { cn } from '@/lib/utils';
 
+// Five destinations. With the feed on, Mentors lives inside Discover; with the map on,
+// Matches lives at the top of Messages.
 export const TABS = [
+  FEATURES.feed ? { to: '/feed', label: 'Home', icon: House } : { to: '/mentors', label: 'Mentors', icon: GraduationCap },
   { to: '/discover', label: 'Discover', icon: Compass },
-  { to: '/mentors', label: 'Mentors', icon: GraduationCap },
-  { to: '/matches', label: 'Matches', icon: Heart },
+  FEATURES.memberMap ? { to: '/map', label: 'Map', icon: MapIcon } : { to: '/matches', label: 'Matches', icon: Heart },
   { to: '/messages', label: 'Messages', icon: MessageCircle },
   { to: '/profile', label: 'Profile', icon: UserRound },
 ];

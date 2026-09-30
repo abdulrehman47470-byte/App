@@ -6,12 +6,14 @@ import { Avatar } from '@/components/brand/portrait';
 import { PageBody, PageHeader } from '@/components/layout/page';
 import { Button } from '@/components/ui/button';
 import { SearchInput, Skeleton } from '@/components/ui/misc';
-import { useConversations } from '@/features/queries';
+import { useConversations, useMatches } from '@/features/queries';
 import { cn, timeAgo } from '@/lib/utils';
 
 export default function Messages() {
   const { data, isLoading } = useConversations();
   const [q, setQ] = useState('');
+  const { data: matches } = useMatches();
+  const fresh = matches?.filter((m) => !m.hasMessages) ?? [];
   const list = data?.filter((c) => c.member.name.toLowerCase().includes(q.trim().toLowerCase()));
 
   return (
@@ -19,6 +21,28 @@ export default function Messages() {
       <PageHeader title="Messages" large />
       <PageBody className="space-y-4">
         <SafetyBanner />
+        {fresh.length > 0 && (
+          <section aria-label="New matches">
+            <div className="mb-2 flex items-center justify-between">
+              <h2 className="micro-label">New matches</h2>
+              <Link to="/matches" className="text-xs font-medium text-gold hover:underline">
+                See all matches
+              </Link>
+            </div>
+            <ul className="scrollbar-none -mx-4 flex gap-4 overflow-x-auto px-4 pb-1">
+              {fresh.map((m) => (
+                <li key={m.id}>
+                  <Link to={`/messages/${m.id}`} className="flex w-[68px] flex-col items-center gap-1.5 text-center">
+                    <span className="gold-gradient rounded-full p-[2.5px] shadow-[var(--shadow-glow)]">
+                      <Avatar name={m.member.name} hue={m.member.photoHue} size={60} className="border-2 border-bg" />
+                    </span>
+                    <span className="w-full truncate text-xs text-text">{m.member.name}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
         {!!data?.length && <SearchInput value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search conversations" aria-label="Search conversations" />}
         {isLoading ? (
           Array.from({ length: 5 }, (_, i) => <Skeleton key={i} className="h-[72px]" />)

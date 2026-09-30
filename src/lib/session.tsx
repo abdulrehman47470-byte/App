@@ -1,6 +1,7 @@
 // Mock auth + sign-up gate state. Phase 2 replaces this with Supabase Auth, and every gate
 // below is re-enforced in the database (RLS / checks), not only in these route guards.
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { HOME } from '@/config/features';
 import { api } from '@/lib/api';
 import { DEMO_PROFILE, MOCK_STATE_KEY } from '@/lib/api/mock';
 import { storage } from '@/lib/storage';
@@ -45,7 +46,7 @@ export function nextStep(o: Onboarding): string {
   if (!o.photoUploaded) return '/photo';
   if (!o.plan) return '/subscribe';
   if (o.profileStep < 3) return `/setup/${o.profileStep + 1}`;
-  return '/discover';
+  return HOME;
 }
 
 interface SessionCtx {
@@ -87,7 +88,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [update]);
 
   const value = useMemo(
-    () => ({ session, update, signOut, loadDemo, isComplete: nextStep(session) === '/discover' }),
+    () => ({ session, update, signOut, loadDemo, isComplete: nextStep(session) === HOME }),
     [session, update, signOut, loadDemo],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

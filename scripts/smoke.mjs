@@ -2,8 +2,8 @@
 // Usage: npm run dev (in another terminal), then npm run smoke. Phase 9 turns this into a Playwright test suite.
 import { chromium } from 'playwright';
 const B = process.env.BASE_URL ?? 'http://localhost:5173';
-const browser = await chromium.launch();
-const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+const browser = await chromium.launch({ args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'] });
+const page = await browser.newPage({ viewport: { width: 390, height: 844 }, permissions: ['camera'] });
 const errs = [];
 page.on('pageerror', (e) => errs.push(e.message));
 const step = async (label, fn) => { await fn(); console.log('ok  ', label, '->', new URL(page.url()).pathname); };
@@ -33,10 +33,12 @@ await step('underage is blocked', async () => {
 await step('adult DOB', async () => { await page.getByLabel('Date of birth').fill('04181989'); await page.getByRole('button', { name: 'Continue' }).click(); await page.waitForURL('**/verify/face'); });
 await step('face check needs consent, then verifies', async () => {
   await page.getByText('Take a quick live selfie').waitFor();
-  const start = page.getByRole('button', { name: 'Start camera' });
-  if (!(await start.isDisabled())) throw new Error('start enabled without consent');
+  const start = page.getByRole('button', { name: 'Open camera' });
+  if (!(await start.isDisabled())) throw new Error('camera enabled without consent');
   await page.getByRole('checkbox').first().click();
   await start.click();
+  await page.getByRole('button', { name: 'Take photo' }).click({ timeout: 10000 });
+  await page.getByRole('button', { name: 'Use this selfie' }).click();
   await page.getByRole('button', { name: 'Continue' }).click({ timeout: 8000 });
   await page.waitForURL('**/ethics');
 });
@@ -69,7 +71,27 @@ await step('step 2 pick chips', async () => {
   await page.getByRole('checkbox', { name: 'Cedar' }).first().click();
   await page.getByRole('button', { name: 'Next' }).click(); await page.waitForURL('**/setup/3');
 });
-await step('step 3 complete', async () => { await page.getByRole('button', { name: 'Complete profile' }).click(); await page.waitForURL('**/discover'); });
+await step('step 3 complete -> home feed', async () => { await page.getByRole('button', { name: 'Complete profile' }).click(); await page.waitForURL('**/feed'); });
+await step('post, like and comment on the feed', async () => {
+  await page.getByRole('button', { name: 'Start a post' }).click();
+  await page.getByLabel('Post text').fill('First night at the lounge!');
+  await page.getByRole('button', { name: 'Post', exact: true }).click();
+  const mine = page.getByRole('article', { name: /Post by Sam Test/ });
+  await mine.getByText('First night at the lounge!').waitFor();
+  await mine.getByRole('button', { name: 'Like' }).click();
+  await mine.getByRole('button', { name: 'Liked' }).waitFor();
+  await mine.getByRole('button', { name: 'Comment' }).click();
+  await mine.getByLabel('Add a comment').fill('Cheers everyone');
+  await mine.getByRole('button', { name: 'Post comment' }).click();
+  await mine.getByText('Cheers everyone').waitFor();
+});
+await step('member map shows members', async () => {
+  await page.getByRole('link', { name: 'Map' }).first().click();
+  await page.waitForURL('**/map');
+  await page.locator('section').getByRole('button', { name: /Elena/ }).click();
+  await page.getByRole('link', { name: 'View profile' }).waitFor();
+});
+await step('open discover', async () => { await page.goto(B + '/discover'); });
 await step('pass via keyboard, then undo', async () => {
   const card = page.getByRole('group', { name: /Tap to view profile/ });
   await card.first().waitFor();

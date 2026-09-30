@@ -1,5 +1,9 @@
 import type {
   BlogPost,
+  Comment,
+  FeedFilter,
+  Post,
+  PostKind,
   Conversation,
   DiscoverCard,
   DiscoverFilters,
@@ -14,6 +18,14 @@ import type {
 } from '@/types';
 
 export type MentorSegment = 'find' | 'guide';
+
+export interface NewPost {
+  kind: PostKind;
+  body: string;
+  imageUrl?: string;
+  loungeId?: string;
+  cigar?: string;
+}
 
 export interface LoungeQuery {
   q?: string;
@@ -49,6 +61,17 @@ export interface DataProvider {
   getSession(id: string): Promise<SessionVideo | null>;
   getPosts(): Promise<BlogPost[]>;
   getPost(slug: string): Promise<BlogPost | null>;
+
+  getFeed(filter: FeedFilter): Promise<Post[]>;
+  getFeedPost(id: string): Promise<Post | null>;
+  getMemberPosts(memberId: string): Promise<Post[]>;
+  createPost(input: NewPost): Promise<Post>;
+  deletePost(id: string): Promise<void>;
+  togglePostLike(id: string): Promise<Post>;
+  getComments(postId: string): Promise<Comment[]>;
+  addComment(postId: string, body: string): Promise<Comment>;
+  /** Members who chose to appear on the map, at city-level precision. */
+  getMapMembers(): Promise<DiscoverCard[]>;
 
   admin: {
     getPendingPhotos(): Promise<PendingPhoto[]>;

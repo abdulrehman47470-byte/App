@@ -2,6 +2,7 @@ import { animate, AnimatePresence, motion, useMotionValue, useTransform, type Mo
 import { Heart, RotateCcw, SlidersHorizontal, X } from 'lucide-react';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { DiscoverTabs } from '@/features/discover/discover-tabs';
 import { EmptyState } from '@/components/brand/empty-state';
 import { PageHeader } from '@/components/layout/page';
 import { Button } from '@/components/ui/button';
@@ -106,6 +107,7 @@ export default function Discover() {
           </Button>
         }
       />
+      <DiscoverTabs />
       <p className="sr-only" aria-live="polite">
         {announce}
       </p>

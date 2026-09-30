@@ -1,6 +1,7 @@
 import { lazy, Suspense, type ReactNode } from 'react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { AppShell, Frame } from '@/components/layout/app-shell';
+import { FEATURES, HOME } from '@/config/features';
 import { Skeleton } from '@/components/ui/misc';
 import { nextStep, useSession } from '@/lib/session';
 
@@ -16,6 +17,9 @@ import ProfileSetup from '@/pages/profile-setup';
 import Discover from '@/pages/discover';
 
 const MemberProfile = lazy(() => import('@/pages/member-profile'));
+const Feed = lazy(() => import('@/pages/feed'));
+const PostPage = lazy(() => import('@/pages/feed').then((m) => ({ default: m.PostPage })));
+const MemberMap = lazy(() => import('@/pages/member-map'));
 const Mentors = lazy(() => import('@/pages/mentors'));
 const Matches = lazy(() => import('@/pages/matches'));
 const Messages = lazy(() => import('@/pages/messages'));
@@ -82,6 +86,9 @@ export default function App() {
           <Route path="/profile/edit/:step" element={<ProfileSetup mode="edit" />} />
           <Route path="/admin" element={<Admin />} />
           <Route element={<AppShell />}>
+            {FEATURES.feed && <Route path="/feed" element={<Feed />} />}
+            {FEATURES.feed && <Route path="/post/:id" element={<PostPage />} />}
+            {FEATURES.memberMap && <Route path="/map" element={<MemberMap />} />}
             <Route path="/discover" element={<Discover />} />
             <Route path="/member/:id" element={<MemberProfile />} />
             <Route path="/mentors" element={<Mentors />} />
@@ -100,7 +107,7 @@ export default function App() {
             <Route path="/blog/:slug" element={<BlogPost />} />
           </Route>
         </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to={HOME} replace />} />
       </Routes>
     </Suspense>
   );
