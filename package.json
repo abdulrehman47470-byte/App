@@ -16,7 +16,8 @@
     "setup:check": "node scripts/setup-check.mjs",
     "perf": "node scripts/perf.mjs",
     "icons": "python scripts/logo_assets.py docs/logo-original.png",
-    "smooth": "node scripts/smooth.mjs"
+    "smooth": "node scripts/smooth.mjs",
+    "forms": "node scripts/forms.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",
@@ -40,13 +41,17 @@
     "tailwind-merge": "^3.7.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.7",
     "@eslint/js": "^10.0.1",
+    "@rolldown/plugin-babel": "^0.2.4",
     "@tailwindcss/vite": "^4.3.3",
+    "@types/babel__core": "^7.20.5",
     "@types/leaflet": "^1.9.22",
     "@types/node": "^26.6.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
+    "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "^10.11.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",

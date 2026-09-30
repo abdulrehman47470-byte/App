@@ -1,6 +1,7 @@
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig, type Plugin } from 'vite';
-import react from '@vitejs/plugin-react';
+import react, { reactCompilerPreset } from '@vitejs/plugin-react';
+import babel from '@rolldown/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
@@ -26,6 +27,9 @@ function preloadFonts(patterns: RegExp[]): Plugin {
 export default defineConfig({
   plugins: [
     react(),
+    // React Compiler: automatically skips re-rendering parts of the screen that did not change,
+    // which keeps typing and tapping in long forms (e.g. hundreds of preference chips) instant.
+    babel({ presets: [reactCompilerPreset()] }),
     tailwindcss(),
     preloadFonts([/inter-latin-400-normal/, /inter-latin-600-normal/, /playfair-display-latin-600-normal/]),
     // Service worker: after the first visit the app shell loads straight from the device,

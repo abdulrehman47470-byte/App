@@ -69,7 +69,6 @@ export default function Chat() {
     );
   }
 
-  let lastDay = '';
   return (
     <div className="flex h-[calc(100dvh-76px-env(safe-area-inset-bottom))] flex-col lg:h-dvh">
       <header className="flex items-center gap-2 border-b border-line bg-bg/95 px-3 pb-2 pt-[max(8px,env(safe-area-inset-top))]">
@@ -112,8 +111,7 @@ export default function Chat() {
             <AnimatePresence initial={false}>
               {messages.map((msg, i) => {
                 const day = dayLabel(msg.sentAt);
-                const showDay = day !== lastDay;
-                lastDay = day;
+                const showDay = i === 0 || day !== dayLabel(messages[i - 1].sentAt);
                 const nextSame = messages[i + 1]?.fromMe === msg.fromMe;
                 return (
                   <M.li key={msg.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>

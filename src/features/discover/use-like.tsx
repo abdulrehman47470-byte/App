@@ -27,9 +27,10 @@ export function useLikeFlow() {
       me={me}
       onClose={() => setMatched(null)}
       onMessage={() => {
-        const id = matched!.id;
+        // Null-safe on purpose: the React Compiler reads a callback's dependencies during render.
+        const id = matched?.id;
         setMatched(null);
-        navigate(`/messages/${id}`);
+        if (id) navigate(`/messages/${id}`);
       }}
     />
   );

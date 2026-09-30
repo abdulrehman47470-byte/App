@@ -28,6 +28,7 @@ through the whole sign-up flow.
 | `npm run setup:check` | Show which keys are missing, in plain English |
 | `npm run preview` then `npm run perf` | Measure load and tab-switch speed on the production build (simulated phone on 4G) |
 | `npm run preview` then `npm run smooth` | Measure smoothness (frames per second, stutters) while scrolling, swiping, opening sheets, panning the map |
+| `npm run preview` then `npm run forms` | Measure how fast every form reacts to typing and tapping (sign-up, profile, checkout, composer) |
 | `npm run icons` | Regenerate the app icons from `public/icon.svg` |
 
 ## Where things live
@@ -110,3 +111,23 @@ How:
 - Taps respond immediately (no double-tap-zoom delay); off-screen posts are skipped by the browser.
 
 Also fixed: releasing a card without completing the swipe no longer opens that member's profile.
+
+## Forms
+
+Measured with `npm run forms` (production build, CPU slowed 4x; under 50 ms feels instant):
+
+| Form action | Before | Now |
+|---|---|---|
+| Typing in the preferences search | up to 424 ms | 16–24 ms |
+| Tapping a preference chip | 64–72 ms | ~48 ms |
+| Opening a preference section | up to 96 ms | 56–72 ms |
+| Typing in sign-up, date of birth, profile, checkout | 16–32 ms | 16–32 ms |
+| Opening a picker or the post composer | 120–144 ms | 120–136 ms (dialog scroll-lock + focus, kept for accessibility) |
+
+How:
+- **React Compiler** (`babel-plugin-react-compiler` via `@rolldown/plugin-babel`) automatically skips re-rendering
+  parts of a screen that did not change. Keep callbacks null-safe (`x?.id`, not `x!.id`): the compiler reads a
+  callback's dependencies during render.
+- The preferences page redraws only the section and chip group you touched; sections open without measuring.
+- The search box updates instantly and filters at lower priority (from the second letter).
+- Profile autosave waits until you pause typing and the phone is idle, and no longer refetches Discover each time.

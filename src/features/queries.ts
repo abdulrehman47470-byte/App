@@ -11,7 +11,9 @@ export function useSaveMe() {
     mutationFn: (patch: Partial<MyProfile>) => api.saveMe(patch),
     onSuccess: (me) => {
       qc.setQueryData(['me'], me);
-      qc.invalidateQueries({ queryKey: ['discover'] });
+      // Mark Discover stale (it re-scores against the new profile next time it is shown) without
+      // refetching now, so autosave never competes with typing.
+      qc.invalidateQueries({ queryKey: ['discover'], refetchType: 'none' });
     },
   });
 }

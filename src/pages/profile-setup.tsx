@@ -25,7 +25,7 @@ export default function ProfileSetup({ mode = 'onboarding' }: { mode?: 'onboardi
   const step = Number(raw);
   const navigate = useNavigate();
   const { session, update } = useSession();
-  const { draft, patch, flush, saving } = useProfileDraft();
+  const { draft, patch, update: updateDraft, flush, saving } = useProfileDraft();
   const [showErrors, setShowErrors] = useState(false);
   const base = mode === 'edit' ? '/profile/edit' : '/setup';
 
@@ -68,7 +68,7 @@ export default function ProfileSetup({ mode = 'onboarding' }: { mode?: 'onboardi
           <AnimatePresence mode="wait">
             <m.div key={step} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -24 }} transition={{ duration: 0.22 }}>
               {step === 1 && <StepDemographics d={draft} patch={patch} showErrors={showErrors} />}
-              {step === 2 && <StepPreferences prefs={draft.preferences} onChange={(preferences) => patch({ preferences })} />}
+              {step === 2 && <StepPreferences prefs={draft.preferences} onChange={(fn) => updateDraft((d) => ({ preferences: fn(d.preferences) }))} />}
               {step === 3 && (
                 <StepAbout
                   about={draft.about}

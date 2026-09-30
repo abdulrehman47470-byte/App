@@ -1,7 +1,6 @@
-import * as Collapsible from '@radix-ui/react-collapsible';
 import { AnimatePresence, m } from 'framer-motion';
 import { ChevronDown, Plus, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { memo, useDeferredValue, useMemo, useState } from 'react';
 import { Chip } from '@/components/ui/chip';
 import { Input } from '@/components/ui/field';
 import { SearchInput } from '@/components/ui/misc';
@@ -10,13 +9,20 @@ import { PREFERENCE_SECTIONS, groupOptions, type OptionGroup, type PreferenceSec
 import { cn } from '@/lib/utils';
 import type { Preferences } from '@/types';
 
+const NONE: string[] = [];
 const PRICE_MIN = 5;
 const PRICE_MAX = 100;
 
-export function StepPreferences({ prefs, onChange }: { prefs: Preferences; onChange: (p: Preferences) => void }) {
+type PrefsUpdate = (fn: (p: Preferences) => Preferences) => void;
+
+export function StepPreferences({ prefs, onChange }: { prefs: Preferences; onChange: PrefsUpdate }) {
   const [q, setQ] = useState('');
   const [open, setOpen] = useState<string[]>(['lounge']);
-  const needle = q.trim().toLowerCase();
+  // The search box updates instantly; filtering hundreds of chips follows at lower priority.
+  // One letter matches almost everything, so filtering starts at two.
+  const deferredQ = useDeferredValue(q);
+  const typed = deferredQ.trim().toLowerCase();
+  const needle = typed.length >= 2 ? typed : '';
 
   const sections = useMemo(() => {
     if (!needle) return PREFERENCE_SECTIONS;
@@ -27,16 +33,14 @@ export function StepPreferences({ prefs, onChange }: { prefs: Preferences; onCha
     );
   }, [needle]);
 
-  const toggle = (g: OptionGroup, opt: string) => {
-    const cur = (prefs[g.id] as string[] | undefined) ?? [];
-    const next = g.kind === 'single' ? (cur.includes(opt) ? [] : [opt]) : cur.includes(opt) ? cur.filter((x) => x !== opt) : [...cur, opt];
-    onChange({ ...prefs, [g.id]: next });
-  };
+  const toggle = (g: OptionGroup, opt: string) =>
+    onChange((p) => {
+      const cur = (p[g.id] as string[] | undefined) ?? [];
+      const next = g.kind === 'single' ? (cur.includes(opt) ? [] : [opt]) : cur.includes(opt) ? cur.filter((x) => x !== opt) : [...cur, opt];
+      return { ...p, [g.id]: next };
+    });
 
-  const countFor = (s: PreferenceSection) =>
-    s.groups.reduce((n, g) => n + ((prefs[g.id] as string[] | undefined)?.length ?? 0), 0) +
-    (s.special === 'price' && prefs.priceMin !== undefined ? 1 : 0) +
-    (s.special === 'wishlist' ? (prefs.wishlist?.length ?? 0) : 0);
+  const setSectionOpen = (id: string, v: boolean) => setOpen((o) => (v ? [...o, id] : o.filter((x) => x !== id)));
 
   return (
     <div>
@@ -48,44 +52,99 @@ export function StepPreferences({ prefs, onChange }: { prefs: Preferences; onCha
         className="mb-4"
       />
       <div className="space-y-2.5">
-        {sections.map((s) => {
-          const isOpen = !!needle || open.includes(s.id);
-          const count = countFor(s);
-          return (
-            <Collapsible.Root
-              key={s.id}
-              open={isOpen}
-              onOpenChange={(v) => setOpen((o) => (v ? [...o, s.id] : o.filter((x) => x !== s.id)))}
-              className={cn('rounded-[16px] border bg-surface transition-colors', isOpen ? 'border-line-strong' : 'border-line')}
-            >
-              <Collapsible.Trigger className="flex min-h-14 w-full items-center gap-3 px-4 text-left">
-                <span className={cn('grid size-6 place-items-center rounded-full border', count ? 'border-gold bg-gold-fill' : 'border-line-strong')}>
-                  <span className={cn('size-2 rounded-full', count ? 'bg-gold' : 'bg-transparent')} />
-                </span>
-                <span className="flex-1 text-[15px] text-text">{s.title}</span>
-                {count > 0 && <span className="rounded-full bg-gold-fill px-2 py-0.5 text-xs font-semibold text-gold">{count}</span>}
-                <ChevronDown className={cn('size-5 text-muted transition-transform', isOpen && 'rotate-180')} strokeWidth={1.5} />
-              </Collapsible.Trigger>
-              <Collapsible.Content>
-                <div className="space-y-5 border-t border-line/60 px-4 pb-5 pt-4">
-                  {s.special === 'price' && <PriceRange prefs={prefs} onChange={onChange} />}
-                  {s.groups.map((g) => (
-                    <GroupChips key={g.id} group={g} selected={(prefs[g.id] as string[] | undefined) ?? []} onToggle={(o) => toggle(g, o)} needle={needle} />
-                  ))}
-                  {s.special === 'strengthScale' && <StrengthScale prefs={prefs} onChange={onChange} />}
-                  {s.special === 'wishlist' && <Wishlist prefs={prefs} onChange={onChange} />}
-                </div>
-              </Collapsible.Content>
-            </Collapsible.Root>
-          );
-        })}
+        {sections.map((s) => (
+          <SectionItem
+            key={s.id}
+            section={s}
+            prefs={prefs}
+            isOpen={!!needle || open.includes(s.id)}
+            needle={needle}
+            onOpenChange={setSectionOpen}
+            onToggle={toggle}
+            onChange={onChange}
+          />
+        ))}
         {!sections.length && <p className="py-10 text-center text-sm text-muted">Nothing matches “{q}”.</p>}
       </div>
     </div>
   );
 }
 
-function GroupChips({ group, selected, onToggle, needle }: { group: OptionGroup; selected: string[]; onToggle: (o: string) => void; needle: string }) {
+const countFor = (s: PreferenceSection, prefs: Preferences) =>
+  s.groups.reduce((n, g) => n + ((prefs[g.id] as string[] | undefined)?.length ?? 0), 0) +
+  (s.special === 'price' && prefs.priceMin !== undefined ? 1 : 0) +
+  (s.special === 'wishlist' ? (prefs.wishlist?.length ?? 0) : 0);
+
+interface SectionProps {
+  section: PreferenceSection;
+  prefs: Preferences;
+  isOpen: boolean;
+  needle: string;
+  onOpenChange: (id: string, open: boolean) => void;
+  onToggle: (g: OptionGroup, o: string) => void;
+  onChange: PrefsUpdate;
+}
+
+/**
+ * One collapsible section. Re-renders only when its own answers change (a chip tap elsewhere does
+ * not touch it). Plain show/hide, no height measuring, so opening is instant.
+ */
+const SectionItem = memo(
+  function SectionItem({ section: s, prefs, isOpen, needle, onOpenChange, onToggle, onChange }: SectionProps) {
+    const count = countFor(s, prefs);
+    const panelId = `pref-${s.id}`;
+    return (
+      <div className={cn('rounded-[16px] border bg-surface transition-colors', isOpen ? 'border-line-strong' : 'border-line')}>
+        <button
+          type="button"
+          aria-expanded={isOpen}
+          aria-controls={panelId}
+          onClick={() => onOpenChange(s.id, !isOpen)}
+          className="flex min-h-14 w-full items-center gap-3 px-4 text-left"
+        >
+          <span className={cn('grid size-6 place-items-center rounded-full border', count ? 'border-gold bg-gold-fill' : 'border-line-strong')}>
+            <span className={cn('size-2 rounded-full', count ? 'bg-gold' : 'bg-transparent')} />
+          </span>
+          <span className="flex-1 text-[15px] text-text">{s.title}</span>
+          {count > 0 && <span className="rounded-full bg-gold-fill px-2 py-0.5 text-xs font-semibold text-gold">{count}</span>}
+          <ChevronDown className={cn('size-5 text-muted transition-transform', isOpen && 'rotate-180')} strokeWidth={1.5} />
+        </button>
+        {isOpen && (
+          <div id={panelId} className="page-enter space-y-5 border-t border-line/60 px-4 pb-5 pt-4">
+            {s.special === 'price' && <PriceRange prefs={prefs} onChange={onChange} />}
+            {s.groups.map((g) => (
+              <GroupChips key={g.id} group={g} selected={(prefs[g.id] as string[] | undefined) ?? NONE} onToggle={onToggle} needle={needle} />
+            ))}
+            {s.special === 'strengthScale' && <StrengthScale prefs={prefs} onChange={onChange} />}
+            {s.special === 'wishlist' && <Wishlist prefs={prefs} onChange={onChange} />}
+          </div>
+        )}
+      </div>
+    );
+  },
+  (a, b) =>
+    a.isOpen === b.isOpen &&
+    a.needle === b.needle &&
+    a.section === b.section &&
+    a.onToggle === b.onToggle &&
+    a.onOpenChange === b.onOpenChange &&
+    a.onChange === b.onChange &&
+    a.section.groups.every((g) => a.prefs[g.id] === b.prefs[g.id]) &&
+    (!a.section.special || a.prefs === b.prefs),
+);
+
+/** One group of chips. Memoised: tapping a chip re-renders only its own group. */
+const GroupChips = memo(function GroupChips({
+  group,
+  selected,
+  onToggle,
+  needle,
+}: {
+  group: OptionGroup;
+  selected: string[];
+  onToggle: (g: OptionGroup, o: string) => void;
+  needle: string;
+}) {
   const [local, setLocal] = useState('');
   const n = (local || needle).trim().toLowerCase();
   const match = (o: string) => !n || o.toLowerCase().includes(n) || group.label.toLowerCase().includes(n);
@@ -93,7 +152,7 @@ function GroupChips({ group, selected, onToggle, needle }: { group: OptionGroup;
   const chips = (opts: string[]) => (
     <div role={group.kind === 'single' ? 'radiogroup' : 'group'} aria-label={group.label} className="flex flex-wrap gap-2">
       {opts.filter(match).map((o) => (
-        <Chip key={o} size="sm" role={role} label={o} selected={selected.includes(o)} onToggle={() => onToggle(o)} />
+        <Chip key={o} size="sm" role={role} label={o} selected={selected.includes(o)} onToggle={() => onToggle(group, o)} />
       ))}
     </div>
   );
@@ -122,9 +181,9 @@ function GroupChips({ group, selected, onToggle, needle }: { group: OptionGroup;
       )}
     </div>
   );
-}
+});
 
-function PriceRange({ prefs, onChange }: { prefs: Preferences; onChange: (p: Preferences) => void }) {
+function PriceRange({ prefs, onChange }: { prefs: Preferences; onChange: PrefsUpdate }) {
   const lo = prefs.priceMin ?? 10;
   const hi = prefs.priceMax ?? 30;
   return (
@@ -140,7 +199,7 @@ function PriceRange({ prefs, onChange }: { prefs: Preferences; onChange: (p: Pre
         min={PRICE_MIN}
         max={PRICE_MAX}
         value={[lo, hi]}
-        onValueChange={([a, b]) => onChange({ ...prefs, priceMin: a, priceMax: b })}
+        onValueChange={([a, b]) => onChange((p) => ({ ...p, priceMin: a, priceMax: b }))}
         labels={['Minimum price', 'Maximum price']}
       />
       <div className="flex justify-between text-xs text-faint">
@@ -151,7 +210,7 @@ function PriceRange({ prefs, onChange }: { prefs: Preferences; onChange: (p: Pre
   );
 }
 
-function StrengthScale({ prefs, onChange }: { prefs: Preferences; onChange: (p: Preferences) => void }) {
+function StrengthScale({ prefs, onChange }: { prefs: Preferences; onChange: PrefsUpdate }) {
   const v = prefs.strengthScale ?? 3;
   return (
     <div>
@@ -159,7 +218,7 @@ function StrengthScale({ prefs, onChange }: { prefs: Preferences; onChange: (p: 
         <h3 className="text-sm font-medium text-text">Strength scale</h3>
         <p className="font-serif text-lg text-gold-light">{v} / 5</p>
       </div>
-      <Slider min={1} max={5} value={[v]} onValueChange={([x]) => onChange({ ...prefs, strengthScale: x })} labels={['Strength scale']} />
+      <Slider min={1} max={5} value={[v]} onValueChange={([x]) => onChange((p) => ({ ...p, strengthScale: x }))} labels={['Strength scale']} />
       <div className="flex justify-between text-xs text-faint">
         <span>Mild</span>
         <span>Full</span>
@@ -168,13 +227,13 @@ function StrengthScale({ prefs, onChange }: { prefs: Preferences; onChange: (p: 
   );
 }
 
-function Wishlist({ prefs, onChange }: { prefs: Preferences; onChange: (p: Preferences) => void }) {
+function Wishlist({ prefs, onChange }: { prefs: Preferences; onChange: PrefsUpdate }) {
   const [text, setText] = useState('');
   const list = prefs.wishlist ?? [];
   const add = () => {
     const t = text.trim();
     if (!t || list.includes(t)) return;
-    onChange({ ...prefs, wishlist: [...list, t] });
+    onChange((p) => ({ ...p, wishlist: [...(p.wishlist ?? []), t] }));
     setText('');
   };
   return (
@@ -204,7 +263,7 @@ function Wishlist({ prefs, onChange }: { prefs: Preferences; onChange: (p: Prefe
               className="flex items-center justify-between rounded-[12px] border border-line bg-surface-2 pl-4 text-sm text-text"
             >
               {w}
-              <button type="button" aria-label={`Remove ${w}`} onClick={() => onChange({ ...prefs, wishlist: list.filter((x) => x !== w) })} className="grid size-11 place-items-center text-muted hover:text-danger">
+              <button type="button" aria-label={`Remove ${w}`} onClick={() => onChange((p) => ({ ...p, wishlist: (p.wishlist ?? []).filter((x) => x !== w) }))} className="grid size-11 place-items-center text-muted hover:text-danger">
                 <X className="size-4" />
               </button>
             </m.li>

@@ -30,6 +30,8 @@ function Section({ title, rows, shared }: { title: string; rows: Row[]; shared: 
   );
 }
 
+const NO_SHARED = new Set<string>();
+
 const p = (prefs: Preferences, k: string) => (prefs[k] as string[] | undefined) ?? [];
 
 /** LinkedIn-style profile sections. Items shared with the viewer are highlighted in gold. */
@@ -37,7 +39,7 @@ export function ProfileSections({
   prefs,
   about,
   mentorship,
-  shared = new Set(),
+  shared = NO_SHARED,
   extra,
 }: {
   prefs: Preferences;
