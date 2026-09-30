@@ -13,6 +13,7 @@ import { useMe } from '@/features/queries';
 import { SettingsMenu } from '@/features/settings/settings-menu';
 import { useSession, type Plan } from '@/lib/session';
 import { PlanPicker, PLANS } from './onboarding/paywall';
+import { CheckoutSheet } from '@/features/billing/checkout-sheet';
 
 export function SettingsPage() {
   return (
@@ -31,6 +32,11 @@ export function SubscriptionPage() {
   const toast = useToast();
   const [plan, setPlan] = useState<Plan>(session.plan ?? 'yearly');
   const current = PLANS.find((p) => p.id === session.plan);
+  const [checkout, setCheckout] = useState(false);
+  const pay = session.payment;
+  const renews = pay
+    ? new Date(new Date(pay.paidAt).getTime() + (pay.plan === 'yearly' ? 365 : 30) * 86_400_000).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })
+    : null;
 
   return (
     <>
@@ -45,8 +51,13 @@ export function SubscriptionPage() {
             {current?.price ?? '—'} <span className="font-sans text-sm text-muted">{current?.per}</span>
           </p>
           <p className="mt-3 flex items-center gap-2 text-sm text-muted">
-            <CalendarClock className="size-4 text-gold" /> Renews automatically. {/* Phase 6: renewal date from Stripe */}
+            <CalendarClock className="size-4 text-gold" /> {renews ? `Renews on ${renews}` : 'Renews automatically.'}
           </p>
+          {pay && (
+            <p className="mt-2 text-sm text-muted">
+              Payment method: <span className="text-text">{pay.brand === 'Demo' ? 'Demo payment' : `${pay.brand} •••• ${pay.last4}`}</span>
+            </p>
+          )}
         </Card>
 
         <div>
@@ -56,10 +67,7 @@ export function SubscriptionPage() {
             block
             className="mt-4"
             disabled={plan === session.plan}
-            onClick={() => {
-              update({ plan });
-              toast('Plan updated (demo).');
-            }}
+            onClick={() => setCheckout(true)}
           >
             Switch to {PLANS.find((p) => p.id === plan)!.name.toLowerCase()}
           </Button>
@@ -70,6 +78,15 @@ export function SubscriptionPage() {
         </Button>
         <p className="text-center text-xs text-faint">Payments are handled securely by Stripe. We never store card details.</p>
       </PageBody>
+      <CheckoutSheet
+        open={checkout}
+        onOpenChange={setCheckout}
+        plan={PLANS.find((p) => p.id === plan)!}
+        onPaid={(payment) => {
+          update({ plan, payment });
+          toast('Plan updated');
+        }}
+      />
     </>
   );
 }

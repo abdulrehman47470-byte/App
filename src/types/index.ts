@@ -186,8 +186,10 @@ export interface Post {
   author: PostAuthor;
   kind: PostKind;
   body: string;
-  /** Data URL in Phase 0; Supabase Storage in the backend phases. */
+  /** Legacy inline image (data URL). New uploads use `media`. */
   imageUrl?: string;
+  /** Uploaded photo or video (Phase 0: on-device store; later Supabase Storage). */
+  media?: { id: string; type: 'image' | 'video' };
   /** Generated placeholder art for mock posts (no stock photos). */
   imageHue?: number;
   loungeId?: string;
@@ -195,6 +197,8 @@ export interface Post {
   createdAt: string;
   likes: number;
   likedByMe: boolean;
+  savedByMe?: boolean;
+  editedAt?: string;
   commentCount: number;
 }
 
@@ -206,4 +210,4 @@ export interface Comment {
   createdAt: string;
 }
 
-export type FeedFilter = 'all' | 'near' | 'checkin' | 'question';
+export type FeedFilter = 'all' | 'near' | 'checkin' | 'question' | 'saved';

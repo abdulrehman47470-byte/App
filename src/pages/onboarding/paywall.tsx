@@ -7,12 +7,13 @@ import { Frame } from '@/components/layout/frame';
 import { OnboardingHeader } from '@/components/layout/page';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/misc';
+import { CheckoutSheet } from '@/features/billing/checkout-sheet';
 import { nextStep, useSession, type Plan } from '@/lib/session';
 import { cn } from '@/lib/utils';
 
-export const PLANS: { id: Plan; name: string; price: string; per: string; note?: string }[] = [
-  { id: 'monthly', name: 'Monthly', price: '$1.99', per: 'per month' },
-  { id: 'yearly', name: 'Yearly', price: '$19.99', per: 'per year', note: 'Save 16%' },
+export const PLANS: { id: Plan; name: string; price: string; per: string; amount: number; note?: string }[] = [
+  { id: 'monthly', name: 'Monthly', price: '$1.99', per: 'per month', amount: 1.99 },
+  { id: 'yearly', name: 'Yearly', price: '$19.99', per: 'per year', amount: 19.99, note: 'Save 16%' },
 ];
 
 const PERKS = ['Profile-based matching', 'Instant messaging with your matches', 'Stogie Search lounge locator', 'Stogie Sessions videos and the Blog'];
@@ -58,6 +59,7 @@ export default function Paywall() {
   const { session, update } = useSession();
   const navigate = useNavigate();
   const [plan, setPlan] = useState<Plan>('yearly');
+  const [checkout, setCheckout] = useState(false);
 
   return (
     <Frame>
@@ -83,11 +85,8 @@ export default function Paywall() {
           <Button
             size="lg"
             block
-            onClick={() => {
-              // Phase 6: Stripe Checkout; the webhook writes subscription state to the database.
-              update({ plan });
-              navigate(nextStep({ ...session, plan }));
-            }}
+            // Phase 6: Stripe Checkout; the webhook writes subscription state to the database.
+            onClick={() => setCheckout(true)}
           >
             Continue to payment
           </Button>
@@ -109,6 +108,15 @@ export default function Paywall() {
           </div>
         </div>
       </div>
+      <CheckoutSheet
+        open={checkout}
+        onOpenChange={setCheckout}
+        plan={PLANS.find((p) => p.id === plan)!}
+        onPaid={(payment) => {
+          update({ plan, payment });
+          navigate(nextStep({ ...session, plan, payment }));
+        }}
+      />
     </Frame>
   );
 }

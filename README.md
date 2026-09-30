@@ -40,6 +40,17 @@ through the whole sign-up flow.
   can swap the mock for Supabase without touching the screens.
 - `docs/`: design reference, requirements checklist, open questions, screenshots
 
+## Mock sign-in and payment (Phase 0)
+
+- **Continue with Google** opens a mock Google sign-in (email, then consent, then back to the app; returning
+  users get an account chooser). It never asks for a password and sends nothing to Google. Phase 2 swaps it for
+  real Google sign-in via Supabase Auth.
+- **Continue to payment** opens a mock card checkout. Any details, or none, are accepted; "Fill in a test card"
+  fills 4242 4242 4242 4242. A receipt is shown and the plan/payment method appear under Settings → Subscription.
+  Phase 6 swaps it for Stripe Checkout.
+- Posts can include photos and videos. They appear instantly and are kept on the device (IndexedDB) until
+  Phase 1 moves uploads to Supabase Storage. Posts can be saved (Saved filter), edited and deleted.
+
 ## Mock data notes
 
 Mock state (likes, matches, messages, blocks) is kept in your browser's localStorage so reloads keep it.
@@ -53,10 +64,10 @@ Measured with `npm run perf` (production build, simulated mid-range phone on 4G,
 | | Before optimising | Now |
 |---|---|---|
 | JavaScript downloaded to show the Welcome screen | 215 KB | 126 KB |
-| Welcome screen visible | ~0.6 s | ~0.5 s (mostly network round trips) |
+| Welcome screen visible | ~0.6 s | ~0.57 s, now including the logo image (mostly network round trips) |
 | Opening a tab for the first time (incl. ~70 ms test-tool overhead) | 0.2–0.7 s | 0.1–0.2 s |
-| Opening a tab for the first time (measured inside the page) | not measured | 20–80 ms |
-| Returning to a tab (measured inside the page) | not measured | 10–45 ms |
+| Opening a tab for the first time (measured inside the page) | not measured | 20–115 ms |
+| Returning to a tab (measured inside the page) | not measured | 10–70 ms |
 | Reopening the app (service worker cache) | full download | ~90 ms once the browser has cached compiled code |
 
 How:

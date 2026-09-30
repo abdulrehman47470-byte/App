@@ -1,10 +1,17 @@
+import { LogIn, UserPlus } from 'lucide-react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { Logo } from '@/components/brand/logo';
+import { LogoMark, Wordmark } from '@/components/brand/logo';
 import { CigarBand, TrustNote } from '@/components/brand/ornaments';
 import { Frame } from '@/components/layout/frame';
 import { Button } from '@/components/ui/button';
 import { DEMO_ENABLED, HOME } from '@/config/features';
 import { nextStep, useSession } from '@/lib/session';
+
+// Fixed positions so the embers look natural but render identically every time.
+const EMBERS = [
+  [8, 0, 11], [18, 3.5, 14], [27, 7, 9], [36, 1.5, 13], [46, 5, 10], [55, 9, 12],
+  [63, 2.5, 15], [72, 6, 11], [81, 0.8, 13], [90, 4.2, 10], [14, 10, 16], [68, 11, 12],
+];
 
 export default function Welcome() {
   const { session, loadDemo } = useSession();
@@ -13,30 +20,38 @@ export default function Welcome() {
 
   return (
     <Frame>
-      <div className="relative flex min-h-dvh flex-col overflow-hidden px-6 pb-[max(28px,env(safe-area-inset-bottom))] pt-[max(40px,env(safe-area-inset-top))]">
-        {/* moody lounge backdrop: warm lamp glow, leather shadows, drifting smoke */}
-        <div aria-hidden className="absolute inset-0 bg-[radial-gradient(70%_45%_at_50%_30%,rgba(200,100,43,0.22),transparent_70%),radial-gradient(90%_60%_at_50%_110%,rgba(176,122,40,0.18),transparent_70%)]" />
+      <div className="welcome-bg relative flex min-h-dvh items-center justify-center overflow-hidden px-6 py-[max(32px,env(safe-area-inset-top))]">
+        {/* Background layers (CSS only, decorative) */}
+        <div aria-hidden className="welcome-rays" />
         <div aria-hidden className="smoke" />
-        <div aria-hidden className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-bg via-bg/80 to-transparent" />
-
-        <div className="rise relative flex flex-1 flex-col items-center justify-center text-center">
-          <Logo size="lg" />
-          <p className="mt-6 font-serif text-lg italic text-text/90">Find your circle. Share the smoke.</p>
-          <CigarBand label="Members only" className="mt-8 w-56" />
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          {EMBERS.map(([left, delay, dur], i) => (
+            <span key={i} className="ember" style={{ left: `${left}%`, animationDelay: `${delay}s`, animationDuration: `${dur}s` }} />
+          ))}
         </div>
+        <div aria-hidden className="welcome-vignette" />
 
-        <div className="rise relative space-y-3" style={{ animationDelay: '120ms' }}>
-          <Button size="lg" block onClick={() => navigate('/signin?mode=signup')}>
-            Sign up
-          </Button>
-          <Button size="lg" variant="outline" block onClick={() => navigate('/signin')}>
-            Log in
-          </Button>
-          <TrustNote className="pt-3">Adults 21+ only</TrustNote>
-          <p className="text-center font-serif text-sm italic text-faint">Good Cigars. Better Company.</p>
+        {/* Everything centered in the middle of the page */}
+        <main className="rise relative z-10 flex w-full max-w-[340px] flex-col items-center text-center">
+          <LogoMark className="size-32" priority />
+          <Wordmark className="mt-6 text-[40px]" />
+          <p className="mt-4 font-serif text-lg italic text-text/90">Find your circle. Share the smoke.</p>
+          <CigarBand label="Members only" className="mt-6 w-56" />
+
+          <div className="mt-8 w-full space-y-3">
+            <Button size="lg" block onClick={() => navigate('/signin?mode=signup')}>
+              <UserPlus className="size-5" /> Sign up
+            </Button>
+            <Button size="lg" variant="outline" block onClick={() => navigate('/signin')} className="bg-bg/40 backdrop-blur-sm">
+              <LogIn className="size-5" /> Log in
+            </Button>
+          </div>
+
+          <TrustNote className="mt-6">Adults 21+ only</TrustNote>
+          <p className="mt-2 font-serif text-sm italic text-faint">Good Cigars. Better Company.</p>
           {DEMO_ENABLED && (
-            <p className="pt-1 text-center text-xs text-faint">
-              Try it:{" "}
+            <p className="mt-4 text-xs text-faint">
+              Try it:{' '}
               <button
                 type="button"
                 className="underline decoration-dotted underline-offset-4 hover:text-gold"
@@ -53,7 +68,7 @@ export default function Welcome() {
               </Link>
             </p>
           )}
-        </div>
+        </main>
       </div>
     </Frame>
   );

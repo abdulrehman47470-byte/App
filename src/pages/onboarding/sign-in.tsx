@@ -7,20 +7,10 @@ import { Frame } from '@/components/layout/frame';
 import { BackButton } from '@/components/layout/page';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/field';
+import { GoogleG, GoogleSignInMock } from '@/features/auth/google-signin-mock';
 import { useSaveMe } from '@/features/queries';
 import { nextStep, useSession } from '@/lib/session';
 
-function GoogleIcon() {
-  return (
-    // Google's required multi-colour "G" mark for sign-in buttons.
-    <svg viewBox="0 0 48 48" className="size-5" aria-hidden>
-      <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z" />
-      <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
-      <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2A11.9 11.9 0 0 1 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z" />
-      <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3a12 12 0 0 1-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z" />
-    </svg>
-  );
-}
 function AppleIcon() {
   return (
     <svg viewBox="0 0 24 24" className="size-5" aria-hidden fill="currentColor">
@@ -40,6 +30,7 @@ export default function SignIn() {
   const [name, setName] = useState('');
   const [show, setShow] = useState(false);
   const [error, setError] = useState<string>();
+  const [googleOpen, setGoogleOpen] = useState(false);
 
   const finish = async (method: 'google' | 'apple' | 'email', displayName: string) => {
     // Mock: Phase 2 replaces this with Supabase Auth (OAuth + email/password with verification).
@@ -71,8 +62,8 @@ export default function SignIn() {
         </div>
 
         <div className="mt-8 space-y-3">
-          <Button variant="secondary" size="lg" block onClick={() => finish('google', 'Google Member')}>
-            <GoogleIcon /> Continue with Google
+          <Button variant="secondary" size="lg" block onClick={() => setGoogleOpen(true)}>
+            <GoogleG /> Continue with Google
           </Button>
           <Button variant="secondary" size="lg" block onClick={() => finish('apple', 'Apple Member')}>
             <AppleIcon /> Continue with Apple
@@ -141,6 +132,7 @@ export default function SignIn() {
         </p>
         <TrustNote className="mt-auto pt-8" />
       </div>
+      <GoogleSignInMock open={googleOpen} onOpenChange={setGoogleOpen} onSignedIn={(a) => finish('google', a.name)} />
     </Frame>
   );
 }

@@ -23,6 +23,7 @@ export interface NewPost {
   kind: PostKind;
   body: string;
   imageUrl?: string;
+  media?: { id: string; type: 'image' | 'video' };
   loungeId?: string;
   cigar?: string;
 }
@@ -68,6 +69,8 @@ export interface DataProvider {
   createPost(input: NewPost): Promise<Post>;
   deletePost(id: string): Promise<void>;
   togglePostLike(id: string): Promise<Post>;
+  togglePostSave(id: string): Promise<Post>;
+  updatePost(id: string, body: string): Promise<Post>;
   getComments(postId: string): Promise<Comment[]>;
   addComment(postId: string, body: string): Promise<Comment>;
   /** Members who chose to appear on the map, at city-level precision. */

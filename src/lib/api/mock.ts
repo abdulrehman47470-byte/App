@@ -4,6 +4,7 @@ import { MOCK_FEED } from '@/data/mock/feed';
 import { MOCK_MEMBERS, findMember } from '@/data/mock/members';
 import { MOCK_LOUNGES, MOCK_POSTS, MOCK_REPORT_REASONS, MOCK_SESSIONS, MOCK_THREADS } from '@/data/mock/content';
 import { scoreMatch } from '@/lib/matching';
+import { deleteMedia } from '@/lib/media-store';
 import { STORAGE_KEYS, storage } from '@/lib/storage';
 import type { Comment, DiscoverCard, Match, Member, Message, MyProfile, PendingPhoto, Post, PostAuthor, Report } from '@/types';
 import type { DataProvider } from './types';
@@ -305,7 +306,11 @@ export const mockProvider: DataProvider = {
     return state.posts
       .filter((p) => !state.blocked.has(p.author.id))
       .filter((p) =>
-        filter === 'near' ? sameArea(me, p.author) : filter === 'checkin' ? p.kind === 'checkin' : filter === 'question' ? p.kind === 'question' : true,
+        filter === 'near' ? sameArea(me, p.author)
+        : filter === 'checkin' ? p.kind === 'checkin'
+        : filter === 'question' ? p.kind === 'question'
+        : filter === 'saved' ? !!p.savedByMe
+        : true,
       )
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   },
@@ -321,10 +326,10 @@ export const mockProvider: DataProvider = {
   async createPost(input) {
     await wait(300);
     const body = input.body.trim();
-    if (!body && !input.imageUrl) throw new Error('Write something or add a photo.');
+    if (!body && !input.imageUrl && !input.media) throw new Error('Write something or add a photo or video.');
     if (body.length > POST_MAX) throw new Error(`Posts can be up to ${POST_MAX} characters.`);
     const post: Post = {
-      id: crypto.randomUUID(), author: myAuthor(), kind: input.kind, body, imageUrl: input.imageUrl, loungeId: input.loungeId,
+      id: crypto.randomUUID(), author: myAuthor(), kind: input.kind, body, imageUrl: input.imageUrl, media: input.media, loungeId: input.loungeId,
       cigar: input.cigar?.trim() || undefined, createdAt: new Date().toISOString(), likes: 0, likedByMe: false, commentCount: 0,
     };
     state.posts = [post, ...state.posts];
@@ -333,12 +338,31 @@ export const mockProvider: DataProvider = {
   },
   async deletePost(id) {
     await wait(150);
-    state.posts = state.posts.filter((p) => !(p.id === id && p.author.id === 'me'));
+    const post = state.posts.find((p) => p.id === id && p.author.id === 'me');
+    if (!post) return;
+    state.posts = state.posts.filter((p) => p !== post);
+    state.comments.delete(id);
     persist();
+    if (post.media) deleteMedia(post.media.id).catch(() => {});
   },
   async togglePostLike(id) {
     await wait(120);
     state.posts = state.posts.map((p) => (p.id === id ? { ...p, likedByMe: !p.likedByMe, likes: p.likes + (p.likedByMe ? -1 : 1) } : p));
+    persist();
+    return state.posts.find((p) => p.id === id)!;
+  },
+  async togglePostSave(id) {
+    state.posts = state.posts.map((p) => (p.id === id ? { ...p, savedByMe: !p.savedByMe } : p));
+    persist();
+    return state.posts.find((p) => p.id === id)!;
+  },
+  async updatePost(id, body) {
+    const text = body.trim();
+    const post = state.posts.find((p) => p.id === id && p.author.id === 'me');
+    if (!post) throw new Error('You can only edit your own posts.');
+    if (!text && !post.media && !post.imageUrl) throw new Error('A post needs text or a photo.');
+    if (text.length > POST_MAX) throw new Error(`Posts can be up to ${POST_MAX} characters.`);
+    state.posts = state.posts.map((p) => (p === post ? { ...p, body: text, editedAt: new Date().toISOString() } : p));
     persist();
     return state.posts.find((p) => p.id === id)!;
   },

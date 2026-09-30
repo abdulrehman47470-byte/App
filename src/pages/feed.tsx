@@ -16,6 +16,7 @@ const FILTERS: { id: FeedFilter; label: string }[] = [
   { id: 'near', label: 'Near me' },
   { id: 'checkin', label: 'Check-ins' },
   { id: 'question', label: 'Questions' },
+  { id: 'saved', label: 'Saved' },
 ];
 
 export const PostSkeleton = () => (
@@ -55,7 +56,13 @@ export default function Feed() {
           <EmptyState
             illustration="ashtray"
             title="Quiet in here"
-            body={filter === 'near' ? 'No posts from members near you yet. Be the first to share.' : 'No posts yet. Start the conversation.'}
+            body={
+              filter === 'saved'
+                ? 'Tap Save on any post to keep it here for later.'
+                : filter === 'near'
+                  ? 'No posts from members near you yet. Be the first to share.'
+                  : 'No posts yet. Start the conversation.'
+            }
           />
         ) : (
           <ul className="space-y-4">

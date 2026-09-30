@@ -15,7 +15,7 @@
     "smoke": "node scripts/smoke.mjs",
     "setup:check": "node scripts/setup-check.mjs",
     "perf": "node scripts/perf.mjs",
-    "icons": "node scripts/icons.mjs"
+    "icons": "python scripts/logo_assets.py docs/logo-original.png"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",

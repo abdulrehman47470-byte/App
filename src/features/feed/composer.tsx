@@ -1,5 +1,5 @@
-import { Camera, Flame, HelpCircle, Images, MapPin, PenLine, X } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { Camera, Clapperboard, Flame, HelpCircle, Images, MapPin, PenLine, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { Avatar } from '@/components/brand/portrait';
 import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
@@ -12,7 +12,10 @@ import { useFeedActions, useMe } from '@/features/queries';
 import { CameraCapture } from '@/features/verification/camera-capture';
 import { POST_MAX } from '@/lib/api/mock';
 import { checkImageFile, compressImage } from '@/lib/media';
+import { newMediaId, putMedia, rememberMediaUrl } from '@/lib/media-store';
 import type { PostKind } from '@/types';
+
+const MAX_VIDEO_MB = 200;
 
 const KINDS: { id: PostKind; label: string; icon: typeof PenLine; hint: string }[] = [
   { id: 'update', label: 'Update', icon: PenLine, hint: 'Share something with the community…' },
@@ -60,20 +63,35 @@ function ComposerSheet({ open, onOpenChange, initialKind }: { open: boolean; onO
   const { create } = useFeedActions();
   const toast = useToast();
   const file = useRef<HTMLInputElement>(null);
+  const videoInput = useRef<HTMLInputElement>(null);
   const [kind, setKind] = useState<PostKind>(initialKind);
   const [body, setBody] = useState('');
   const [cigar, setCigar] = useState('');
   const [loungeId, setLoungeId] = useState('');
   const [image, setImage] = useState<string>();
+  const [video, setVideo] = useState<{ file: File; url: string }>();
   const [camera, setCamera] = useState(false);
   const [error, setError] = useState<string>();
   const meta = KINDS.find((k) => k.id === kind)!;
 
+  // Release the preview URL if the sheet closes without posting.
+  const posted = useRef(false);
+  useEffect(() => () => void (video && !posted.current && URL.revokeObjectURL(video.url)), [video]);
+
   const pickFile = async (f?: File) => {
     if (!f) return;
+    if (f.type.startsWith('video/')) {
+      if (!/^video\/(mp4|quicktime|webm|x-m4v|3gpp)$/.test(f.type)) return setError('Please choose an MP4, MOV or WebM video.');
+      if (f.size > MAX_VIDEO_MB * 1024 * 1024) return setError(`Videos can be up to ${MAX_VIDEO_MB} MB.`);
+      setImage(undefined);
+      setVideo({ file: f, url: URL.createObjectURL(f) }); // preview appears instantly
+      setError(undefined);
+      return;
+    }
     const problem = checkImageFile(f);
     if (problem) return setError(problem);
     const url = URL.createObjectURL(f);
+    setVideo(undefined);
     setImage(await compressImage(url, 1280));
     URL.revokeObjectURL(url);
     setError(undefined);
@@ -81,16 +99,30 @@ function ComposerSheet({ open, onOpenChange, initialKind }: { open: boolean; onO
 
   const submit = async () => {
     if (kind === 'checkin' && !loungeId) return setError('Choose the lounge you are at.');
+    // The file shows in the feed immediately from memory; saving to the device happens in the background.
+    let media: { id: string; type: 'image' | 'video' } | undefined;
+    let blob: Blob | undefined;
+    if (video) {
+      media = { id: newMediaId(), type: 'video' };
+      rememberMediaUrl(media.id, video.url);
+      blob = video.file;
+    } else if (image) {
+      media = { id: newMediaId(), type: 'image' };
+      rememberMediaUrl(media.id, image);
+      blob = await (await fetch(image)).blob();
+    }
     try {
-      await create.mutateAsync({ kind, body, imageUrl: image, cigar: kind === 'smoking' ? cigar : undefined, loungeId: kind === 'checkin' ? loungeId : undefined });
+      await create.mutateAsync({ kind, body, media, cigar: kind === 'smoking' ? cigar : undefined, loungeId: kind === 'checkin' ? loungeId : undefined });
+      posted.current = true;
       toast('Posted to the feed');
       onOpenChange(false);
+      if (media && blob) putMedia(media.id, blob).catch(() => toast('Could not save the file on this device. It will show until you reload.', 'danger'));
     } catch (e) {
       setError((e as Error).message);
     }
   };
 
-  const canPost = (body.trim() || image) && body.length <= POST_MAX && !create.isPending;
+  const canPost = (body.trim() || image || video) && body.length <= POST_MAX && !create.isPending;
 
   return (
     <Sheet
@@ -100,8 +132,11 @@ function ComposerSheet({ open, onOpenChange, initialKind }: { open: boolean; onO
       footer={
         camera ? undefined : (
           <div className="flex items-center gap-2">
-            <button type="button" onClick={() => file.current?.click()} aria-label="Add photo from library" className="grid size-11 place-items-center rounded-full text-gold hover:bg-surface-2">
+            <button type="button" onClick={() => file.current?.click()} aria-label="Add photo or video from library" className="grid size-11 place-items-center rounded-full text-gold hover:bg-surface-2">
               <Images className="size-5" strokeWidth={1.75} />
+            </button>
+            <button type="button" onClick={() => videoInput.current?.click()} aria-label="Add a video" className="grid size-11 place-items-center rounded-full text-gold hover:bg-surface-2">
+              <Clapperboard className="size-5" strokeWidth={1.75} />
             </button>
             <button type="button" onClick={() => setCamera(true)} aria-label="Take a photo" className="grid size-11 place-items-center rounded-full text-gold hover:bg-surface-2">
               <Camera className="size-5" strokeWidth={1.75} />
@@ -123,6 +158,7 @@ function ComposerSheet({ open, onOpenChange, initialKind }: { open: boolean; onO
             confirmLabel="Add to post"
             onCancel={() => setCamera(false)}
             onCapture={(img) => {
+              setVideo(undefined);
               setImage(img);
               setCamera(false);
             }}
@@ -166,6 +202,14 @@ function ComposerSheet({ open, onOpenChange, initialKind }: { open: boolean; onO
               </button>
             </div>
           )}
+          {video && (
+            <div className="relative overflow-hidden rounded-[16px] border border-line bg-black">
+              <video src={video.url} className="max-h-72 w-full object-contain" controls playsInline muted autoPlay loop aria-label="Attached video preview" />
+              <button type="button" onClick={() => (URL.revokeObjectURL(video.url), setVideo(undefined))} aria-label="Remove video" className="absolute right-2 top-2 grid size-9 place-items-center rounded-full bg-bg/80 text-text">
+                <X className="size-4" />
+              </button>
+            </div>
+          )}
           {error && (
             <p role="alert" className="text-sm text-danger">
               {error}
@@ -175,7 +219,8 @@ function ComposerSheet({ open, onOpenChange, initialKind }: { open: boolean; onO
             Posts follow the Stogie Ethics: be respectful, no selling or trading cigars, no explicit photos. Everyone here
             is 21+.
           </p>
-          <input ref={file} type="file" accept="image/*" className="sr-only" tabIndex={-1} onChange={(e) => pickFile(e.target.files?.[0])} />
+          <input ref={file} type="file" accept="image/*,video/*" className="sr-only" tabIndex={-1} onChange={(e) => (pickFile(e.target.files?.[0]), (e.target.value = ''))} />
+          <input ref={videoInput} type="file" accept="video/*" className="sr-only" tabIndex={-1} onChange={(e) => (pickFile(e.target.files?.[0]), (e.target.value = ''))} />
         </div>
       )}
     </Sheet>

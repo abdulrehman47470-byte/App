@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import { HOME } from '@/config/features';
 import { STORAGE_KEYS, storage } from '@/lib/storage';
+import type { MockPayment } from '@/features/billing/checkout-sheet';
 import type { VerificationState } from '@/types';
 
 export type Plan = 'monthly' | 'yearly';
@@ -17,6 +18,8 @@ export interface Onboarding {
   ethicsAgreed: boolean;
   photoUploaded: boolean;
   plan?: Plan;
+  /** Mock receipt from the Phase 0 checkout. Phase 6: subscription state from Stripe webhooks. */
+  payment?: MockPayment;
   /** Number of completed profile steps (0-3). */
   profileStep: number;
   role: 'member' | 'admin';
@@ -72,6 +75,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     storage.remove(KEY);
     storage.remove(STORAGE_KEYS.me);
     storage.remove(STORAGE_KEYS.mock);
+    // Remove this member's uploaded photos/videos from the device too.
+    import('@/lib/media-store').then((m) => m.clearMedia()).catch(() => {});
     // Reload so the in-memory mock backend starts fresh too.
     window.location.assign('/');
   }, []);

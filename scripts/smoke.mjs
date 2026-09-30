@@ -57,7 +57,15 @@ await step('photo is mandatory', async () => {
   await page.getByRole('button', { name: 'Use this photo' }).click(); await page.waitForURL('**/subscribe');
 });
 await step('guard: cannot skip to discover', async () => { await page.goto(B + '/discover'); await page.waitForURL('**/subscribe'); });
-await step('choose monthly plan', async () => { await page.getByRole('radio', { name: /Monthly/ }).click(); await page.getByRole('button', { name: 'Continue to payment' }).click(); await page.waitForURL('**/setup/1'); });
+await step('checkout opens; paying works with empty card fields', async () => {
+  await page.getByRole('radio', { name: /Monthly/ }).click();
+  await page.getByRole('button', { name: 'Continue to payment' }).click();
+  await page.getByRole('dialog', { name: 'Daily Stogie' }).waitFor();
+  await page.getByRole('button', { name: 'Pay $1.99' }).click();
+  await page.getByText('Payment successful').waitFor();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await page.waitForURL('**/setup/1');
+});
 await step('step 1 validation then fill', async () => {
   await page.getByRole('button', { name: 'Next' }).click();
   await page.getByText('Choose your cigar knowledge level.').waitFor();
@@ -84,6 +92,33 @@ await step('post, like and comment on the feed', async () => {
   await mine.getByLabel('Add a comment').fill('Cheers everyone');
   await mine.getByRole('button', { name: 'Post comment' }).click();
   await mine.getByText('Cheers everyone').waitFor();
+});
+await step('post a video: it shows instantly and plays', async () => {
+  await page.getByRole('button', { name: 'Start a post' }).click();
+  await page.getByLabel('Post text').fill('Lounge tour');
+  await page.locator('input[type=file][accept="video/*"]').setInputFiles({ name: 'tour.webm', mimeType: 'video/webm', buffer: Buffer.from('1a45dfa3', 'hex') });
+  await page.getByLabel('Attached video preview').waitFor();
+  await page.getByRole('button', { name: 'Post', exact: true }).click();
+  const post = page.getByRole('article', { name: /Post by Sam Test/ }).filter({ hasText: 'Lounge tour' });
+  await post.locator('video').waitFor();
+});
+await step('save, edit and delete your own post', async () => {
+  const post = page.getByRole('article', { name: /Post by Sam Test/ }).filter({ hasText: 'Lounge tour' });
+  await post.getByRole('button', { name: 'Save', exact: true }).click();
+  await page.getByRole('radio', { name: 'Saved' }).click();
+  await page.getByText('Lounge tour').waitFor();
+  await page.getByRole('radio', { name: 'All' }).click();
+  await post.getByRole('button', { name: 'Manage post' }).click();
+  await page.getByRole('button', { name: 'Edit post' }).click();
+  await page.getByRole('dialog').getByLabel('Post text').fill('Lounge tour (updated)');
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  const edited = page.getByRole('article').filter({ hasText: 'Lounge tour (updated)' });
+  await edited.getByText('Edited').waitFor();
+  await edited.getByRole('button', { name: 'Manage post' }).click();
+  await page.getByRole('button', { name: 'Delete post' }).click();
+  await page.getByRole('button', { name: 'Delete', exact: true }).click();
+  await page.waitForTimeout(300);
+  if (await page.getByText('Lounge tour (updated)').count()) throw new Error('post was not deleted');
 });
 await step('member map shows members', async () => {
   await page.getByRole('link', { name: 'Map' }).first().click();
@@ -121,5 +156,14 @@ await step('block removes from matches', async () => {
 });
 await step('non-admin blocked from /admin', async () => { await page.goto(B + '/admin'); await page.waitForURL('**/discover'); });
 await step('sign out', async () => { await page.goto(B + '/profile'); await page.getByRole('button', { name: 'Sign Out' }).click(); await page.waitForURL(B + '/'); });
+await step('mock Google sign-in (email -> consent -> app)', async () => {
+  await page.getByRole('button', { name: 'Log in' }).click();
+  await page.getByRole('button', { name: 'Continue with Google' }).click();
+  await page.getByLabel('Email or phone').fill('pat.smoker@gmail.com');
+  await page.getByRole('button', { name: 'Next' }).click();
+  await page.getByText('Google will allow Daily Stogie to access this info about you:').waitFor();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await page.waitForURL('**/verify/age');
+});
 console.log(errs.length ? 'PAGE ERRORS:\n' + errs.join('\n') : 'No page errors.');
 await browser.close();

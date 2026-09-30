@@ -53,6 +53,12 @@ These are from the concept board. In each case Phase 0 followed the client rules
 | "Message" button on Discover cards | Only matched members can message | Pass / Undo / Like only; Message appears after a match |
 | Refer a Friend "Your Rewards: 1 month premium per friend" | No rewards requested | Plain invite link + copy + share; TODO to confirm rewards |
 
+## Mocks to replace
+
+- Mock Google sign-in (`src/features/auth/google-signin-mock.tsx`) → Supabase Auth Google OAuth (Phase 2)
+- Mock card checkout (`src/features/billing/checkout-sheet.tsx`) → Stripe Checkout (Phase 6)
+- On-device photo/video storage (`src/lib/media-store.ts`) → Supabase Storage with size limits (Phase 1)
+
 ## Other TODOs flagged in code
 
 - Support email address for the Access Restricted screen (`src/pages/onboarding/restricted.tsx`)

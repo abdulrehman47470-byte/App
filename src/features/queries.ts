@@ -108,8 +108,29 @@ export function useFeedActions() {
     qc.setQueriesData<Post | null>({ queryKey: ['feed-post', id] }, (p) => (p ? fn(p) : p));
   };
   return {
-    create: useMutation({ mutationFn: (p: NewPost) => api.createPost(p), onSuccess: refresh }),
-    remove: useMutation({ mutationFn: (id: string) => api.deletePost(id), onSuccess: refresh }),
+    create: useMutation({
+      mutationFn: (p: NewPost) => api.createPost(p),
+      // Show the new post at the top straight away, then sync the lists.
+      onSuccess: (post) => {
+        qc.setQueriesData<Post[]>({ queryKey: ['feed', 'all'] }, (list) => (list ? [post, ...list] : list));
+        refresh();
+      },
+    }),
+    update: useMutation({
+      mutationFn: ({ id, body }: { id: string; body: string }) => api.updatePost(id, body),
+      onSuccess: (post) => patchPost(post.id, () => post),
+    }),
+    save: useMutation({
+      mutationFn: (id: string) => api.togglePostSave(id),
+      onMutate: (id) => patchPost(id, (p) => ({ ...p, savedByMe: !p.savedByMe })),
+      onSettled: () => qc.invalidateQueries({ queryKey: ['feed', 'saved'] }),
+    }),
+    remove: useMutation({
+      mutationFn: (id: string) => api.deletePost(id),
+      // Remove it from every list immediately.
+      onMutate: (id) => qc.setQueriesData<Post[]>({ queryKey: ['feed'] }, (list) => list?.filter((p) => p.id !== id)),
+      onSettled: refresh,
+    }),
     like: useMutation({
       mutationFn: (id: string) => api.togglePostLike(id),
       onMutate: (id) => patchPost(id, (p) => ({ ...p, likedByMe: !p.likedByMe, likes: p.likes + (p.likedByMe ? -1 : 1) })),
