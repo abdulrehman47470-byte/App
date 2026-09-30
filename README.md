@@ -54,8 +54,9 @@ Measured with `npm run perf` (production build, simulated mid-range phone on 4G,
 |---|---|---|
 | JavaScript downloaded to show the Welcome screen | 215 KB | 126 KB |
 | Welcome screen visible | ~0.6 s | ~0.5 s (mostly network round trips) |
-| Opening a tab for the first time | 0.2–0.7 s | 20–80 ms |
-| Returning to a tab | 60–140 ms | 10–45 ms |
+| Opening a tab for the first time (incl. ~70 ms test-tool overhead) | 0.2–0.7 s | 0.1–0.2 s |
+| Opening a tab for the first time (measured inside the page) | not measured | 20–80 ms |
+| Returning to a tab (measured inside the page) | not measured | 10–45 ms |
 | Reopening the app (service worker cache) | full download | ~90 ms once the browser has cached compiled code |
 
 How:
