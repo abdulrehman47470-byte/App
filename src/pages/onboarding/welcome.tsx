@@ -37,12 +37,12 @@ export default function Welcome() {
     <Frame>
       <div className="welcome-bg relative flex min-h-dvh items-center justify-center overflow-hidden px-6 py-[max(32px,env(safe-area-inset-top))]">
         <main className="rise relative z-10 flex w-full max-w-[360px] flex-col items-center text-center">
-          {/* Logo: 156px on phones (≈40% of a 390px screen), 176px on larger screens; soft glow behind it */}
+          {/* Logo: 180px on phones (≈46% of a 390px screen), 204px on larger screens, 150px on short screens (iPhone SE); soft glow behind it */}
           <div className="relative">
             <span aria-hidden className="absolute inset-[-14%] rounded-full bg-[radial-gradient(circle,rgba(201,162,39,0.22),transparent_68%)]" />
-            <LogoMark className="relative size-[156px] sm:size-[176px]" priority />
+            <LogoMark className="relative size-[180px] sm:size-[204px] [@media(max-height:700px)]:size-[150px]" priority />
           </div>
-          <Wordmark className="mt-6 text-[44px] sm:text-[48px]" />
+          <Wordmark className="mt-7 text-[50px] sm:text-[54px] [@media(max-height:700px)]:mt-5 [@media(max-height:700px)]:text-[42px]" />
           <div aria-hidden className="mt-3 flex items-center gap-2 text-gold">
             <span className="h-px w-8 bg-gradient-to-r from-transparent to-current opacity-60" />
             <span className="size-1 rotate-45 bg-current opacity-80" />
@@ -50,7 +50,7 @@ export default function Welcome() {
           </div>
           <p className="mt-3 font-serif text-lg italic text-text/85">Good cigars. Better company.</p>
 
-          <div className="mt-10 w-full space-y-3">
+          <div className="mt-10 w-full space-y-3 [@media(max-height:700px)]:mt-7">
             <Button size="lg" block className="h-[52px] rounded-[14px] text-[15px]" onClick={() => openSheet('signup')}>
               <UserPlus className="size-5" /> Sign up
             </Button>
