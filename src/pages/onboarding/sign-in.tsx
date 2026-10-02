@@ -1,5 +1,6 @@
 import { ArrowRight, ChevronLeft, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { LogoMark } from '@/components/brand/logo';
 import { TrustNote } from '@/components/brand/ornaments';
 import { Frame } from '@/components/layout/frame';
@@ -31,6 +32,7 @@ const STRENGTH = ['Too short', 'Fair', 'Good', 'Strong', 'Very strong'];
  */
 export default function SignIn() {
   const auth = useSignIn();
+  const signup = useSearchParams()[0].get('mode') === 'signup';
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
@@ -77,9 +79,9 @@ export default function SignIn() {
         <div className="mx-auto w-full max-w-[380px] flex-1">
           <div className="mt-4 text-center">
             <LogoMark className="mx-auto size-14" />
-            <h1 className="mt-4 font-serif text-[30px] leading-tight text-text">{step === 'email' ? 'Continue with email' : 'Create your account'}</h1>
+            <h1 className="mt-4 font-serif text-[30px] leading-tight text-text">{step === 'email' ? (signup ? 'Sign up with email' : 'Sign in with email') : 'Create your account'}</h1>
             <p className="mt-1 text-sm text-muted">
-              {step === 'email' ? 'Members sign in, new members create an account.' : (
+              {step === 'email' ? (signup ? 'Enter your email to create your account.' : 'Welcome back. Enter your email to continue.') : (
                 <>
                   for <strong className="font-semibold text-text">{normalizeEmail(email)}</strong>{' '}
                   <button type="button" className="font-medium text-gold hover:underline" onClick={() => (setStep('email'), setError(undefined))}>

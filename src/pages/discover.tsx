@@ -1,7 +1,7 @@
 import { animate, AnimatePresence, m, useMotionValue, useTransform, type MotionValue, type PanInfo } from 'framer-motion';
-import { Plus, RotateCcw, X } from 'lucide-react';
+import { Check, Plus, RotateCcw, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { RequestsIndicator } from '@/features/connections/requests-indicator';
 import { DiscoverTabs } from '@/features/discover/discover-tabs';
 import { EmptyState } from '@/components/brand/empty-state';
@@ -9,8 +9,7 @@ import { PageHeader } from '@/components/layout/page';
 import { Skeleton } from '@/components/ui/misc';
 import { DEFAULT_FILTERS, FiltersButton } from '@/features/discover/filter-sheet';
 import { MemberCardFace } from '@/features/discover/member-card';
-import { useLikeFlow } from '@/features/discover/use-like';
-import { useConnections, useDiscover, useMe } from '@/features/queries';
+import { useConnectionActions, useConnections, useDiscover, useMe } from '@/features/queries';
 import { SafetySheet } from '@/features/safety/safety-sheet';
 import { api } from '@/lib/api';
 import { STORAGE_KEYS, storage } from '@/lib/storage';
@@ -23,7 +22,7 @@ export default function Discover() {
   const [filters, setFilters] = useState<DiscoverFilters>(() => storage.get(STORAGE_KEYS.filters) ?? DEFAULT_FILTERS);
   const { data, isLoading } = useDiscover(filters);
   const { data: me } = useMe();
-  const { like, overlay } = useLikeFlow();
+  const { connect } = useConnectionActions();
   const { data: connections } = useConnections();
   const navigate = useNavigate();
   const askedMe = new Set(connections?.received.map((r) => r.member.id));
@@ -32,6 +31,9 @@ export default function Discover() {
   const [lastPassed, setLastPassed] = useState<DiscoverCard | null>(null);
   const [safetyFor, setSafetyFor] = useState<DiscoverCard | null>(null);
   const [announce, setAnnounce] = useState('');
+  // Small "Request sent" note instead of a full-screen popup; hides itself after a few seconds.
+  const [sent, setSent] = useState<{ name: string; connected: boolean } | null>(null);
+  const sentTimer = useRef<number | undefined>(undefined);
   const x = useMotionValue(0);
 
   useEffect(() => {
@@ -52,10 +54,13 @@ export default function Discover() {
       } else {
         setLastPassed(null);
         setAnnounce(`Connection request sent to ${top.member.name}.`);
-        await like(top.member.id);
+        const res = await connect.mutateAsync(top.member.id);
+        setSent({ name: top.member.name, connected: res.connected });
+        window.clearTimeout(sentTimer.current);
+        sentTimer.current = window.setTimeout(() => setSent(null), 4000);
       }
     },
-    [top, like, x],
+    [top, connect, x],
   );
 
   const fling = useCallback(
@@ -114,6 +119,28 @@ export default function Discover() {
 
       <section aria-label="Member cards. Use the left and right arrow keys to pass or connect, U to undo." className="px-4 pt-4">
         <div className="relative mx-auto h-[clamp(340px,calc(100dvh-330px),560px)]">
+          <AnimatePresence>
+            {sent && (
+              <m.div
+                key={sent.name}
+                role="status"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="surface absolute inset-x-3 top-3 z-40 flex items-center gap-3 rounded-full py-2 pl-2 pr-4 shadow-[0_10px_30px_-8px_rgba(59,36,18,0.35)]"
+              >
+                <span className="grid size-8 shrink-0 place-items-center rounded-full bg-gold-fill text-gold">
+                  <Check className="size-4" strokeWidth={2.5} />
+                </span>
+                <span className="min-w-0 flex-1 truncate text-sm text-text">
+                  {sent.connected ? `You're now connected with ${sent.name.split(' ')[0]}` : `Request sent to ${sent.name.split(' ')[0]}`}
+                </span>
+                <Link to={sent.connected ? '/connections?tab=connected' : '/connections?tab=sent'} className="shrink-0 text-sm font-semibold text-gold hover:underline">
+                  View
+                </Link>
+              </m.div>
+            )}
+          </AnimatePresence>
           {isLoading || !data ? (
             <Skeleton className="absolute inset-0 rounded-[24px]" />
           ) : !top ? (
@@ -161,7 +188,6 @@ export default function Discover() {
           onBlocked={() => setStack((s) => s.filter((c) => c.member.id !== safetyFor.member.id))}
         />
       )}
-      {overlay}
     </>
   );
 }

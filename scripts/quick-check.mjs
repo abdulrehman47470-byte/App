@@ -21,22 +21,25 @@ const step = async (name, fn) => {
 
 await page.goto(BASE + '/');
 await step('welcome has 3 sign-in options', async () => {
-  for (const n of [/Continue with Google/, /Continue with Apple/, /Continue with Email/]) await page.getByRole('button', { name: n }).waitFor({ timeout: 8000 });
+  await page.getByRole('button', { name: /Sign up/ }).click();
+  for (const n of [/with Google/, /with Apple/, /with Email/]) await page.getByRole('button', { name: n }).waitFor({ timeout: 8000 });
 });
 await step('apple sheet opens', async () => {
-  await page.getByRole('button', { name: /Continue with Apple/ }).click();
+  await page.getByRole('button', { name: /with Apple/ }).click();
   await page.getByPlaceholder('Apple ID (email)').waitFor();
   await page.keyboard.press('Escape');
 });
 await step('email sign-in with demo account goes straight in', async () => {
-  await page.getByRole('button', { name: /Continue with Email/ }).click();
+  await page.getByRole('button', { name: /Log in/ }).click();
+  await page.getByRole('button', { name: /with Email/ }).click();
   await page.getByLabel('Email address').fill('alex.morgan@example.com');
   await page.getByRole('button', { name: /^Continue$/ }).click();
   await page.waitForURL(/\/feed/, { timeout: 10000 });
 });
 await step('feed: stories, media, reactions', async () => {
   await page.getByRole('region', { name: 'Stories' }).waitFor();
-  await page.getByRole('button', { name: /Like\. Hold/ }).first().click();
+  await page.getByRole('button', { name: 'React to this post' }).first().click();
+  await page.getByRole('menuitem', { name: 'Haha' }).click();
   await page.getByRole('button', { name: /story, new/ }).first().click();
   await page.getByRole('button', { name: 'Close stories' }).waitFor();
   await page.waitForTimeout(600);

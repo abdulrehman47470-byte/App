@@ -15,16 +15,12 @@ export const REACTIONS: { type: ReactionType; emoji: string; label: string; colo
 ];
 const byType = Object.fromEntries(REACTIONS.map((r) => [r.type, r])) as Record<ReactionType, (typeof REACTIONS)[number]>;
 
-const LONG_PRESS_MS = 380;
-
 /**
- * Like button with a reaction picker. Tap = Like (or remove your reaction); long-press on touch,
- * or hover on desktop, opens the picker. Keyboard: Enter likes, ArrowUp opens the picker.
+ * Like button with a reaction picker. Tapping it opens the full set of reactions; pick one to react,
+ * or tap your current reaction again to remove it. Escape or tapping outside closes the picker.
  */
 export function ReactionButton({ value, onReact }: { value?: ReactionType; onReact: (r: ReactionType | null) => void }) {
   const [open, setOpen] = useState(false);
-  const timer = useRef<number | undefined>(undefined);
-  const longPressed = useRef(false);
   const wrap = useRef<HTMLDivElement>(null);
   const current = value ? byType[value] : undefined;
 
@@ -49,20 +45,7 @@ export function ReactionButton({ value, onReact }: { value?: ReactionType; onRea
   };
 
   return (
-    <div
-      ref={wrap}
-      className="relative"
-      onPointerEnter={(e) => {
-        if (e.pointerType !== 'mouse') return;
-        window.clearTimeout(timer.current);
-        timer.current = window.setTimeout(() => setOpen(true), 450);
-      }}
-      onPointerLeave={(e) => {
-        if (e.pointerType !== 'mouse') return;
-        window.clearTimeout(timer.current);
-        timer.current = window.setTimeout(() => setOpen(false), 300);
-      }}
-    >
+    <div ref={wrap} className="relative">
       {open && (
         <div role="menu" aria-label="Choose a reaction" className="reaction-picker absolute bottom-[calc(100%+6px)] left-1 z-30 flex gap-0.5 rounded-full border border-line bg-surface px-2 py-1.5 shadow-[0_10px_30px_-8px_rgba(59,36,18,0.35)]">
           {REACTIONS.map((r) => (
@@ -70,7 +53,7 @@ export function ReactionButton({ value, onReact }: { value?: ReactionType; onRea
               key={r.type}
               type="button"
               role="menuitem"
-              aria-label={r.label}
+              aria-label={value === r.type ? `Remove ${r.label}` : r.label}
               title={r.label}
               onClick={() => pick(r.type)}
               className={cn('reaction-emoji grid size-10 place-items-center rounded-full text-[26px] leading-none', value === r.type && 'bg-gold-fill')}
@@ -84,35 +67,13 @@ export function ReactionButton({ value, onReact }: { value?: ReactionType; onRea
         type="button"
         aria-pressed={!!value}
         aria-haspopup="menu"
-        aria-label={current ? `Reacted ${current.label}. Tap to remove, hold for more reactions` : 'Like. Hold for more reactions'}
-        onPointerDown={(e) => {
-          if (e.pointerType === 'mouse') return;
-          longPressed.current = false;
-          timer.current = window.setTimeout(() => {
-            longPressed.current = true;
-            setOpen(true);
-            navigator.vibrate?.(15);
-          }, LONG_PRESS_MS);
-        }}
-        onPointerUp={() => window.clearTimeout(timer.current)}
-        onPointerCancel={() => window.clearTimeout(timer.current)}
-        onContextMenu={(e) => e.preventDefault()}
-        onKeyDown={(e) => {
-          if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            setOpen(true);
-          }
-        }}
-        onClick={() => {
-          if (longPressed.current) return void (longPressed.current = false);
-          setOpen(false);
-          onReact(value ? null : 'like');
-        }}
+        aria-expanded={open}
+        aria-label={current ? `Reacted ${current.label}. Change reaction` : 'React to this post'}
+        onClick={() => setOpen((o) => !o)}
         className={cn(
           'flex h-12 w-full select-none items-center justify-center gap-1.5 text-[13px] font-medium transition-colors hover:bg-surface-2',
           current ? `${current.color} font-semibold` : 'text-muted hover:text-text',
         )}
-        style={{ WebkitTouchCallout: 'none' }}
       >
         {current ? <span className="text-lg leading-none">{current.emoji}</span> : <ThumbsUp className="size-5" strokeWidth={1.75} />}
         {current ? current.label : 'Like'}

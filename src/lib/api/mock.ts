@@ -256,6 +256,8 @@ export const mockProvider: DataProvider = {
       (m) =>
         visible(m) &&
         !state.sent.has(m.id) &&
+        // people who already asked you wait in Connections → Received, so Connect here always sends a request
+        !state.received.has(m.id) &&
         !state.matches.has(m.id) &&
         !state.declined.has(m.id) &&
         !state.passed.includes(m.id) &&
@@ -267,8 +269,7 @@ export const mockProvider: DataProvider = {
         (!f.mentorship.length || f.mentorship.includes(m.mentorship)),
     )
       .map((m) => card(me, m))
-      // people who already asked to connect come first
-      .sort((a, b) => Number(state.received.has(b.member.id)) - Number(state.received.has(a.member.id)) || b.matchPct - a.matchPct);
+      .sort((a, b) => b.matchPct - a.matchPct);
   },
   async getMemberCard(id) {
     await wait(200);
