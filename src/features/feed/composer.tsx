@@ -1,4 +1,4 @@
-import { Camera, Clapperboard, Flame, HelpCircle, Images, MapPin, PenLine, X } from 'lucide-react';
+import { Camera, Clapperboard, Flame, HelpCircle, Images, MapPin, Music2, PenLine, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Avatar } from '@/components/brand/portrait';
 import { Button } from '@/components/ui/button';
@@ -13,9 +13,10 @@ import { CameraCapture } from '@/features/verification/camera-capture';
 import { POST_MAX } from '@/lib/api/mock';
 import { checkImageFile, compressImage } from '@/lib/media';
 import { newMediaId, putMedia, rememberMediaUrl } from '@/lib/media-store';
-import type { PostKind } from '@/types';
+import type { MediaAsset, PostKind } from '@/types';
 
 const MAX_VIDEO_MB = 200;
+const MAX_AUDIO_MB = 30;
 
 const KINDS: { id: PostKind; label: string; icon: typeof PenLine; hint: string }[] = [
   { id: 'update', label: 'Update', icon: PenLine, hint: 'Share something with the community…' },
@@ -59,17 +60,20 @@ export function Composer() {
   );
 }
 
-function ComposerSheet({ open, onOpenChange, initialKind }: { open: boolean; onOpenChange: (v: boolean) => void; initialKind: PostKind }) {
+export function ComposerSheet({ open, onOpenChange, initialKind }: { open: boolean; onOpenChange: (v: boolean) => void; initialKind: PostKind }) {
   const { create } = useFeedActions();
+  const { data: me } = useMe();
   const toast = useToast();
   const file = useRef<HTMLInputElement>(null);
   const videoInput = useRef<HTMLInputElement>(null);
+  const audioInput = useRef<HTMLInputElement>(null);
   const [kind, setKind] = useState<PostKind>(initialKind);
   const [body, setBody] = useState('');
   const [cigar, setCigar] = useState('');
   const [loungeId, setLoungeId] = useState('');
   const [image, setImage] = useState<string>();
   const [video, setVideo] = useState<{ file: File; url: string }>();
+  const [audio, setAudio] = useState<{ file: File; url: string; title: string }>();
   const [camera, setCamera] = useState(false);
   const [error, setError] = useState<string>();
   const meta = KINDS.find((k) => k.id === kind)!;
@@ -77,13 +81,23 @@ function ComposerSheet({ open, onOpenChange, initialKind }: { open: boolean; onO
   // Release the preview URL if the sheet closes without posting.
   const posted = useRef(false);
   useEffect(() => () => void (video && !posted.current && URL.revokeObjectURL(video.url)), [video]);
+  useEffect(() => () => void (audio && !posted.current && URL.revokeObjectURL(audio.url)), [audio]);
 
   const pickFile = async (f?: File) => {
     if (!f) return;
+    if (f.type.startsWith('audio/')) {
+      if (f.size > MAX_AUDIO_MB * 1024 * 1024) return setError(`Audio files can be up to ${MAX_AUDIO_MB} MB.`);
+      setImage(undefined);
+      setVideo(undefined);
+      setAudio({ file: f, url: URL.createObjectURL(f), title: f.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ') });
+      setError(undefined);
+      return;
+    }
     if (f.type.startsWith('video/')) {
       if (!/^video\/(mp4|quicktime|webm|x-m4v|3gpp)$/.test(f.type)) return setError('Please choose an MP4, MOV or WebM video.');
       if (f.size > MAX_VIDEO_MB * 1024 * 1024) return setError(`Videos can be up to ${MAX_VIDEO_MB} MB.`);
       setImage(undefined);
+      setAudio(undefined);
       setVideo({ file: f, url: URL.createObjectURL(f) }); // preview appears instantly
       setError(undefined);
       return;
@@ -92,6 +106,7 @@ function ComposerSheet({ open, onOpenChange, initialKind }: { open: boolean; onO
     if (problem) return setError(problem);
     const url = URL.createObjectURL(f);
     setVideo(undefined);
+    setAudio(undefined);
     setImage(await compressImage(url, 1280));
     URL.revokeObjectURL(url);
     setError(undefined);
@@ -100,29 +115,34 @@ function ComposerSheet({ open, onOpenChange, initialKind }: { open: boolean; onO
   const submit = async () => {
     if (kind === 'checkin' && !loungeId) return setError('Choose the lounge you are at.');
     // The file shows in the feed immediately from memory; saving to the device happens in the background.
-    let media: { id: string; type: 'image' | 'video' } | undefined;
+    let attachment: MediaAsset | undefined;
     let blob: Blob | undefined;
+    const mediaId = newMediaId();
     if (video) {
-      media = { id: newMediaId(), type: 'video' };
-      rememberMediaUrl(media.id, video.url);
+      attachment = { type: 'video', mediaId };
+      rememberMediaUrl(mediaId, video.url);
       blob = video.file;
+    } else if (audio) {
+      attachment = { type: 'audio', mediaId, title: audio.title.trim() || 'Untitled track', artist: me?.name || 'You' };
+      rememberMediaUrl(mediaId, audio.url);
+      blob = audio.file;
     } else if (image) {
-      media = { id: newMediaId(), type: 'image' };
-      rememberMediaUrl(media.id, image);
+      attachment = { type: 'image', mediaId };
+      rememberMediaUrl(mediaId, image);
       blob = await (await fetch(image)).blob();
     }
     try {
-      await create.mutateAsync({ kind, body, media, cigar: kind === 'smoking' ? cigar : undefined, loungeId: kind === 'checkin' ? loungeId : undefined });
+      await create.mutateAsync({ kind, body, attachment, cigar: kind === 'smoking' ? cigar : undefined, loungeId: kind === 'checkin' ? loungeId : undefined });
       posted.current = true;
       toast('Posted to the feed');
       onOpenChange(false);
-      if (media && blob) putMedia(media.id, blob).catch(() => toast('Could not save the file on this device. It will show until you reload.', 'danger'));
+      if (attachment && blob) putMedia(mediaId, blob).catch(() => toast('Could not save the file on this device. It will show until you reload.', 'danger'));
     } catch (e) {
       setError((e as Error).message);
     }
   };
 
-  const canPost = (body.trim() || image || video) && body.length <= POST_MAX && !create.isPending;
+  const canPost = (body.trim() || image || video || audio) && body.length <= POST_MAX && !create.isPending;
 
   return (
     <Sheet
@@ -137,6 +157,9 @@ function ComposerSheet({ open, onOpenChange, initialKind }: { open: boolean; onO
             </button>
             <button type="button" onClick={() => videoInput.current?.click()} aria-label="Add a video" className="grid size-11 place-items-center rounded-full text-gold hover:bg-surface-2">
               <Clapperboard className="size-5" strokeWidth={1.75} />
+            </button>
+            <button type="button" onClick={() => audioInput.current?.click()} aria-label="Add a song or audio" className="grid size-11 place-items-center rounded-full text-gold hover:bg-surface-2">
+              <Music2 className="size-5" strokeWidth={1.75} />
             </button>
             <button type="button" onClick={() => setCamera(true)} aria-label="Take a photo" className="grid size-11 place-items-center rounded-full text-gold hover:bg-surface-2">
               <Camera className="size-5" strokeWidth={1.75} />
@@ -159,6 +182,7 @@ function ComposerSheet({ open, onOpenChange, initialKind }: { open: boolean; onO
             onCancel={() => setCamera(false)}
             onCapture={(img) => {
               setVideo(undefined);
+              setAudio(undefined);
               setImage(img);
               setCamera(false);
             }}
@@ -210,6 +234,20 @@ function ComposerSheet({ open, onOpenChange, initialKind }: { open: boolean; onO
               </button>
             </div>
           )}
+          {audio && (
+            <div className="flex items-center gap-3 rounded-[16px] border border-line bg-surface-2 p-3">
+              <span className="gold-gradient grid size-12 shrink-0 place-items-center rounded-[12px] text-gold-ink">
+                <Music2 className="size-5" />
+              </span>
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <Input value={audio.title} onChange={(e) => setAudio({ ...audio, title: e.target.value })} aria-label="Track title" maxLength={80} className="h-10" />
+                <audio src={audio.url} controls className="h-8 w-full" aria-label="Attached audio preview" />
+              </div>
+              <button type="button" onClick={() => (URL.revokeObjectURL(audio.url), setAudio(undefined))} aria-label="Remove audio" className="grid size-9 shrink-0 place-items-center rounded-full text-muted hover:bg-surface hover:text-text">
+                <X className="size-4" />
+              </button>
+            </div>
+          )}
           {error && (
             <p role="alert" className="text-sm text-danger">
               {error}
@@ -220,6 +258,7 @@ function ComposerSheet({ open, onOpenChange, initialKind }: { open: boolean; onO
             is 21+.
           </p>
           <input ref={file} type="file" accept="image/*,video/*" className="sr-only" tabIndex={-1} onChange={(e) => (pickFile(e.target.files?.[0]), (e.target.value = ''))} />
+          <input ref={audioInput} type="file" accept="audio/*" className="sr-only" tabIndex={-1} onChange={(e) => (pickFile(e.target.files?.[0]), (e.target.value = ''))} />
           <input ref={videoInput} type="file" accept="video/*" className="sr-only" tabIndex={-1} onChange={(e) => (pickFile(e.target.files?.[0]), (e.target.value = ''))} />
         </div>
       )}

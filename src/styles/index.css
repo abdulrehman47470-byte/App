@@ -190,31 +190,6 @@
   }
 }
 
-/* Drifting smoke for the Welcome screen */
-@keyframes smoke-drift {
-  0% {
-    transform: translate3d(-8%, 6%, 0) scale(1);
-    opacity: 0.35;
-  }
-  50% {
-    transform: translate3d(6%, -6%, 0) scale(1.15);
-    opacity: 0.55;
-  }
-  100% {
-    transform: translate3d(-8%, 6%, 0) scale(1);
-    opacity: 0.35;
-  }
-}
-.smoke {
-  position: absolute;
-  inset: -20%;
-  background:
-    radial-gradient(40% 30% at 30% 40%, rgba(159, 85, 22, 0.05), transparent 70%),
-    radial-gradient(35% 25% at 70% 30%, rgba(243, 170, 59, 0.08), transparent 70%),
-    radial-gradient(50% 35% at 50% 70%, rgba(204, 130, 41, 0.06), transparent 70%);
-  animation: smoke-drift 18s ease-in-out infinite;
-  pointer-events: none;
-}
 @keyframes skeleton-pulse {
   50% {
     opacity: 0.55;
@@ -352,61 +327,8 @@
 /* ---------- Welcome background ---------- */
 .welcome-bg {
   background:
-    radial-gradient(55% 34% at 50% 34%, rgba(243, 170, 59, 0.22), transparent 70%),
-    radial-gradient(90% 55% at 50% 112%, rgba(204, 130, 41, 0.16), transparent 70%),
-    linear-gradient(180deg, #ffffff 0%, #fffaf2 60%, #fbf1e2 100%);
-}
-/* slow-turning shafts of lounge light behind the logo */
-@keyframes rays-turn {
-  to {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
-}
-.welcome-rays {
-  position: absolute;
-  left: 50%;
-  top: 42%;
-  width: 160vmax;
-  height: 160vmax;
-  transform: translate(-50%, -50%);
-  background: repeating-conic-gradient(from 0deg, rgba(243, 170, 59, 0.12) 0deg 6deg, transparent 6deg 22deg);
-  -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 42%);
-  mask-image: radial-gradient(circle, #000 0%, transparent 42%);
-  animation: rays-turn 120s linear infinite;
-  pointer-events: none;
-}
-.welcome-vignette {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(120% 90% at 50% 40%, transparent 60%, rgba(159, 85, 22, 0.1) 100%);
-  pointer-events: none;
-}
-/* embers drifting up from the bottom */
-@keyframes ember-rise {
-  0% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.9;
-  }
-  70% {
-    opacity: 0.5;
-  }
-  100% {
-    transform: translate(28px, -105vh) scale(0.4);
-    opacity: 0;
-  }
-}
-.ember {
-  position: absolute;
-  bottom: -10px;
-  width: 4px;
-  height: 4px;
-  border-radius: 999px;
-  background: radial-gradient(circle, #ffd28a 0%, var(--brand-gold-3) 60%, transparent 100%);
-  box-shadow: 0 0 8px 2px rgba(243, 170, 59, 0.5);
-  animation: ember-rise 12s linear infinite both;
+    radial-gradient(60% 38% at 50% 26%, rgba(243, 170, 59, 0.14), transparent 72%),
+    linear-gradient(180deg, #ffffff 0%, #fffbf5 55%, #fbf3e6 100%);
 }
 
 /* ---------- Mock Google sign-in (imitates Google's own light UI, so it keeps its own palette) ---------- */
@@ -576,4 +498,76 @@
 /* Placeholder shown wherever a member has no photo yet: the client's logo on warm cream */
 .logo-placeholder {
   background: radial-gradient(circle at 50% 40%, #fffaf1 0%, #f6ead6 65%, #ecd9ba 100%);
+}
+
+/* ---------- Audio player ---------- */
+@keyframes eq {
+  0%, 100% { height: 4px; }
+  50% { height: 14px; }
+}
+.eq-bar {
+  height: 4px;
+  animation: eq 0.8s ease-in-out infinite;
+}
+.audio-seek {
+  appearance: none;
+  background: linear-gradient(90deg, var(--brand-gold-3) var(--p, 0%), rgba(159, 85, 22, 0.18) var(--p, 0%));
+  border-radius: 99px;
+  cursor: pointer;
+}
+.audio-seek::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 99px;
+  background: var(--brand-gold-3);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(59, 36, 18, 0.35);
+}
+.audio-seek::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 99px;
+  background: var(--brand-gold-3);
+  border: 2px solid #fff;
+}
+
+/* ---------- Reaction picker ---------- */
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.92); }
+}
+.reaction-picker {
+  animation: pop-in 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reaction-emoji {
+  transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reaction-emoji:hover,
+.reaction-emoji:focus-visible {
+  transform: translateY(-6px) scale(1.35);
+}
+
+/* Story viewer progress: one compositor-only animation per segment. */
+.story-progress {
+  transform: scaleX(0);
+  animation: story-fill var(--story-ms, 5000ms) linear forwards;
+}
+@keyframes story-fill {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Identity verification: a soft band sweeping over the ID / selfie while it is being checked. */
+.id-scan {
+  top: -20%;
+  animation: id-scan 1.6s ease-in-out infinite;
+}
+@keyframes id-scan {
+  50% {
+    top: 85%;
+  }
+  100% {
+    top: -20%;
+  }
 }

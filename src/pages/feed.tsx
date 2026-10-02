@@ -1,3 +1,4 @@
+import { Search } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { EmptyState } from '@/components/brand/empty-state';
@@ -6,8 +7,10 @@ import { PageBody, PageHeader } from '@/components/layout/page';
 import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
 import { Skeleton } from '@/components/ui/misc';
+import { RequestsIndicator } from '@/features/connections/requests-indicator';
 import { Composer } from '@/features/feed/composer';
 import { PostCard } from '@/features/feed/post-card';
+import { StoriesBar } from '@/features/feed/stories';
 import { useFeed, useFeedPost } from '@/features/queries';
 import type { FeedFilter } from '@/types';
 
@@ -39,8 +42,21 @@ export default function Feed() {
 
   return (
     <>
-      <PageHeader title="The Lounge" large subtitle="What members are smoking and sharing" />
+      <PageHeader
+        title="The Lounge"
+        large
+        subtitle="What members are smoking and sharing"
+        action={
+          <div className="flex gap-2">
+            <Link to="/search" aria-label="Search" className="grid size-11 place-items-center rounded-full border border-line bg-surface-2 text-text transition-colors hover:border-line-strong">
+              <Search className="size-5" strokeWidth={1.75} />
+            </Link>
+            <RequestsIndicator />
+          </div>
+        }
+      />
       <PageBody className="space-y-4">
+        <StoriesBar />
         <Composer />
         <div role="radiogroup" aria-label="Filter posts" className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4">
           {FILTERS.map((f) => (

@@ -1,4 +1,4 @@
-import { Ban, ChevronLeft, Flag, MessageCircle, MoreHorizontal, Plus, X } from 'lucide-react';
+import { Ban, ChevronLeft, Flag, MoreHorizontal, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { EmptyState } from '@/components/brand/empty-state';
@@ -7,10 +7,11 @@ import { PortraitArt } from '@/components/brand/portrait';
 import { Button } from '@/components/ui/button';
 import { Card, Skeleton } from '@/components/ui/misc';
 import { MENTORSHIP_LABEL, userTypeLabel } from '@/data/options';
-import { useLikeFlow } from '@/features/discover/use-like';
+import { ConnectButton } from '@/features/connections/connect-button';
 import { ProfileSections } from '@/features/profile/profile-sections';
-import { useMatches, useMemberCard } from '@/features/queries';
+import { useConnectionStatus, useMemberCard } from '@/features/queries';
 import { ActivitySection } from '@/features/feed/activity-section';
+import { MemberBlogs } from '@/features/blog/member-blogs';
 import { MapView } from '@/components/map/map-view';
 import { FEATURES } from '@/config/features';
 import { MapPin } from 'lucide-react';
@@ -21,12 +22,9 @@ export default function MemberProfile() {
   const { id = '' } = useParams();
   const navigate = useNavigate();
   const { data: card, isLoading } = useMemberCard(id);
-  const { data: matches } = useMatches();
-  const { like, overlay } = useLikeFlow();
+  const { data: status } = useConnectionStatus(id);
   const [safety, setSafety] = useState(false);
-  const [liked, setLiked] = useState(false);
   const shared = useMemo(() => new Set(card?.shared ?? []), [card]);
-  const isMatch = matches?.some((m) => m.id === id);
 
   if (isLoading) {
     return (
@@ -87,11 +85,10 @@ export default function MemberProfile() {
           {card.shared.length > 0 && <span className="text-gold">· {card.shared.length} things in common</span>}
         </p>
 
-        {isMatch ? (
-          <Button size="lg" block onClick={() => navigate(`/messages/${m.id}`)}>
-            <MessageCircle className="size-5" /> Message
-          </Button>
-        ) : (
+        {status === 'received' && (
+          <p className="rounded-[14px] border border-brand-gold/40 bg-gold-fill px-4 py-2.5 text-sm font-medium text-gold-light">{m.name} wants to connect with you.</p>
+        )}
+        {status === 'none' ? (
           <div className="grid grid-cols-2 gap-3">
             <Button
               size="lg"
@@ -103,17 +100,10 @@ export default function MemberProfile() {
             >
               <X className="size-5" /> Pass
             </Button>
-            <Button
-              size="lg"
-              disabled={liked}
-              onClick={async () => {
-                setLiked(true);
-                await like(m.id);
-              }}
-            >
-              <Plus className="size-5" strokeWidth={2.25} /> {liked ? 'Requested' : 'Connect'}
-            </Button>
+            <ConnectButton memberId={m.id} name={m.name} size="lg" block />
           </div>
+        ) : (
+          <ConnectButton memberId={m.id} name={m.name} size="lg" block />
         )}
 
         <Card className="p-5">
@@ -149,6 +139,7 @@ export default function MemberProfile() {
         )}
 
         {FEATURES.feed && <ActivitySection memberId={m.id} name={m.name} />}
+        <MemberBlogs memberId={m.id} name={m.name} />
 
         <CigarBand label="Stay safe" />
         <SafetyBanner />
@@ -163,7 +154,6 @@ export default function MemberProfile() {
       </div>
 
       <SafetySheet memberId={m.id} name={m.name} open={safety} onOpenChange={setSafety} onBlocked={() => navigate('/discover')} />
-      {overlay}
     </article>
   );
 }

@@ -6,7 +6,7 @@ import Welcome from '@/pages/onboarding/welcome';
 import { hideSplash, LogoLoader } from '@/components/brand/logo-loader';
 import { lazyPage } from '@/lib/lazy-page';
 import { pages, prefetchWhenIdle } from '@/routes';
-import { Discover, Feed, Matches, MemberMap, Mentors, Messages, MyProfile } from '@/pages/tab-pages';
+import { Connections, Discover, Feed, MemberMap, Mentors, Messages, MyProfile } from '@/pages/tab-pages';
 
 // Only the Welcome screen ships in the first download; everything else is split out and
 // preloaded in the background (see src/routes.ts).
@@ -33,9 +33,10 @@ const Sessions = lazyPage(pages.content, 'SessionsPage');
 const SessionDetail = lazyPage(pages.content, 'SessionDetailPage');
 const Blog = lazyPage(pages.content, 'BlogPage');
 const BlogPost = lazyPage(pages.content, 'BlogPostPage');
+const BlogEditor = lazyPage(pages.content, 'BlogEditorPage');
 const Legal = lazyPage(pages.content, 'LegalPage');
 
-const TAB_ROUTES = [HOME, '/discover', FEATURES.memberMap ? '/map' : '/matches', '/messages', '/profile', '/member/x', '/messages/x', '/mentors', '/matches', '/settings', '/search', '/sessions'];
+const TAB_ROUTES = [HOME, '/discover', FEATURES.memberMap ? '/map' : '/connections', '/messages', '/profile', '/member/x', '/messages/x', '/mentors', '/connections', '/settings', '/search', '/sessions', '/blog'];
 
 /** Preload the screens the member is most likely to open next. */
 function Prefetcher() {
@@ -101,7 +102,8 @@ export default function App() {
             <Route path="/discover" element={<Discover />} />
             <Route path="/member/:id" element={<MemberProfile />} />
             <Route path="/mentors" element={<Mentors />} />
-            <Route path="/matches" element={<Matches />} />
+            <Route path="/connections" element={<Connections />} />
+            <Route path="/matches" element={<Navigate to="/connections" replace />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/messages/:id" element={<Chat />} />
             <Route path="/profile" element={<MyProfile />} />
@@ -113,6 +115,7 @@ export default function App() {
             <Route path="/sessions" element={<Sessions />} />
             <Route path="/sessions/:id" element={<SessionDetail />} />
             <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/new" element={<BlogEditor />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
           </Route>
         </Route>

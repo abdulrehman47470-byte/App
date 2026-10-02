@@ -21,7 +21,7 @@ import { Frame } from './frame';
 export const TABS = [
   FEATURES.feed ? { to: '/feed', label: 'Home', icon: House } : { to: '/mentors', label: 'Mentors', icon: GraduationCap },
   { to: '/discover', label: 'Discover', icon: Compass },
-  FEATURES.memberMap ? { to: '/map', label: 'Map', icon: MapIcon } : { to: '/matches', label: 'Connections', icon: UsersRound },
+  FEATURES.memberMap ? { to: '/map', label: 'Map', icon: MapIcon } : { to: '/connections', label: 'Connections', icon: UsersRound },
   { to: '/messages', label: 'Messages', icon: MessageCircle },
   { to: '/profile', label: 'Profile', icon: UserRound },
 ];
@@ -38,7 +38,7 @@ export function AppShell() {
           tabs={TABS.map((t) => t.to)}
           elements={TAB_ELEMENTS}
           cssOnly={['/map']}
-          prebuild={['/feed', '/discover', '/messages', '/profile', '/mentors', '/matches']}
+          prebuild={['/feed', '/discover', '/messages', '/profile', '/mentors', '/connections']}
           fallback={<PageSkeleton />}
         />
       </main>
@@ -140,6 +140,7 @@ function useWarmCache() {
       qc.prefetchQuery({ queryKey: ['feed', 'all'], queryFn: () => api.getFeed('all') });
       qc.prefetchQuery({ queryKey: ['discover', filters], queryFn: () => api.getDiscover(filters), staleTime: Infinity });
       qc.prefetchQuery({ queryKey: ['matches'], queryFn: api.getMatches });
+      qc.prefetchQuery({ queryKey: ['connections'], queryFn: api.getConnections });
       qc.prefetchQuery({ queryKey: ['conversations'], queryFn: api.getConversations });
       qc.prefetchQuery({ queryKey: ['map-members'], queryFn: api.getMapMembers });
       qc.prefetchQuery({ queryKey: ['feed', 'member', 'me'], queryFn: () => api.getMemberPosts('me') });

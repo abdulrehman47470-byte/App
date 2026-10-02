@@ -1,23 +1,23 @@
 import { AnimatePresence, m } from 'framer-motion';
-import { Bookmark, Flame, Heart, HelpCircle, ImageOff, MapPin, MessageCircle, MoreHorizontal, Pencil, Send, Share2, Trash2, Volume2, VolumeX } from 'lucide-react';
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { Bookmark, CornerDownRight, Flame, Heart, HelpCircle, MapPin, MessageCircle, MoreHorizontal, Pencil, Send, Share2, Trash2, X } from 'lucide-react';
+import { useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { VerifiedBadge } from '@/components/brand/ornaments';
 import { Avatar } from '@/components/brand/portrait';
-import { SceneArt } from '@/components/brand/scene-art';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/field';
 import { Card, Skeleton } from '@/components/ui/misc';
 import { Sheet } from '@/components/ui/sheet';
 import { useToast } from '@/components/ui/toast';
 import { MOCK_LOUNGES } from '@/data/mock/content';
-import { userTypeLabel } from '@/data/options';
+import { userTypeLabel } from '@/data/user-types';
 import { useComments, useFeedActions, useMe } from '@/features/queries';
 import { SafetySheet } from '@/features/safety/safety-sheet';
 import { COMMENT_MAX, POST_MAX } from '@/lib/api/mock';
-import { useMediaUrl } from '@/lib/media-store';
-import { Textarea } from '@/components/ui/field';
 import { cn, timeAgo } from '@/lib/utils';
-import type { Post, PostAuthor } from '@/types';
+import type { Comment, Post, PostAuthor } from '@/types';
+import { PostMedia } from './post-media';
+import { ReactionButton, ReactionSummary } from './reactions';
 
 const profileLink = (a: PostAuthor) => (a.id === 'me' ? '/profile' : `/member/${a.id}`);
 const headline = (a: PostAuthor) => [userTypeLabel(a.userType), [a.city, a.state].filter(Boolean).join(', ')].filter(Boolean).join(' · ');
@@ -29,7 +29,7 @@ export function PostCard({ post, defaultOpen = false }: { post: Post; defaultOpe
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [ownMenu, setOwnMenu] = useState(false);
   const [editing, setEditing] = useState(false);
-  const { like, remove, save } = useFeedActions();
+  const { react, remove, save } = useFeedActions();
   const toast = useToast();
   const a = post.author;
   const mine = a.id === 'me';
@@ -54,7 +54,7 @@ export function PostCard({ post, defaultOpen = false }: { post: Post; defaultOpe
       <article aria-label={`Post by ${a.name}`}>
         <header className="flex items-start gap-3 p-4 pb-3">
           <Link to={profileLink(a)} aria-label={`${a.name}'s profile`}>
-            <Avatar name={a.name} hue={a.hue} src={a.photoUrl} size={46} />
+            <Avatar name={a.name} src={a.photoUrl} size={46} />
           </Link>
           <div className="min-w-0 flex-1">
             <Link to={profileLink(a)} className="flex items-center gap-1 text-[15px] font-semibold text-text hover:text-gold-light">
@@ -80,17 +80,17 @@ export function PostCard({ post, defaultOpen = false }: { post: Post; defaultOpe
         {(lounge || post.cigar || post.kind === 'question') && (
           <div className="flex flex-wrap gap-2 px-4 pb-2">
             {lounge && (
-              <Link to={`/search?focus=${lounge.id}`} className="inline-flex items-center gap-1.5 rounded-full border border-ember/50 bg-ember/10 px-3 py-1 text-xs text-text hover:border-ember">
+              <Link to={`/search?tab=lounges&focus=${lounge.id}`} className="inline-flex items-center gap-1.5 rounded-full border border-ember/40 bg-ember/10 px-3 py-1 text-xs text-text hover:border-ember">
                 <MapPin className="size-3.5 text-ember" /> Checked in at <strong className="font-semibold">{lounge.name}</strong>
               </Link>
             )}
             {post.cigar && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold-fill px-3 py-1 text-xs text-gold-light">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-gold/40 bg-gold-fill px-3 py-1 text-xs text-gold-light">
                 <Flame className="size-3.5" /> Smoking {post.cigar}
               </span>
             )}
             {post.kind === 'question' && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-info/40 bg-info/10 px-3 py-1 text-xs text-info">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-info/30 bg-info/10 px-3 py-1 text-xs text-info">
                 <HelpCircle className="size-3.5" /> Question
               </span>
             )}
@@ -98,7 +98,7 @@ export function PostCard({ post, defaultOpen = false }: { post: Post; defaultOpe
         )}
 
         {post.body && (
-          <p className="whitespace-pre-wrap break-words px-4 pb-3 text-[15px] leading-relaxed text-text/90">
+          <p className="whitespace-pre-wrap break-words px-4 pb-3 text-[15px] leading-relaxed text-text">
             {long && !expanded ? `${post.body.slice(0, 240).trimEnd()}… ` : post.body}
             {long && !expanded && (
               <button type="button" onClick={() => setExpanded(true)} className="font-medium text-gold hover:underline">
@@ -108,30 +108,10 @@ export function PostCard({ post, defaultOpen = false }: { post: Post; defaultOpe
           </p>
         )}
 
-        {post.media?.type === 'video' && <FeedVideo id={post.media.id} author={a.name} />}
-        {post.media?.type === 'image' && <FeedImage id={post.media.id} author={a.name} />}
+        {post.attachment && <PostMedia asset={post.attachment} author={a.name} />}
 
-        {!post.media && (post.imageUrl || post.imageHue !== undefined) && (
-          <div className="aspect-[16/10] border-y border-line/60 bg-bg-elevated">
-            {post.imageUrl ? (
-              <img src={post.imageUrl} alt={`Photo shared by ${a.name}`} className="size-full object-cover" loading="lazy" />
-            ) : (
-              <SceneArt hue={post.imageHue!} />
-            )}
-          </div>
-        )}
-
-        <div className="flex items-center justify-between px-4 py-2 text-xs text-muted">
-          <span className="flex items-center gap-1.5">
-            {post.likes > 0 && (
-              <>
-                <span className="gold-gradient grid size-4 place-items-center rounded-full">
-                  <Heart className="size-2.5 fill-gold-ink text-gold-ink" />
-                </span>
-                {post.likes}
-              </>
-            )}
-          </span>
+        <div className="flex min-h-9 items-center justify-between px-4 py-2 text-xs text-muted">
+          <ReactionSummary reactions={post.reactions} />
           {post.commentCount > 0 && (
             <button type="button" onClick={() => setShowComments((v) => !v)} className="hover:text-text hover:underline">
               {post.commentCount} {post.commentCount === 1 ? 'comment' : 'comments'}
@@ -140,11 +120,7 @@ export function PostCard({ post, defaultOpen = false }: { post: Post; defaultOpe
         </div>
 
         <div className="grid grid-cols-4 border-t border-line/60">
-          <ActionButton active={post.likedByMe} onClick={() => like.mutate(post.id)} label={post.likedByMe ? 'Liked' : 'Like'} pressed={post.likedByMe}>
-            <m.span key={String(post.likedByMe)} initial={{ scale: post.likedByMe ? 0.4 : 1 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 15 }}>
-              <Heart className={cn('size-5', post.likedByMe && 'fill-gold text-gold')} strokeWidth={1.75} />
-            </m.span>
-          </ActionButton>
+          <ReactionButton value={post.myReaction} onReact={(reaction) => react.mutate({ id: post.id, reaction })} />
           <ActionButton onClick={() => setShowComments((v) => !v)} label="Comment" expanded={showComments}>
             <MessageCircle className="size-5" strokeWidth={1.75} />
           </ActionButton>
@@ -160,13 +136,13 @@ export function PostCard({ post, defaultOpen = false }: { post: Post; defaultOpe
             }}
             label={post.savedByMe ? 'Saved' : 'Save'}
           >
-            <Bookmark className={cn('size-5', post.savedByMe && 'fill-gold text-gold')} strokeWidth={1.75} />
+            <Bookmark className={cn('size-5', post.savedByMe && 'fill-brand-gold text-gold')} strokeWidth={1.75} />
           </ActionButton>
         </div>
 
         <AnimatePresence initial={false}>
           {showComments && (
-            <m.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden border-t border-line/60 bg-bg-elevated/60">
+            <m.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden border-t border-line/60 bg-bg-elevated">
               <Comments postId={post.id} />
             </m.div>
           )}
@@ -246,141 +222,138 @@ function ActionButton({
   );
 }
 
+/** Comment thread: top-level comments with one level of replies, likes and a reply composer. */
 function Comments({ postId }: { postId: string }) {
   const { data, isLoading } = useComments(postId);
   const { data: me } = useMe();
   const { comment } = useFeedActions();
   const toast = useToast();
   const [text, setText] = useState('');
+  const [replyTo, setReplyTo] = useState<Comment | null>(null);
+  const input = useRef<HTMLInputElement>(null);
+
+  const threads = useMemo(() => {
+    const list = data ?? [];
+    const top = list.filter((c) => !c.parentId);
+    return top.map((c) => ({ comment: c, replies: list.filter((r) => r.parentId === c.id) }));
+  }, [data]);
+
+  const startReply = (c: Comment) => {
+    setReplyTo(c);
+    setText((t) => (t.startsWith('@') ? t : `@${c.author.id === 'me' ? 'you' : c.author.name} `));
+    requestAnimationFrame(() => input.current?.focus());
+  };
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
     const body = text.trim();
     if (!body) return;
+    // replies always attach to the top-level comment (one level of threading keeps it readable)
+    const parentId = replyTo ? (replyTo.parentId ?? replyTo.id) : undefined;
     setText('');
-    comment.mutate({ postId, body }, { onError: (err) => toast((err as Error).message, 'danger') });
+    setReplyTo(null);
+    comment.mutate({ postId, body, parentId }, { onError: (err) => toast((err as Error).message, 'danger') });
   };
 
   return (
-    <div className="space-y-3 p-4">
+    <div className="space-y-4 p-4">
       {isLoading ? (
         <Skeleton className="h-14" />
+      ) : threads.length ? (
+        threads.map(({ comment: c, replies }) => <Thread key={c.id} comment={c} replies={replies} onReply={startReply} />)
       ) : (
-        data?.map((c) => (
-          <div key={c.id} className="flex gap-2.5">
-            <Link to={profileLink(c.author)} aria-label={`${c.author.name}'s profile`}>
-              <Avatar name={c.author.name} hue={c.author.hue} src={c.author.photoUrl} size={34} />
-            </Link>
-            <div className="min-w-0 flex-1 rounded-[14px] rounded-tl-[4px] bg-surface-2 px-3.5 py-2">
-              <div className="flex items-baseline justify-between gap-2">
-                <Link to={profileLink(c.author)} className="truncate text-sm font-semibold text-text hover:text-gold-light">
-                  {c.author.id === 'me' ? 'You' : c.author.name}
-                </Link>
-                <time dateTime={c.createdAt} className="shrink-0 text-[11px] text-faint">
-                  {timeAgo(c.createdAt)}
-                </time>
-              </div>
-              <p className="whitespace-pre-wrap break-words text-sm text-text/90">{c.body}</p>
-            </div>
-          </div>
-        ))
+        <p className="py-2 text-center text-xs text-faint">No comments yet. Start the conversation.</p>
       )}
-      {!isLoading && !data?.length && <p className="text-center text-xs text-faint">No comments yet. Start the conversation.</p>}
-      <form onSubmit={submit} className="flex items-center gap-2 pt-1">
-        {me && <Avatar name={me.name || 'You'} hue={me.photoHue} src={me.photoUrl} size={34} />}
-        <label htmlFor={`c-${postId}`} className="sr-only">
-          Add a comment
-        </label>
-        <input
-          id={`c-${postId}`}
-          value={text}
-          maxLength={COMMENT_MAX}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Add a comment…"
-          className="h-11 min-w-0 flex-1 rounded-full border border-line bg-surface px-4 text-sm text-text placeholder:text-faint focus:border-gold focus:outline-none"
-        />
-        <button type="submit" disabled={!text.trim()} aria-label="Post comment" className="gold-gradient grid size-11 shrink-0 place-items-center rounded-full text-gold-ink disabled:opacity-40">
-          <Send className="size-4" />
-        </button>
+
+      <form onSubmit={submit} className="space-y-1.5 pt-1">
+        {replyTo && (
+          <p className="flex items-center gap-1.5 pl-11 text-xs text-muted">
+            <CornerDownRight className="size-3.5" /> Replying to <strong className="font-semibold text-text">{replyTo.author.id === 'me' ? 'your comment' : replyTo.author.name}</strong>
+            <button type="button" onClick={() => (setReplyTo(null), setText(''))} aria-label="Cancel reply" className="ml-1 grid size-6 place-items-center rounded-full hover:bg-surface-2">
+              <X className="size-3.5" />
+            </button>
+          </p>
+        )}
+        <div className="flex items-center gap-2">
+          {me && <Avatar name={me.name || 'You'} src={me.photoUrl} size={34} />}
+          <label htmlFor={`c-${postId}`} className="sr-only">
+            {replyTo ? 'Write a reply' : 'Add a comment'}
+          </label>
+          <input
+            ref={input}
+            id={`c-${postId}`}
+            value={text}
+            maxLength={COMMENT_MAX}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={replyTo ? 'Write a reply…' : 'Add a comment…'}
+            className="h-11 min-w-0 flex-1 rounded-full border border-line bg-surface px-4 text-sm text-text placeholder:text-faint focus:border-brand-gold focus:outline-none focus:ring-2 focus:ring-brand-gold/25"
+          />
+          <button type="submit" disabled={!text.trim()} aria-label={replyTo ? 'Post reply' : 'Post comment'} className="gold-gradient grid size-11 shrink-0 place-items-center rounded-full text-gold-ink transition-opacity disabled:opacity-40">
+            <Send className="size-4" />
+          </button>
+        </div>
       </form>
     </div>
   );
 }
 
-/** Photo from the on-device media store. */
-function FeedImage({ id, author }: { id: string; author: string }) {
-  const url = useMediaUrl(id);
-  if (url === null) return <MediaMissing />;
+function Thread({ comment, replies, onReply }: { comment: Comment; replies: Comment[]; onReply: (c: Comment) => void }) {
+  const [showAll, setShowAll] = useState(false);
+  const visible = showAll ? replies : replies.slice(-2);
+  const hidden = replies.length - visible.length;
   return (
-    <div className="border-y border-line/60 bg-bg-elevated">
-      {url ? (
-        <img src={url} alt={`Photo shared by ${author}`} className="max-h-[70dvh] w-full object-cover" decoding="async" />
-      ) : (
-        <Skeleton className="aspect-[4/3] rounded-none" />
+    <div>
+      <CommentItem c={comment} onReply={onReply} />
+      {replies.length > 0 && (
+        <div className="ml-11 mt-2 space-y-2 border-l-2 border-line pl-3">
+          {hidden > 0 && (
+            <button type="button" onClick={() => setShowAll(true)} className="text-xs font-semibold text-gold hover:underline">
+              View {hidden} more {hidden === 1 ? 'reply' : 'replies'}
+            </button>
+          )}
+          {visible.map((r) => (
+            <CommentItem key={r.id} c={r} onReply={onReply} small />
+          ))}
+        </div>
       )}
     </div>
   );
 }
 
-/**
- * Video like Instagram/LinkedIn: plays muted automatically while mostly on screen, pauses when
- * scrolled away. Tap the speaker to hear it; full controls are available too.
- */
-function FeedVideo({ id, author }: { id: string; author: string }) {
-  const url = useMediaUrl(id);
-  const ref = useRef<HTMLVideoElement>(null);
-  const [muted, setMuted] = useState(true);
-
-  useEffect(() => {
-    const v = ref.current;
-    if (!v || !url) return;
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting && e.intersectionRatio >= 0.6) v.play().catch(() => {});
-        else v.pause();
-      },
-      { threshold: [0, 0.6, 1] },
-    );
-    io.observe(v);
-    return () => io.disconnect();
-  }, [url]);
-
-  if (url === null) return <MediaMissing />;
+function CommentItem({ c, onReply, small }: { c: Comment; onReply: (c: Comment) => void; small?: boolean }) {
+  const { likeComment } = useFeedActions();
   return (
-    <div className="relative border-y border-line/60 bg-black">
-      {url ? (
-        <>
-          <video
-            ref={ref}
-            src={url}
-            muted={muted}
-            loop
-            playsInline
-            controls
-            preload="metadata"
-            className="max-h-[75dvh] w-full object-contain"
-            aria-label={`Video shared by ${author}`}
-          />
+    <div className="flex gap-2.5">
+      <Link to={profileLink(c.author)} aria-label={`${c.author.name}'s profile`} className="shrink-0">
+        <Avatar name={c.author.name} src={c.author.photoUrl} size={small ? 28 : 34} />
+      </Link>
+      <div className="min-w-0 flex-1">
+        <div className="rounded-[16px] rounded-tl-[4px] bg-surface-2 px-3.5 py-2">
+          <div className="flex items-baseline justify-between gap-2">
+            <Link to={profileLink(c.author)} className="truncate text-[13px] font-semibold text-text hover:text-gold-light">
+              {c.author.id === 'me' ? 'You' : c.author.name}
+            </Link>
+            <time dateTime={c.createdAt} className="shrink-0 text-[11px] text-faint">
+              {timeAgo(c.createdAt)}
+            </time>
+          </div>
+          <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-text">{c.body}</p>
+        </div>
+        <div className="mt-1 flex items-center gap-3 pl-2 text-xs">
           <button
             type="button"
-            onClick={() => setMuted((m) => !m)}
-            aria-label={muted ? 'Turn sound on' : 'Mute'}
-            className="absolute right-3 top-3 grid size-10 place-items-center rounded-full bg-bg/80 text-text"
+            onClick={() => likeComment.mutate({ postId: c.postId, commentId: c.id })}
+            aria-pressed={c.likedByMe}
+            className={cn('flex min-h-8 items-center gap-1 font-semibold transition-colors', c.likedByMe ? 'text-danger' : 'text-muted hover:text-text')}
           >
-            {muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
+            <Heart className={cn('size-3.5', c.likedByMe && 'fill-current')} /> {c.likedByMe ? 'Liked' : 'Like'}
+            {c.likes > 0 && <span className="font-normal tabular-nums text-faint">· {c.likes}</span>}
           </button>
-        </>
-      ) : (
-        <Skeleton className="aspect-video rounded-none" />
-      )}
-    </div>
-  );
-}
-
-function MediaMissing() {
-  return (
-    <div className="flex items-center justify-center gap-2 border-y border-line/60 bg-bg-elevated py-10 text-sm text-muted">
-      <ImageOff className="size-4" /> This file is no longer available on this device.
+          <button type="button" onClick={() => onReply(c)} className="min-h-8 font-semibold text-muted hover:text-text">
+            Reply
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

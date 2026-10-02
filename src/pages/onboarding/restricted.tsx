@@ -30,7 +30,7 @@ export default function Restricted() {
           <Button variant="outline" block asChild>
             <a href="mailto:support@example.com">Contact support</a>
           </Button>
-          <Button variant="ghost" block onClick={signOut}>
+          <Button variant="ghost" block onClick={() => signOut()}>
             Back to start
           </Button>
         </div>

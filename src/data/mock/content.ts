@@ -17,18 +17,18 @@ export const MOCK_LOUNGES: Lounge[] = [
 ];
 
 export const MOCK_SESSIONS: SessionVideo[] = [
-  { id: 's1', title: 'Cutting & Lighting, the Right Way', description: 'Guillotine, punch or V-cut: when to use each, and how to toast the foot for an even burn.', vimeoId: 'TODO', durationMin: 9, hue: 30 },
-  { id: 's2', title: 'Reading a Wrapper', description: 'Connecticut to Oscuro: what wrapper colour tells you, and what it does not.', vimeoId: 'TODO', durationMin: 14, hue: 18 },
-  { id: 's3', title: 'Humidor Basics', description: 'Seasoning a new humidor, two-way humidity packs, and where to put the hygrometer.', vimeoId: 'TODO', durationMin: 12, hue: 36 },
-  { id: 's4', title: 'Pairing with Bourbon', description: 'Complementary vs contrasting pairings, with three easy starting points.', vimeoId: 'TODO', durationMin: 11, hue: 24 },
-  { id: 's5', title: 'Resting and Aging', description: 'Fresh from the shop, rested for weeks, or aged for years: what changes.', vimeoId: 'TODO', durationMin: 16, hue: 14 },
-  { id: 's6', title: 'Lounge Etiquette', description: 'Ashtrays, sharing tables and bringing your own cigars: the unwritten rules.', vimeoId: 'TODO', durationMin: 7, hue: 40 },
+  { id: 's1', title: 'Cutting & Lighting, the Right Way', description: 'Guillotine, punch or V-cut: when to use each, and how to toast the foot for an even burn. A five-minute habit that fixes most first-cigar problems.', vimeoId: 'TODO', durationMin: 9, hue: 30, category: 'Basics', host: 'Victor H.', thumb: '/media/cigar-box.webp', src: '/media/smoke.mp4', level: 'Beginner' },
+  { id: 's2', title: 'Reading a Wrapper', description: 'Connecticut to Oscuro: what wrapper colour tells you about flavour, and what it does not. With side-by-side tasting notes.', vimeoId: 'TODO', durationMin: 14, hue: 18, category: 'Tasting', host: 'Elena R.', thumb: '/media/cigar-brandy.webp', src: '/media/lounge-table.mp4', level: 'All levels' },
+  { id: 's3', title: 'Humidor Basics', description: 'Seasoning a new humidor, two-way humidity packs, and where to put the hygrometer so your collection stays happy year-round.', vimeoId: 'TODO', durationMin: 12, hue: 36, category: 'Care', host: 'Grace L.', thumb: '/media/cozy-lounge.webp', src: '/media/bookstore.mp4', level: 'Beginner' },
+  { id: 's4', title: 'Pairing with Bourbon', description: 'Complementary vs contrasting pairings, with three easy starting points and the one pairing mistake almost everyone makes.', vimeoId: 'TODO', durationMin: 11, hue: 24, category: 'Pairing', host: 'Beau T.', thumb: '/media/bourbon-pour.webp', src: '/media/lounge-table.mp4', level: 'All levels' },
+  { id: 's5', title: 'Resting and Aging', description: 'Fresh from the shop, rested for weeks, or aged for years: what really changes, and how to run your own side-by-side test.', vimeoId: 'TODO', durationMin: 16, hue: 14, category: 'Care', host: 'Victor H.', thumb: '/media/whiskey-glass.webp', src: '/media/smoke.mp4', level: 'Advanced' },
+  { id: 's6', title: 'Lounge Etiquette', description: 'Ashtrays, sharing tables and bringing your own cigars: the unwritten rules that make every lounge visit a good one.', vimeoId: 'TODO', durationMin: 7, hue: 40, category: 'Culture', host: 'Rafael M.', thumb: '/media/bar-shelf.webp', src: '/media/barbershop.mp4', level: 'All levels' },
 ];
 
 // TODO(content): placeholder articles for layout only; the client/admin will publish real ones.
 export const MOCK_POSTS: BlogPost[] = [
   {
-    id: 'b1', slug: 'best-cigars-for-beginners', title: 'Starting Out: Mild Cigars Worth Your First Evening', category: 'Guides',
+    id: 'b1', cover: { src: '/media/cigar-box.webp' }, slug: 'best-cigars-for-beginners', title: 'Starting Out: Mild Cigars Worth Your First Evening', category: 'Guides',
     excerpt: 'A gentle introduction to wrappers, sizes and strengths for your first few smokes.', publishedAt: '2026-09-12', readMin: 6, hue: 32,
     body: [
       'Your first cigar should be something you can enjoy slowly, without rushing or fighting it. Look for a mild to mild-medium strength and a medium ring gauge.',
@@ -37,7 +37,7 @@ export const MOCK_POSTS: BlogPost[] = [
     ],
   },
   {
-    id: 'b2', slug: 'how-to-store-cigars', title: 'How to Store Cigars Properly', category: 'Guides',
+    id: 'b2', cover: { src: '/media/cozy-lounge.webp' }, slug: 'how-to-store-cigars', title: 'How to Store Cigars Properly', category: 'Guides',
     excerpt: 'Humidity, temperature and the simple setup that keeps your collection happy.', publishedAt: '2026-08-28', readMin: 8, hue: 22,
     body: [
       'Cigars like stable conditions. Most smokers aim for roughly 65 to 70 percent relative humidity and a room temperature that does not swing.',
@@ -46,7 +46,7 @@ export const MOCK_POSTS: BlogPost[] = [
     ],
   },
   {
-    id: 'b3', slug: 'what-makes-a-great-lounge', title: 'What Makes a Great Cigar Lounge', category: 'Culture',
+    id: 'b3', cover: { src: '/media/bar-shelf.webp' }, slug: 'what-makes-a-great-lounge', title: 'What Makes a Great Cigar Lounge', category: 'Culture',
     excerpt: 'Ventilation, seating, staff and the regulars: the ingredients of a room worth returning to.', publishedAt: '2026-08-14', readMin: 5, hue: 12,
     body: [
       'The best lounges feel like someone’s well-kept living room. Good ventilation matters more than decor: you should be able to taste your own cigar.',
@@ -54,7 +54,7 @@ export const MOCK_POSTS: BlogPost[] = [
     ],
   },
   {
-    id: 'b4', slug: 'maduro-myths', title: 'Maduro Myths, Explained', category: 'Reviews',
+    id: 'b4', cover: { src: '/media/cigar-brandy.webp' }, slug: 'maduro-myths', title: 'Maduro Myths, Explained', category: 'Reviews',
     excerpt: 'Darker does not always mean stronger. Here is what a maduro wrapper really brings.', publishedAt: '2026-07-30', readMin: 4, hue: 8,
     body: [
       'A maduro wrapper gets its colour from extended fermentation and sun exposure, which tends to bring sweetness: cocoa, coffee, molasses.',

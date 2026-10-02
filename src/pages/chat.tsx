@@ -62,7 +62,7 @@ export default function Chat() {
       <div className="px-6 py-20 text-center">
         <h1 className="font-serif text-2xl text-text">Conversation unavailable</h1>
         <p className="mt-2 text-sm text-muted">Only connected members can message each other.</p>
-        <Link to="/matches" className="mt-6 inline-block text-gold hover:underline">
+        <Link to="/connections" className="mt-6 inline-block text-gold hover:underline">
           Go to Connections
         </Link>
       </div>

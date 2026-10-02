@@ -60,6 +60,20 @@ export interface DiscoverCard {
   shared: string[];
 }
 
+/** Where you stand with another member. */
+export type ConnectionStatus = 'none' | 'sent' | 'received' | 'connected';
+
+export interface ConnectionRequest {
+  member: Member;
+  at: string;
+}
+
+export interface Connections {
+  received: ConnectionRequest[];
+  sent: ConnectionRequest[];
+  connected: Match[];
+}
+
 export interface Match {
   id: string;
   member: Member;
@@ -105,7 +119,16 @@ export interface SessionVideo {
   vimeoId: string;
   durationMin: number;
   hue: number;
+  category: 'Basics' | 'Tasting' | 'Pairing' | 'Care' | 'Culture';
+  host: string;
+  /** Thumbnail image (bundled demo media). */
+  thumb: string;
+  /** Demo video played until the Vimeo embed is wired in (Phase 7). */
+  src?: string;
+  level: 'Beginner' | 'All levels' | 'Advanced';
 }
+
+export type BlogBlock = { type: 'p'; text: string } | { type: 'img'; src?: string; mediaId?: string; caption?: string };
 
 export interface BlogPost {
   id: string;
@@ -114,6 +137,11 @@ export interface BlogPost {
   category: 'Reviews' | 'Guides' | 'Culture';
   excerpt: string;
   body: string[];
+  /** Rich content (member-written blogs: paragraphs and images). Falls back to `body`. */
+  blocks?: BlogBlock[];
+  cover?: { src?: string; mediaId?: string };
+  /** Members who write blogs; editorial posts have no author. */
+  author?: PostAuthor;
   publishedAt: string;
   readMin: number;
   hue: number;
@@ -183,22 +211,34 @@ export interface PostAuthor {
 
 export type PostKind = 'update' | 'checkin' | 'question' | 'smoking';
 
+export type ReactionType = 'like' | 'love' | 'haha' | 'wow' | 'sad' | 'angry' | 'fire';
+
+/**
+ * A photo, video or song attached to a post or story. `src` = bundled demo media / remote URL,
+ * `mediaId` = a file the member uploaded (Phase 0: on-device store; later Supabase Storage).
+ */
+export interface MediaAsset {
+  type: 'image' | 'video' | 'audio';
+  src?: string;
+  mediaId?: string;
+  poster?: string;
+  title?: string;
+  artist?: string;
+  /** License / credit line shown under the media (e.g. CC BY tracks). */
+  credit?: string;
+}
+
 export interface Post {
   id: string;
   author: PostAuthor;
   kind: PostKind;
   body: string;
-  /** Legacy inline image (data URL). New uploads use `media`. */
-  imageUrl?: string;
-  /** Uploaded photo or video (Phase 0: on-device store; later Supabase Storage). */
-  media?: { id: string; type: 'image' | 'video' };
-  /** Generated placeholder art for mock posts (no stock photos). */
-  imageHue?: number;
+  attachment?: MediaAsset;
   loungeId?: string;
   cigar?: string;
   createdAt: string;
-  likes: number;
-  likedByMe: boolean;
+  reactions: Partial<Record<ReactionType, number>>;
+  myReaction?: ReactionType;
   savedByMe?: boolean;
   editedAt?: string;
   commentCount: number;
@@ -207,9 +247,37 @@ export interface Post {
 export interface Comment {
   id: string;
   postId: string;
+  /** Set on replies: the comment being replied to. */
+  parentId?: string;
   author: PostAuthor;
   body: string;
   createdAt: string;
+  likes: number;
+  likedByMe: boolean;
+}
+
+export interface StoryItem {
+  id: string;
+  type: 'image' | 'video';
+  src?: string;
+  mediaId?: string;
+  createdAt: string;
+  caption?: string;
+}
+
+export interface Story {
+  id: string;
+  author: PostAuthor;
+  items: StoryItem[];
+  seen: boolean;
+}
+
+export interface SearchResults {
+  members: DiscoverCard[];
+  lounges: Lounge[];
+  posts: Post[];
+  blogs: BlogPost[];
+  sessions: SessionVideo[];
 }
 
 export type FeedFilter = 'all' | 'near' | 'checkin' | 'question' | 'saved';

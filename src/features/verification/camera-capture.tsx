@@ -24,15 +24,18 @@ export function CameraCapture({
   /** Liveness hints shown in turn while the camera is live. */
   prompts?: string[];
   confirmLabel?: string;
-  guide?: 'oval' | 'none';
+  /** 'card' frames an ID document (landscape, rear camera by default). */
+  guide?: 'oval' | 'none' | 'card';
 }) {
+  const card = guide === 'card';
+  const ratio = card ? 1.586 : 1; // ID-1 card proportions
   const video = useRef<HTMLVideoElement>(null);
   const stream = useRef<MediaStream | null>(null);
   const [state, setState] = useState<CamState>('starting');
   const [error, setError] = useState('');
   const [shot, setShot] = useState<string>();
   const [flash, setFlash] = useState(false);
-  const [facing, setFacing] = useState<'user' | 'environment'>('user');
+  const [facing, setFacing] = useState<'user' | 'environment'>(card ? 'environment' : 'user');
   const [prompt, setPrompt] = useState(0);
 
   const stop = useCallback(() => {
@@ -90,16 +93,18 @@ export function CameraCapture({
   const capture = () => {
     const v = video.current;
     if (!v || !v.videoWidth) return;
-    // Square crop from the centre, mirrored for the front camera so it matches the preview.
-    const size = Math.min(v.videoWidth, v.videoHeight);
+    // Centre crop in the frame's shape, mirrored for the front camera so it matches the preview.
+    const sw = Math.min(v.videoWidth, v.videoHeight * ratio);
+    const sh = sw / ratio;
     const canvas = document.createElement('canvas');
-    canvas.width = canvas.height = Math.min(size, 720);
+    canvas.width = Math.round(Math.min(sw, card ? 1000 : 720));
+    canvas.height = Math.round(canvas.width / ratio);
     const ctx = canvas.getContext('2d')!;
     if (facing === 'user') {
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
     }
-    ctx.drawImage(v, (v.videoWidth - size) / 2, (v.videoHeight - size) / 2, size, size, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(v, (v.videoWidth - sw) / 2, (v.videoHeight - sh) / 2, sw, sh, 0, 0, canvas.width, canvas.height);
     playShutter();
     navigator.vibrate?.(30);
     setFlash(true);
@@ -116,7 +121,7 @@ export function CameraCapture({
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative aspect-square w-full max-w-[340px] overflow-hidden rounded-[28px] border border-line-strong bg-bg-elevated shadow-[var(--shadow-card)]">
+      <div className={cn('relative w-full overflow-hidden border border-line-strong bg-bg-elevated shadow-[var(--shadow-card)]', card ? 'aspect-[1.586/1] max-w-[420px] rounded-[20px]' : 'aspect-square max-w-[340px] rounded-[28px]')}>
         <video
           ref={video}
           playsInline
@@ -136,6 +141,26 @@ export function CameraCapture({
             </defs>
             <rect width="100" height="100" fill="rgba(28,16,7,0.55)" mask="url(#cam-oval)" />
             <ellipse cx="50" cy="47" rx="30" ry="38" fill="none" stroke="var(--gold)" strokeWidth="0.8" strokeDasharray="2 1.5" />
+          </svg>
+        )}
+
+        {card && state === 'live' && (
+          <svg viewBox="0 0 158.6 100" className="pointer-events-none absolute inset-0 size-full" aria-hidden>
+            <defs>
+              <mask id="cam-card">
+                <rect width="158.6" height="100" fill="white" />
+                <rect x="10" y="9" width="138.6" height="82" rx="6" fill="black" />
+              </mask>
+            </defs>
+            <rect width="158.6" height="100" fill="rgba(28,16,7,0.5)" mask="url(#cam-card)" />
+            {[
+              'M10 21V15a6 6 0 0 1 6-6h6',
+              'M136.6 9h6a6 6 0 0 1 6 6v6',
+              'M148.6 79v6a6 6 0 0 1-6 6h-6',
+              'M22 91h-6a6 6 0 0 1-6-6v-6',
+            ].map((d) => (
+              <path key={d} d={d} fill="none" stroke="var(--brand-gold-1)" strokeWidth="1.6" strokeLinecap="round" />
+            ))}
           </svg>
         )}
 
@@ -177,7 +202,7 @@ export function CameraCapture({
       </div>
 
       {/* Controls */}
-      <div className="mt-6 flex w-full max-w-[340px] items-center justify-between">
+      <div className={cn('mt-6 flex w-full items-center justify-between', card ? 'max-w-[420px]' : 'max-w-[340px]')}>
         {state === 'captured' ? (
           <div className="grid w-full grid-cols-2 gap-3">
             <Button variant="secondary" size="lg" onClick={retake}>
@@ -227,7 +252,7 @@ export function CameraCapture({
           </>
         )}
       </div>
-      {state === 'live' && <p className="mt-2 text-xs text-faint">Tap the shutter to take your photo</p>}
+      {state === 'live' && <p className="mt-2 text-xs text-faint">{card ? 'Fit the whole document inside the frame, then tap the shutter' : 'Tap the shutter to take your photo'}</p>}
     </div>
   );
 }

@@ -1,4 +1,3 @@
-import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '@/components/brand/empty-state';
@@ -9,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Chip, Tag } from '@/components/ui/chip';
 import { Card, Segmented, Skeleton } from '@/components/ui/misc';
 import { MENTOR_TOPICS } from '@/data/options';
-import { useLikeFlow } from '@/features/discover/use-like';
-import { useMatches, useMentors } from '@/features/queries';
+import { ConnectButton } from '@/features/connections/connect-button';
+import { useMentors } from '@/features/queries';
 import type { MentorSegment } from '@/lib/api';
 import { DiscoverTabs } from '@/features/discover/discover-tabs';
 import { FEATURES } from '@/config/features';
@@ -19,9 +18,6 @@ export default function Mentors() {
   const [segment, setSegment] = useState<MentorSegment>('find');
   const [topic, setTopic] = useState<string>();
   const { data, isLoading } = useMentors(segment, topic);
-  const { data: matches } = useMatches();
-  const { like, overlay } = useLikeFlow();
-  const [liked, setLiked] = useState<string[]>([]);
 
   return (
     <>
@@ -55,8 +51,6 @@ export default function Mentors() {
         ) : (
           <ul className="space-y-3">
             {data.map(({ member: m, matchPct }) => {
-              const matched = matches?.some((x) => x.id === m.id);
-              const isLiked = liked.includes(m.id);
               return (
                 <li key={m.id}>
                   <Card className="p-4">
@@ -87,23 +81,7 @@ export default function Mentors() {
                       <Button variant="secondary" size="sm" className="flex-1" asChild>
                         <Link to={`/member/${m.id}`}>View profile</Link>
                       </Button>
-                      {matched ? (
-                        <Button size="sm" className="flex-1" asChild>
-                          <Link to={`/messages/${m.id}`}>Message</Link>
-                        </Button>
-                      ) : (
-                        <Button
-                          size="sm"
-                          className="flex-1"
-                          disabled={isLiked}
-                          onClick={async () => {
-                            setLiked((l) => [...l, m.id]);
-                            await like(m.id);
-                          }}
-                        >
-                          <Plus className="size-4" strokeWidth={2.25} /> {isLiked ? 'Requested' : 'Connect'}
-                        </Button>
-                      )}
+                      <ConnectButton memberId={m.id} name={m.name} size="sm" className="flex-1" />
                     </div>
                   </Card>
                 </li>
@@ -112,7 +90,6 @@ export default function Mentors() {
           </ul>
         )}
       </PageBody>
-      {overlay}
     </>
   );
 }

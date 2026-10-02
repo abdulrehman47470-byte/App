@@ -25,6 +25,12 @@ export function timeAgo(iso: string): string {
   return d < 7 ? `${d}d` : new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
+/** "5m ago", "just now", or "on Mar 3" for older dates. */
+export function ago(iso: string): string {
+  const t = timeAgo(iso);
+  return t === 'now' ? 'just now' : /\d[mhd]$/.test(t) ? `${t} ago` : `on ${t}`;
+}
+
 export const clockTime = (iso: string) =>
   new Date(iso).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 

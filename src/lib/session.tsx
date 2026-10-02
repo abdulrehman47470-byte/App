@@ -2,6 +2,7 @@
 // below is re-enforced in the database (RLS / checks), not only in these route guards.
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import { HOME } from '@/config/features';
+import { findAccount, forgetAccount, restoreAccount, saveAccount, snapshotAccount, type AuthMethod } from '@/lib/accounts';
 import { STORAGE_KEYS, storage } from '@/lib/storage';
 import type { MockPayment } from '@/features/billing/checkout-sheet';
 import type { VerificationState } from '@/types';
@@ -10,7 +11,9 @@ export type Plan = 'monthly' | 'yearly';
 
 export interface Onboarding {
   signedIn: boolean;
-  method?: 'google' | 'apple' | 'email';
+  method?: AuthMethod;
+  /** Account email (mock auth): used to restore the member's data on their next sign-in. */
+  email?: string;
   dob?: string;
   underage?: boolean;
   photoCheck: VerificationState;
@@ -53,8 +56,11 @@ export function nextStep(o: Onboarding): string {
 interface SessionCtx {
   session: Onboarding;
   update: (patch: Partial<Onboarding>) => void;
-  signOut: () => void;
+  /** `forget` deletes the account from this device (Delete account); otherwise it is kept for next time. */
+  signOut: (opts?: { forget?: boolean }) => void;
   loadDemo: () => Promise<void>;
+  /** Mock sign-in/sign-up. Resolves to the route to open, or null when the page reloads into a restored account. */
+  enter: (a: { email: string; name: string; method: AuthMethod }) => Promise<string | null>;
   isComplete: boolean;
 }
 
@@ -71,12 +77,16 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const signOut = useCallback(() => {
+  const signOut = useCallback((opts?: { forget?: boolean }) => {
+    const email = storage.get<Onboarding>(KEY)?.email;
+    // Keep the account's data on this device so signing back in restores it.
+    const kept = !opts?.forget && !!email && snapshotAccount(email);
+    if (opts?.forget && email) forgetAccount(email);
     storage.remove(KEY);
     storage.remove(STORAGE_KEYS.me);
     storage.remove(STORAGE_KEYS.mock);
-    // Remove this member's uploaded photos/videos from the device too.
-    import('@/lib/media-store').then((m) => m.clearMedia()).catch(() => {});
+    // Deleting the account also removes its uploaded photos/videos from the device.
+    if (!kept) import('@/lib/media-store').then((m) => m.clearMedia()).catch(() => {});
     // Reload so the in-memory mock backend starts fresh too.
     window.location.assign('/');
   }, []);
@@ -91,9 +101,32 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     });
   }, [update]);
 
+  const enter = useCallback(
+    async ({ email, name, method }: { email: string; name: string; method: AuthMethod }) => {
+      const account = findAccount(email);
+      if (account?.snapshot && restoreAccount(account)) {
+        // A full reload so the in-memory mock backend picks up the restored data.
+        window.location.assign(nextStep({ ...INITIAL, ...(account.snapshot.session as Onboarding) }));
+        return null;
+      }
+      if (account?.demo) {
+        await loadDemo();
+        update({ email: account.email });
+        return HOME;
+      }
+      if (!account) saveAccount({ email, name, method, createdAt: new Date().toISOString() });
+      const { api } = await import('@/lib/api');
+      await api.saveMe({ name: account?.name ?? name });
+      const patch = { signedIn: true, method, email: email.trim().toLowerCase() };
+      update(patch);
+      return nextStep({ ...session, ...patch });
+    },
+    [session, update, loadDemo],
+  );
+
   const value = useMemo(
-    () => ({ session, update, signOut, loadDemo, isComplete: nextStep(session) === HOME }),
-    [session, update, signOut, loadDemo],
+    () => ({ session, update, signOut, loadDemo, enter, isComplete: nextStep(session) === HOME }),
+    [session, update, signOut, loadDemo, enter],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

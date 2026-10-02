@@ -1,20 +1,28 @@
 import type {
+  BlogBlock,
   BlogPost,
   Comment,
-  FeedFilter,
-  Post,
-  PostKind,
+  ConnectionStatus,
+  Connections,
   Conversation,
   DiscoverCard,
   DiscoverFilters,
+  FeedFilter,
   Lounge,
   Match,
+  MediaAsset,
   Member,
   Message,
   MyProfile,
   PendingPhoto,
+  Post,
+  PostKind,
+  ReactionType,
   Report,
+  SearchResults,
   SessionVideo,
+  Story,
+  StoryItem,
 } from '@/types';
 
 export type MentorSegment = 'find' | 'guide';
@@ -22,10 +30,16 @@ export type MentorSegment = 'find' | 'guide';
 export interface NewPost {
   kind: PostKind;
   body: string;
-  imageUrl?: string;
-  media?: { id: string; type: 'image' | 'video' };
+  attachment?: MediaAsset;
   loungeId?: string;
   cigar?: string;
+}
+
+export interface NewBlog {
+  title: string;
+  category: BlogPost['category'];
+  cover?: { mediaId?: string; src?: string };
+  blocks: BlogBlock[];
 }
 
 export interface LoungeQuery {
@@ -44,12 +58,21 @@ export interface DataProvider {
 
   getDiscover(filters: DiscoverFilters): Promise<DiscoverCard[]>;
   getMemberCard(id: string): Promise<DiscoverCard | null>;
-  like(memberId: string): Promise<{ matched: boolean; member: Member }>;
   pass(memberId: string): Promise<void>;
   undoPass(memberId: string): Promise<void>;
   getMentors(segment: MentorSegment, topic?: string): Promise<DiscoverCard[]>;
 
+  // ---- Connections (request -> accept / decline; either side can withdraw) ----
+  /** Send a connection request. If they had already asked you, you are connected straight away. */
+  connect(memberId: string): Promise<{ connected: boolean; member: Member }>;
+  acceptConnection(memberId: string): Promise<{ member: Member }>;
+  declineConnection(memberId: string): Promise<void>;
+  withdrawConnection(memberId: string): Promise<void>;
+  getConnections(): Promise<Connections>;
+  getConnectionStatus(memberId: string): Promise<ConnectionStatus>;
+  /** Connected members (messaging is allowed only between them). */
   getMatches(): Promise<Match[]>;
+
   getConversations(): Promise<Conversation[]>;
   getMessages(conversationId: string): Promise<Message[]>;
   sendMessage(conversationId: string, body: string): Promise<Message>;
@@ -60,19 +83,35 @@ export interface DataProvider {
   getLounges(query: LoungeQuery): Promise<Lounge[]>;
   getSessions(): Promise<SessionVideo[]>;
   getSession(id: string): Promise<SessionVideo | null>;
+
+  // ---- Blog ----
   getPosts(): Promise<BlogPost[]>;
   getPost(slug: string): Promise<BlogPost | null>;
+  createBlog(input: NewBlog): Promise<BlogPost>;
+  deleteBlog(id: string): Promise<void>;
+  getMemberBlogs(memberId: string): Promise<BlogPost[]>;
 
+  // ---- Feed ----
   getFeed(filter: FeedFilter): Promise<Post[]>;
   getFeedPost(id: string): Promise<Post | null>;
   getMemberPosts(memberId: string): Promise<Post[]>;
   createPost(input: NewPost): Promise<Post>;
   deletePost(id: string): Promise<void>;
-  togglePostLike(id: string): Promise<Post>;
+  /** Set your reaction on a post (null removes it). */
+  reactToPost(id: string, reaction: ReactionType | null): Promise<Post>;
   togglePostSave(id: string): Promise<Post>;
   updatePost(id: string, body: string): Promise<Post>;
   getComments(postId: string): Promise<Comment[]>;
-  addComment(postId: string, body: string): Promise<Comment>;
+  addComment(postId: string, body: string, parentId?: string): Promise<Comment>;
+  toggleCommentLike(postId: string, commentId: string): Promise<Comment>;
+
+  // ---- Stories (expire after 24 hours) ----
+  getStories(): Promise<Story[]>;
+  addStory(item: Omit<StoryItem, 'id' | 'createdAt'>): Promise<Story>;
+  markStorySeen(storyId: string): Promise<void>;
+
+  search(q: string): Promise<SearchResults>;
+
   /** Members who chose to appear on the map, at city-level precision. */
   getMapMembers(): Promise<DiscoverCard[]>;
 

@@ -1,5 +1,5 @@
 import { AnimatePresence, m } from 'framer-motion';
-import { EyeOff, LocateFixed, MapPin, MessageCircle, Navigation, Phone, Plus, ShieldCheck, X } from 'lucide-react';
+import { EyeOff, LocateFixed, MapPin, Navigation, Phone, ShieldCheck, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MatchRing, UserTypeBadge, VerifiedBadge } from '@/components/brand/ornaments';
@@ -13,22 +13,19 @@ import { Switch } from '@/components/ui/picker';
 import { MOCK_LOUNGES } from '@/data/mock/content';
 import { cityCoords } from '@/data/mock/geo';
 import { USER_TYPES } from '@/data/options';
-import { useLikeFlow } from '@/features/discover/use-like';
-import { useMapMembers, useMatches, useMe, useSaveMe } from '@/features/queries';
+import { ConnectButton } from '@/features/connections/connect-button';
+import { useMapMembers, useMe, useSaveMe } from '@/features/queries';
 import type { UserType } from '@/types';
 
 export default function MemberMap() {
   const { data: cards, isLoading } = useMapMembers();
   const { data: me } = useMe();
-  const { data: matches } = useMatches();
   const saveMe = useSaveMe();
-  const { like, overlay } = useLikeFlow();
   const [showMembers, setShowMembers] = useState(true);
   const [showLounges, setShowLounges] = useState(true);
   const [types, setTypes] = useState<UserType[]>([]);
   const [selected, setSelected] = useState<string>();
   const [flyTo, setFlyTo] = useState<[number, number]>();
-  const [liked, setLiked] = useState<string[]>([]);
 
   const myPos = cityCoords(me?.city);
   const visibleOnMap = !!me?.visibility.map;
@@ -118,24 +115,7 @@ export default function MemberMap() {
                   <Button variant="secondary" size="sm" asChild>
                     <Link to={`/member/${selMember.member.id}`}>View profile</Link>
                   </Button>
-                  {matches?.some((m) => m.id === selMember.member.id) ? (
-                    <Button size="sm" asChild>
-                      <Link to={`/messages/${selMember.member.id}`}>
-                        <MessageCircle className="size-4" /> Message
-                      </Link>
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      disabled={liked.includes(selMember.member.id)}
-                      onClick={async () => {
-                        setLiked((l) => [...l, selMember.member.id]);
-                        await like(selMember.member.id);
-                      }}
-                    >
-                      <Plus className="size-4" strokeWidth={2.25} /> {liked.includes(selMember.member.id) ? 'Requested' : 'Connect'}
-                    </Button>
-                  )}
+                  <ConnectButton memberId={selMember.member.id} name={selMember.member.name} size="sm" />
                 </div>
               </Card>
             </m.div>
@@ -206,7 +186,6 @@ export default function MemberMap() {
         )}
         <p className="text-center text-xs text-faint">Member locations are approximate (city level). Meet in public places like licensed cigar lounges.</p>
       </PageBody>
-      {overlay}
     </>
   );
 }

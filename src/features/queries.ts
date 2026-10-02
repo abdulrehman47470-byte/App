@@ -1,7 +1,7 @@
 // TanStack Query hooks: the only place components reach the data layer.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api, type LoungeQuery, type MentorSegment, type NewPost } from '@/lib/api';
-import type { DiscoverFilters, FeedFilter, Message, MyProfile, Post } from '@/types';
+import { api, type LoungeQuery, type MentorSegment, type NewBlog, type NewPost } from '@/lib/api';
+import type { Comment, DiscoverFilters, FeedFilter, Message, MyProfile, Post, ReactionType, StoryItem } from '@/types';
 
 export const useMe = () => useQuery({ queryKey: ['me'], queryFn: api.getMe });
 
@@ -28,6 +28,33 @@ export const useMentors = (segment: MentorSegment, topic?: string) =>
   useQuery({ queryKey: ['mentors', segment, topic], queryFn: () => api.getMentors(segment, topic) });
 
 export const useMatches = () => useQuery({ queryKey: ['matches'], queryFn: api.getMatches });
+
+// ---- Connections ----
+export const useConnections = () => useQuery({ queryKey: ['connections'], queryFn: api.getConnections });
+export const useConnectionStatus = (id: string) =>
+  useQuery({ queryKey: ['connection-status', id], queryFn: () => api.getConnectionStatus(id), enabled: !!id });
+
+/** Send / accept / decline / withdraw, keeping every connection-related list in sync. */
+export function useConnectionActions() {
+  const qc = useQueryClient();
+  const sync = () => {
+    for (const key of ['connections', 'connection-status', 'matches', 'conversations', 'mentors', 'map-members']) qc.invalidateQueries({ queryKey: [key] });
+    // Discover's card stack manages itself; just mark it stale for next time.
+    qc.invalidateQueries({ queryKey: ['discover'], refetchType: 'none' });
+  };
+  const setStatus = (id: string, status: string) => qc.setQueryData(['connection-status', id], status);
+  return {
+    connect: useMutation({
+      mutationFn: (id: string) => api.connect(id),
+      onMutate: (id) => setStatus(id, 'sent'),
+      onSuccess: (r, id) => setStatus(id, r.connected ? 'connected' : 'sent'),
+      onSettled: sync,
+    }),
+    accept: useMutation({ mutationFn: (id: string) => api.acceptConnection(id), onMutate: (id) => setStatus(id, 'connected'), onSettled: sync }),
+    decline: useMutation({ mutationFn: (id: string) => api.declineConnection(id), onMutate: (id) => setStatus(id, 'none'), onSettled: sync }),
+    withdraw: useMutation({ mutationFn: (id: string) => api.withdrawConnection(id), onMutate: (id) => setStatus(id, 'none'), onSettled: sync }),
+  };
+}
 export const useConversations = () => useQuery({ queryKey: ['conversations'], queryFn: api.getConversations });
 export const useMessages = (id: string) => useQuery({ queryKey: ['messages', id], queryFn: () => api.getMessages(id) });
 
@@ -69,6 +96,30 @@ export const useSessions = () => useQuery({ queryKey: ['sessions'], queryFn: api
 export const useSessionVideo = (id: string) => useQuery({ queryKey: ['session', id], queryFn: () => api.getSession(id) });
 export const usePosts = () => useQuery({ queryKey: ['posts'], queryFn: api.getPosts });
 export const usePost = (slug: string) => useQuery({ queryKey: ['post', slug], queryFn: () => api.getPost(slug) });
+export const useMemberBlogs = (memberId: string) => useQuery({ queryKey: ['posts', 'member', memberId], queryFn: () => api.getMemberBlogs(memberId) });
+
+export function useBlogActions() {
+  const qc = useQueryClient();
+  const refresh = () => qc.invalidateQueries({ queryKey: ['posts'] });
+  return {
+    create: useMutation({ mutationFn: (b: NewBlog) => api.createBlog(b), onSuccess: refresh }),
+    remove: useMutation({ mutationFn: (id: string) => api.deleteBlog(id), onSuccess: refresh }),
+  };
+}
+
+// ---- Search ----
+export const useSearch = (q: string) =>
+  useQuery({ queryKey: ['search', q], queryFn: () => api.search(q), enabled: q.trim().length > 0, placeholderData: (prev) => prev });
+
+// ---- Stories ----
+export const useStories = () => useQuery({ queryKey: ['stories'], queryFn: api.getStories });
+export function useStoryActions() {
+  const qc = useQueryClient();
+  return {
+    add: useMutation({ mutationFn: (item: Omit<StoryItem, 'id' | 'createdAt'>) => api.addStory(item), onSuccess: () => qc.invalidateQueries({ queryKey: ['stories'] }) }),
+    seen: useMutation({ mutationFn: (id: string) => api.markStorySeen(id), onSuccess: () => qc.invalidateQueries({ queryKey: ['stories'] }) }),
+  };
+}
 
 export const usePendingPhotos = () => useQuery({ queryKey: ['admin', 'photos'], queryFn: api.admin.getPendingPhotos });
 export const useReports = () => useQuery({ queryKey: ['admin', 'reports'], queryFn: api.admin.getReports });
@@ -133,17 +184,31 @@ export function useFeedActions() {
       onMutate: (id) => qc.setQueriesData<Post[]>({ queryKey: ['feed'] }, (list) => list?.filter((p) => p.id !== id)),
       onSettled: refresh,
     }),
-    like: useMutation({
-      mutationFn: (id: string) => api.togglePostLike(id),
-      onMutate: (id) => patchPost(id, (p) => ({ ...p, likedByMe: !p.likedByMe, likes: p.likes + (p.likedByMe ? -1 : 1) })),
+    react: useMutation({
+      mutationFn: ({ id, reaction }: { id: string; reaction: ReactionType | null }) => api.reactToPost(id, reaction),
+      // Optimistic: the reaction shows on the post instantly.
+      onMutate: ({ id, reaction }) =>
+        patchPost(id, (p) => {
+          const r = { ...p.reactions };
+          if (p.myReaction) r[p.myReaction] = Math.max(0, (r[p.myReaction] ?? 1) - 1);
+          if (reaction) r[reaction] = (r[reaction] ?? 0) + 1;
+          return { ...p, reactions: r, myReaction: reaction ?? undefined };
+        }),
       onError: refresh,
     }),
     comment: useMutation({
-      mutationFn: ({ postId, body }: { postId: string; body: string }) => api.addComment(postId, body),
-      onSuccess: (_c, { postId }) => {
-        qc.invalidateQueries({ queryKey: ['comments', postId] });
+      mutationFn: ({ postId, body, parentId }: { postId: string; body: string; parentId?: string }) => api.addComment(postId, body, parentId),
+      onSuccess: (c, { postId }) => {
+        qc.setQueryData<Comment[]>(['comments', postId], (list) => (list ? [...list, c] : [c]));
         patchPost(postId, (p) => ({ ...p, commentCount: p.commentCount + 1 }));
       },
+    }),
+    likeComment: useMutation({
+      mutationFn: ({ postId, commentId }: { postId: string; commentId: string }) => api.toggleCommentLike(postId, commentId),
+      onMutate: ({ postId, commentId }) =>
+        qc.setQueryData<Comment[]>(['comments', postId], (list) =>
+          list?.map((c) => (c.id === commentId ? { ...c, likedByMe: !c.likedByMe, likes: c.likes + (c.likedByMe ? -1 : 1) } : c)),
+        ),
     }),
   };
 }

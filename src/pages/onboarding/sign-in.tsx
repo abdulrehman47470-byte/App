@@ -1,138 +1,195 @@
-import { Eye, EyeOff } from 'lucide-react';
+import { ArrowRight, ChevronLeft, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { LogoMark } from '@/components/brand/logo';
 import { TrustNote } from '@/components/brand/ornaments';
 import { Frame } from '@/components/layout/frame';
 import { BackButton } from '@/components/layout/page';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/field';
-import { GoogleG, GoogleSignInMock } from '@/features/auth/google-signin-mock';
-import { useSaveMe } from '@/features/queries';
-import { nextStep, useSession } from '@/lib/session';
+import { DEMO_ENABLED } from '@/config/features';
+import { AppleLogo } from '@/features/auth/apple-signin-mock';
+import { GoogleG } from '@/features/auth/google-signin-mock';
+import { useSignIn } from '@/features/auth/use-social-sign-in';
+import { DEMO_EMAIL, findAccount, isEmail, nameFromEmail, normalizeEmail } from '@/lib/accounts';
+import { cn } from '@/lib/utils';
 
-function AppleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-5" aria-hidden fill="currentColor">
-      <path d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.8 1.2 1.8 2.6 3.1 2.6 1.3-.1 1.7-.8 3.3-.8 1.5 0 1.9.8 3.3.8 1.4 0 2.2-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9-.1 0-2.5-1-2.5-4.1zM13.9 5c.7-.9 1.2-2 1-3.2-1 0-2.3.7-3 1.6-.7.8-1.3 2-1.1 3.1 1.2.1 2.4-.6 3.1-1.5z" />
-    </svg>
-  );
+type Step = 'email' | 'create';
+
+function strength(p: string) {
+  let s = 0;
+  if (p.length >= 8) s++;
+  if (p.length >= 12) s++;
+  if (/[A-Z]/.test(p) && /[a-z]/.test(p)) s++;
+  if (/\d/.test(p) && /[^A-Za-z0-9]/.test(p)) s++;
+  return s;
 }
+const STRENGTH = ['Too short', 'Fair', 'Good', 'Strong', 'Very strong'];
 
+/**
+ * Continue with Email. Email first: a returning member goes straight in; a new email creates an
+ * account (name + password). Mock auth: Phase 2 swaps in Supabase Auth with email verification.
+ */
 export default function SignIn() {
-  const [params] = useSearchParams();
-  const signup = params.get('mode') === 'signup';
-  const { session, update } = useSession();
-  const saveMe = useSaveMe();
-  const navigate = useNavigate();
+  const auth = useSignIn();
+  const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
   const [show, setShow] = useState(false);
   const [error, setError] = useState<string>();
-  const [googleOpen, setGoogleOpen] = useState(false);
+  const [checking, setChecking] = useState(false);
 
-  const finish = async (method: 'google' | 'apple' | 'email', displayName: string) => {
-    // Mock: Phase 2 replaces this with Supabase Auth (OAuth + email/password with verification).
-    await saveMe.mutateAsync({ name: displayName });
-    const next = { ...session, signedIn: true, method };
-    update({ signedIn: true, method });
-    navigate(nextStep(next));
-  };
-
-  const onSubmit = (e: FormEvent) => {
+  const submitEmail = async (e: FormEvent) => {
     e.preventDefault();
-    if (!/^\S+@\S+\.\S+$/.test(email)) return setError('Enter a valid email address.');
-    if (password.length < 8) return setError('Password must be at least 8 characters.');
-    if (signup && !name.trim()) return setError('Tell us your name.');
+    if (!isEmail(email)) return setError('Enter a valid email address.');
     setError(undefined);
-    finish('email', name.trim() || email.split('@')[0]);
+    setChecking(true);
+    await new Promise((r) => setTimeout(r, 450)); // feels like a real account lookup
+    const account = findAccount(email);
+    setChecking(false);
+    if (account) return auth.finish({ name: account.name, email: account.email }, account.method);
+    setName(nameFromEmail(email));
+    setStep('create');
   };
+
+  const submitCreate = (e: FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return setError('Tell us your name.');
+    if (password.length < 8) return setError('Use at least 8 characters for your password.');
+    setError(undefined);
+    auth.finish({ name: name.trim(), email: normalizeEmail(email) }, 'email');
+  };
+
+  const level = strength(password);
 
   return (
     <Frame>
-      <div className="flex min-h-dvh flex-col px-6 pb-8 pt-[max(12px,env(safe-area-inset-top))]">
+      <div className="welcome-bg flex min-h-dvh flex-col px-6 pb-8 pt-[max(12px,env(safe-area-inset-top))]">
         <div className="flex min-h-11 items-center">
-          <BackButton to="/" />
-        </div>
-        <div className="mt-4 text-center">
-          <LogoMark className="mx-auto size-12" />
-          <h1 className="mt-4 font-serif text-[32px] leading-tight text-text">{signup ? 'Join the lounge' : 'Welcome back'}</h1>
-          <p className="mt-1 text-sm text-muted">{signup ? 'Create your members-only account' : 'Sign in to your account'}</p>
-        </div>
-
-        <div className="mt-8 space-y-3">
-          <Button variant="secondary" size="lg" block onClick={() => setGoogleOpen(true)}>
-            <GoogleG /> Continue with Google
-          </Button>
-          <Button variant="secondary" size="lg" block onClick={() => finish('apple', 'Apple Member')}>
-            <AppleIcon /> Continue with Apple
-          </Button>
-        </div>
-
-        <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-faint">
-          <span className="h-px flex-1 bg-line" /> or use email <span className="h-px flex-1 bg-line" />
-        </div>
-
-        <form onSubmit={onSubmit} className="space-y-4" noValidate>
-          {signup && (
-            <Field label="Name">
-              {(id) => <Input id={id} value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" placeholder="Your name" />}
-            </Field>
+          {step === 'create' ? (
+            <button type="button" onClick={() => (setStep('email'), setError(undefined))} aria-label="Back" className="-ml-2 grid size-11 place-items-center rounded-full text-text transition-colors hover:bg-surface-2">
+              <ChevronLeft className="size-6" strokeWidth={1.5} />
+            </button>
+          ) : (
+            <BackButton to="/" />
           )}
-          <Field label="Email address">
-            {(id) => (
-              <Input id={id} type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" placeholder="you@example.com" />
-            )}
-          </Field>
-          <Field
-            label="Password"
-            error={error}
-            aside={
-              !signup && (
-                <button type="button" className="text-xs text-gold hover:underline" onClick={() => setError('Password reset arrives in Phase 2.')}>
-                  Forgot password?
-                </button>
-              )
-            }
-          >
-            {(id, d) => (
-              <div className="relative">
-                <Input
-                  id={id}
-                  aria-describedby={d}
-                  type={show ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete={signup ? 'new-password' : 'current-password'}
-                  placeholder="At least 8 characters"
-                  className="pr-12"
-                />
+        </div>
+        <div className="mx-auto w-full max-w-[380px] flex-1">
+          <div className="mt-4 text-center">
+            <LogoMark className="mx-auto size-14" />
+            <h1 className="mt-4 font-serif text-[30px] leading-tight text-text">{step === 'email' ? 'Continue with email' : 'Create your account'}</h1>
+            <p className="mt-1 text-sm text-muted">
+              {step === 'email' ? 'Members sign in, new members create an account.' : (
+                <>
+                  for <strong className="font-semibold text-text">{normalizeEmail(email)}</strong>{' '}
+                  <button type="button" className="font-medium text-gold hover:underline" onClick={() => (setStep('email'), setError(undefined))}>
+                    Change
+                  </button>
+                </>
+              )}
+            </p>
+          </div>
+
+          {step === 'email' ? (
+            <form key="email" onSubmit={submitEmail} className="page-enter mt-8 space-y-4" noValidate>
+              <Field label="Email address" error={error}>
+                {(id, d) => (
+                  <Input
+                    id={id}
+                    aria-describedby={d}
+                    type="email"
+                    inputMode="email"
+                    autoFocus
+                    value={email}
+                    onChange={(e) => (setEmail(e.target.value), setError(undefined))}
+                    autoComplete="email"
+                    placeholder="you@example.com"
+                  />
+                )}
+              </Field>
+              <Button type="submit" size="lg" block disabled={checking || auth.busy}>
+                {checking ? <Loader2 className="size-5 animate-spin" /> : <ArrowRight className="size-5" />} {checking ? 'Checking…' : 'Continue'}
+              </Button>
+              {DEMO_ENABLED && (
+                <p className="text-center text-xs text-faint">
+                  Returning member demo:{' '}
+                  <button type="button" onClick={() => (setEmail(DEMO_EMAIL), setError(undefined))} className="font-medium text-gold underline decoration-dotted underline-offset-4">
+                    {DEMO_EMAIL}
+                  </button>
+                </p>
+              )}
+            </form>
+          ) : (
+            <form key="create" onSubmit={submitCreate} className="page-enter mt-8 space-y-4" noValidate>
+              <Field label="Your name">
+                {(id) => <Input id={id} value={name} onChange={(e) => (setName(e.target.value), setError(undefined))} autoComplete="name" autoFocus maxLength={60} />}
+              </Field>
+              <Field label="Create a password" error={error}>
+                {(id, d) => (
+                  <div>
+                    <div className="relative">
+                      <Input
+                        id={id}
+                        aria-describedby={d}
+                        type={show ? 'text' : 'password'}
+                        value={password}
+                        onChange={(e) => (setPassword(e.target.value), setError(undefined))}
+                        autoComplete="new-password"
+                        placeholder="At least 8 characters"
+                        className="pr-12"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShow((s) => !s)}
+                        aria-label={show ? 'Hide password' : 'Show password'}
+                        className="absolute right-1 top-1/2 grid size-10 -translate-y-1/2 place-items-center text-muted hover:text-text"
+                      >
+                        {show ? <EyeOff className="size-5" strokeWidth={1.5} /> : <Eye className="size-5" strokeWidth={1.5} />}
+                      </button>
+                    </div>
+                    {password && (
+                      <div className="mt-2 flex items-center gap-2" aria-live="polite">
+                        <div className="grid flex-1 grid-cols-4 gap-1">
+                          {[1, 2, 3, 4].map((i) => (
+                            <span key={i} className={cn('h-1 rounded-full transition-colors', i <= level ? (level < 2 ? 'bg-danger' : level < 3 ? 'bg-warning' : 'bg-success') : 'bg-line')} />
+                          ))}
+                        </div>
+                        <span className="w-20 text-right text-[11px] text-muted">{STRENGTH[level]}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Field>
+              <Button type="submit" size="lg" block disabled={auth.busy}>
+                Create account
+              </Button>
+              <p className="text-center text-[11px] leading-relaxed text-faint">Next you’ll confirm your age and verify your identity. Daily Stogie is for adults 21+.</p>
+            </form>
+          )}
+
+          {step === 'email' && (
+            <>
+              <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-faint">
+                <span className="h-px flex-1 bg-line" /> or <span className="h-px flex-1 bg-line" />
+              </div>
+              <div className="space-y-3">
                 <button
                   type="button"
-                  onClick={() => setShow((s) => !s)}
-                  aria-label={show ? 'Hide password' : 'Show password'}
-                  className="absolute right-1 top-1/2 grid size-10 -translate-y-1/2 place-items-center text-muted hover:text-text"
+                  onClick={auth.openGoogle}
+                  className="flex h-12 w-full items-center justify-center gap-3 rounded-[14px] border border-line-strong bg-white text-[15px] font-semibold text-text transition-colors hover:bg-surface-2"
                 >
-                  {show ? <EyeOff className="size-5" strokeWidth={1.5} /> : <Eye className="size-5" strokeWidth={1.5} />}
+                  <GoogleG /> Continue with Google
+                </button>
+                <button type="button" onClick={auth.openApple} className="flex h-12 w-full items-center justify-center gap-3 rounded-[14px] bg-black text-[15px] font-semibold text-white transition-opacity hover:opacity-90">
+                  <AppleLogo /> Continue with Apple
                 </button>
               </div>
-            )}
-          </Field>
-          <Button type="submit" size="lg" block>
-            {signup ? 'Create account' : 'Sign in'}
-          </Button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-muted">
-          {signup ? 'Already a member? ' : "Don't have an account? "}
-          <Link to={signup ? '/signin' : '/signin?mode=signup'} className="font-semibold text-gold hover:underline">
-            {signup ? 'Log in' : 'Sign up'}
-          </Link>
-        </p>
-        <TrustNote className="mt-auto pt-8" />
+            </>
+          )}
+        </div>
+        <TrustNote className="pt-8" />
       </div>
-      <GoogleSignInMock open={googleOpen} onOpenChange={setGoogleOpen} onSignedIn={(a) => finish('google', a.name)} />
+      {auth.ui}
     </Frame>
   );
 }

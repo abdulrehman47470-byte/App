@@ -2,6 +2,7 @@ import { animate, AnimatePresence, m, useMotionValue, useTransform, type MotionV
 import { Plus, RotateCcw, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { RequestsIndicator } from '@/features/connections/requests-indicator';
 import { DiscoverTabs } from '@/features/discover/discover-tabs';
 import { EmptyState } from '@/components/brand/empty-state';
 import { PageHeader } from '@/components/layout/page';
@@ -9,7 +10,7 @@ import { Skeleton } from '@/components/ui/misc';
 import { DEFAULT_FILTERS, FiltersButton } from '@/features/discover/filter-sheet';
 import { MemberCardFace } from '@/features/discover/member-card';
 import { useLikeFlow } from '@/features/discover/use-like';
-import { useDiscover, useMe } from '@/features/queries';
+import { useConnections, useDiscover, useMe } from '@/features/queries';
 import { SafetySheet } from '@/features/safety/safety-sheet';
 import { api } from '@/lib/api';
 import { STORAGE_KEYS, storage } from '@/lib/storage';
@@ -23,7 +24,9 @@ export default function Discover() {
   const { data, isLoading } = useDiscover(filters);
   const { data: me } = useMe();
   const { like, overlay } = useLikeFlow();
+  const { data: connections } = useConnections();
   const navigate = useNavigate();
+  const askedMe = new Set(connections?.received.map((r) => r.member.id));
 
   const [stack, setStack] = useState<DiscoverCard[]>([]);
   const [lastPassed, setLastPassed] = useState<DiscoverCard | null>(null);
@@ -98,7 +101,10 @@ export default function Discover() {
         large
         subtitle={me?.city ? `Near ${me.city}` : undefined}
         action={
-          <FiltersButton value={filters} onApply={applyFilters} />
+          <div className="flex gap-2">
+            <RequestsIndicator />
+            <FiltersButton value={filters} onApply={applyFilters} />
+          </div>
         }
       />
       <DiscoverTabs />
@@ -124,7 +130,7 @@ export default function Discover() {
           ) : (
             <AnimatePresence initial={false}>
               {stack.slice(0, 3).map((c, i) => (i === 0 ? (
-                <TopCard key={c.member.id} card={c} x={x} onCommit={commit} onOpen={() => navigate(`/member/${c.member.id}`)} onMore={() => setSafetyFor(c)} />
+                <TopCard key={c.member.id} card={c} wantsToConnect={askedMe.has(c.member.id)} x={x} onCommit={commit} onOpen={() => navigate(`/member/${c.member.id}`)} onMore={() => setSafetyFor(c)} />
               ) : (
                 <BackCard key={c.member.id} card={c} depth={i} x={x} />
               ))).reverse()}
@@ -162,12 +168,14 @@ export default function Discover() {
 
 function TopCard({
   card,
+  wantsToConnect,
   x,
   onCommit,
   onOpen,
   onMore,
 }: {
   card: DiscoverCard;
+  wantsToConnect?: boolean;
   x: MotionValue<number>;
   onCommit: (d: 'like' | 'pass') => void;
   onOpen: () => void;
@@ -209,9 +217,14 @@ function TopCard({
       exit={{ opacity: 0, transition: { duration: 0.15 } }}
       role="group"
       aria-roledescription="member card"
-      aria-label={`${card.member.name}, ${card.member.age}, ${card.matchPct}% match. Tap to view profile.`}
+      aria-label={`${card.member.name}, ${card.member.age}, ${card.matchPct}% match.${wantsToConnect ? ' Wants to connect with you.' : ''} Tap to view profile.`}
     >
       <MemberCardFace card={card} onMore={onMore} />
+      {wantsToConnect && (
+        <span className="pointer-events-none absolute left-1/2 top-4 -translate-x-1/2 whitespace-nowrap rounded-full bg-brand-gold px-3.5 py-1.5 text-xs font-bold text-gold-ink shadow-[var(--shadow-glow)]">
+          Wants to connect with you
+        </span>
+      )}
       <m.div style={{ opacity: likeOpacity }} className="pointer-events-none absolute left-6 top-24 -rotate-12 rounded-[10px] border-4 border-success px-3 py-1 font-serif text-3xl font-bold tracking-widest text-success" aria-hidden>
         CONNECT
       </m.div>

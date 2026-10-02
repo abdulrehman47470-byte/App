@@ -10,7 +10,7 @@ export const MemberMap = lazyPage(pages.map);
 export const Messages = lazyPage(pages.messages);
 export const MyProfile = lazyPage(pages.myProfile);
 export const Mentors = lazyPage(pages.mentors);
-export const Matches = lazyPage(pages.matches);
+export const Connections = lazyPage(pages.connections);
 
 export const TAB_ELEMENTS: Record<string, ReactNode> = {
   '/feed': <Feed />,
@@ -19,5 +19,5 @@ export const TAB_ELEMENTS: Record<string, ReactNode> = {
   '/messages': <Messages />,
   '/profile': <MyProfile />,
   '/mentors': <Mentors />,
-  '/matches': <Matches />,
+  '/connections': <Connections />,
 };

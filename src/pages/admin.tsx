@@ -13,7 +13,7 @@ import { useToast } from '@/components/ui/toast';
 import { MOCK_POSTS, MOCK_SESSIONS } from '@/data/mock/content';
 import { useAdminActions, useAdminUsers, usePendingPhotos, useReports } from '@/features/queries';
 import { useSession } from '@/lib/session';
-import { timeAgo } from '@/lib/utils';
+import { ago } from '@/lib/utils';
 
 type Tab = 'photos' | 'reports' | 'users' | 'sessions' | 'blog';
 
@@ -82,7 +82,7 @@ function PhotoReview() {
               {p.member.name}, {p.member.age}
             </p>
             <p className="text-xs text-muted">
-              {p.member.city}, {p.member.state} · submitted {timeAgo(p.submittedAt)} ago
+              {p.member.city}, {p.member.state} · submitted {ago(p.submittedAt)}
             </p>
             <p className="mt-2 text-xs">{p.member.photoVerified ? <span className="text-success">Selfie check passed</span> : <span className="text-warning">Selfie check failed or skipped: review carefully</span>}</p>
             <div className="mt-4 grid grid-cols-2 gap-2">
@@ -115,7 +115,7 @@ function Reports() {
             <div className="min-w-40 flex-1">
               <p className="font-medium text-text">{r.reported.name}</p>
               <p className="text-sm text-muted">
-                {r.reason} · {timeAgo(r.createdAt)} ago
+                {r.reason} · {ago(r.createdAt)}
               </p>
             </div>
             <Badge tone={tone[r.status]}>{r.status}</Badge>

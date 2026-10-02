@@ -78,7 +78,7 @@ export default function VerifyAge() {
         <Card className="mt-6 flex items-start gap-3 p-4">
           <ScanFace className="mt-0.5 size-6 shrink-0 text-gold" strokeWidth={1.5} />
           <div>
-            <p className="text-sm font-medium text-text">Next: a quick photo check</p>
+            <p className="text-sm font-medium text-text">Next: verify your identity</p>
             <p className="mt-0.5 text-xs text-muted">A live selfie confirms your profile photo is really you.</p>
           </div>
         </Card>

@@ -25,7 +25,7 @@ export default function Messages() {
           <section aria-label="New connections">
             <div className="mb-2 flex items-center justify-between">
               <h2 className="micro-label">New connections</h2>
-              <Link to="/matches" className="text-xs font-medium text-gold hover:underline">
+              <Link to="/connections" className="text-xs font-medium text-gold hover:underline">
                 See all connections
               </Link>
             </div>
@@ -53,7 +53,7 @@ export default function Messages() {
             body="Connect with a member, then say hello. Only connected members can message each other."
             action={
               <Button variant="outline" asChild>
-                <Link to="/matches">See your connections</Link>
+                <Link to="/connections">See your connections</Link>
               </Button>
             }
           />

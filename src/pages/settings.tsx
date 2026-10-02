@@ -198,7 +198,7 @@ export function DeleteAccountPage() {
             disabled={confirm !== 'DELETE'}
             onClick={() => {
               // Phase 2: edge function deletes profile, storage objects, messages and match data.
-              signOut();
+              signOut({ forget: true });
               qc.clear();
               navigate('/', { replace: true });
             }}
