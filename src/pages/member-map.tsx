@@ -1,5 +1,5 @@
 import { AnimatePresence, m } from 'framer-motion';
-import { EyeOff, Heart, LocateFixed, MapPin, MessageCircle, Navigation, Phone, ShieldCheck, X } from 'lucide-react';
+import { EyeOff, LocateFixed, MapPin, MessageCircle, Navigation, Phone, Plus, ShieldCheck, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MatchRing, UserTypeBadge, VerifiedBadge } from '@/components/brand/ornaments';
@@ -40,7 +40,7 @@ export default function MemberMap() {
 
   const markers = useMemo<MapMarker[]>(() => {
     const out: MapMarker[] = [];
-    if (showMembers) for (const c of members) out.push({ id: c.member.id, lat: c.member.lat, lng: c.member.lng, kind: 'member', label: c.member.name, hue: c.member.photoHue });
+    if (showMembers) for (const c of members) out.push({ id: c.member.id, lat: c.member.lat, lng: c.member.lng, kind: 'member', label: c.member.name, hue: c.member.photoHue, photoUrl: c.member.photo });
     if (showLounges) for (const l of MOCK_LOUNGES) out.push({ id: l.id, lat: l.lat, lng: l.lng, kind: 'lounge', label: l.name });
     if (myPos && visibleOnMap) out.push({ id: 'me', lat: myPos[0], lng: myPos[1], kind: 'me', label: 'You (approximate)' });
     return out;
@@ -101,7 +101,7 @@ export default function MemberMap() {
               <Card className="relative p-4">
                 <CloseButton onClick={() => setSelected(undefined)} />
                 <div className="flex items-center gap-4 pr-8">
-                  <Avatar name={selMember.member.name} hue={selMember.member.photoHue} size={64} ring />
+                  <Avatar name={selMember.member.name} hue={selMember.member.photoHue} src={selMember.member.photo} size={64} ring />
                   <div className="min-w-0 flex-1">
                     <p className="flex items-center gap-1.5 font-serif text-xl text-text">
                       {selMember.member.name}, {selMember.member.age}
@@ -133,7 +133,7 @@ export default function MemberMap() {
                         await like(selMember.member.id);
                       }}
                     >
-                      <Heart className="size-4 fill-current" /> {liked.includes(selMember.member.id) ? 'Liked' : 'Like'}
+                      <Plus className="size-4" strokeWidth={2.25} /> {liked.includes(selMember.member.id) ? 'Requested' : 'Connect'}
                     </Button>
                   )}
                 </div>
@@ -187,7 +187,7 @@ export default function MemberMap() {
               {members.map(({ member: m }) => (
                 <li key={m.id}>
                   <button type="button" onClick={() => focus(m.id, m.lat, m.lng)} className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-surface-2">
-                    <Avatar name={m.name} hue={m.photoHue} size={44} ring={selected === m.id} />
+                    <Avatar name={m.name} hue={m.photoHue} src={m.photo} size={44} ring={selected === m.id} />
                     <div className="min-w-0 flex-1">
                       <p className="flex items-center gap-1.5 text-[15px] font-medium text-text">
                         {m.name} {m.photoVerified && <VerifiedBadge className="size-4" />}

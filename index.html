@@ -3,14 +3,111 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0d0a08" />
+    <meta name="theme-color" content="#ffffff" />
     <meta name="description" content="Daily Stogie: a members-only network for adult (21+) cigar enthusiasts." />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="preload" as="image" type="image/webp" href="/logo-mark.webp" imagesrcset="/logo-mark.webp 1x, /logo-mark@2x.webp 2x" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>Daily Stogie</title>
+    <!-- Splash screen: shown instantly (before any app code downloads) and faded out once the app is ready. -->
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #ffffff;
+      }
+      #splash {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 22px;
+        background:
+          radial-gradient(55% 34% at 50% 42%, rgba(243, 170, 59, 0.22), transparent 70%),
+          linear-gradient(180deg, #ffffff 0%, #fffaf2 60%, #fbf1e2 100%);
+        transition:
+          opacity 0.35s ease,
+          visibility 0.35s ease;
+      }
+      #splash.is-hidden {
+        opacity: 0;
+        visibility: hidden;
+      }
+      .splash-medal {
+        display: grid;
+        place-items: center;
+        width: 148px;
+        height: 148px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 50% 38%, #f6eddc 0%, #ecdcbc 60%, #e0c89c 100%);
+        box-shadow:
+          0 0 0 2px #cc8229,
+          0 0 0 7px rgba(243, 170, 59, 0.18),
+          0 14px 34px -10px rgba(59, 36, 18, 0.35);
+        animation: splash-breathe 1.8s ease-in-out infinite;
+      }
+      .splash-medal img {
+        width: 82%;
+        height: 82%;
+        object-fit: contain;
+      }
+      .splash-word {
+        font:
+          600 30px/0.95 'Playfair Display',
+          Georgia,
+          serif;
+        letter-spacing: 0.06em;
+        text-align: center;
+        text-transform: uppercase;
+        color: #9f5516;
+      }
+      .splash-bar {
+        position: relative;
+        width: 112px;
+        height: 3px;
+        overflow: hidden;
+        border-radius: 99px;
+        background: rgba(159, 85, 22, 0.15);
+      }
+      .splash-bar::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        width: 40%;
+        border-radius: 99px;
+        background: linear-gradient(90deg, #f3aa3b, #cc8229);
+        animation: splash-slide 1.1s ease-in-out infinite;
+      }
+      @keyframes splash-breathe {
+        50% {
+          transform: scale(1.04);
+        }
+      }
+      @keyframes splash-slide {
+        from {
+          transform: translateX(-100%);
+        }
+        to {
+          transform: translateX(260%);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .splash-medal,
+        .splash-bar::after {
+          animation: none;
+        }
+      }
+    </style>
   </head>
   <body>
+    <div id="splash" role="status" aria-label="Loading Daily Stogie">
+      <div class="splash-medal"><img src="/logo-mark.webp" srcset="/logo-mark.webp 1x, /logo-mark@2x.webp 2x" alt="" width="160" height="160" /></div>
+      <div class="splash-word">Daily<br />Stogie</div>
+      <div class="splash-bar"></div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

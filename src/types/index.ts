@@ -40,6 +40,8 @@ export interface Member {
   userType: UserType;
   bio: string;
   photoHue: number;
+  /** Profile photo URL. Members cannot use the app without one. */
+  photo?: string;
   photoVerified: boolean;
   preferences: Preferences;
   about: AboutYou;

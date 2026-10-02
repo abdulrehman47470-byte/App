@@ -48,6 +48,9 @@ await page.evaluate(() => {
   const s = JSON.parse(localStorage.getItem('ds.session'));
   Object.assign(s, { photoCheck: 'verified', biometricConsent: true, ethicsAgreed: true, photoUploaded: true, plan: 'yearly' });
   localStorage.setItem('ds.session', JSON.stringify(s));
+  const me = JSON.parse(localStorage.getItem('ds.me') || '{}');
+  me.photoUrl = '/members/me.webp'; // a photo is required to continue
+  localStorage.setItem('ds.me', JSON.stringify(me));
 });
 await page.goto(BASE + '/setup/1');
 await page.getByLabel('City', { exact: true }).waitFor();

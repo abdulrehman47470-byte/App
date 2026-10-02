@@ -1,4 +1,4 @@
-import { Ban, ChevronLeft, Flag, Heart, MessageCircle, MoreHorizontal, X } from 'lucide-react';
+import { Ban, ChevronLeft, Flag, MessageCircle, MoreHorizontal, Plus, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { EmptyState } from '@/components/brand/empty-state';
@@ -57,7 +57,7 @@ export default function MemberProfile() {
   return (
     <article>
       <div className="relative aspect-[4/5] max-h-[62dvh] w-full overflow-hidden">
-        <PortraitArt name={m.name} hue={m.photoHue} />
+        <PortraitArt name={m.name} hue={m.photoHue} src={m.photo} />
         <div className="photo-fade absolute inset-0" aria-hidden />
         <div className="absolute inset-x-0 top-0 flex items-center justify-between p-3 pt-[max(12px,env(safe-area-inset-top))]">
           <button type="button" onClick={() => navigate(-1)} aria-label="Back" className="grid size-11 place-items-center rounded-full bg-bg/80">
@@ -70,12 +70,12 @@ export default function MemberProfile() {
         <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-5">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className="font-serif text-[36px] leading-none text-text">{m.name}</h1>
-              <span className="text-2xl font-light text-text/85">{m.age}</span>
+              <h1 className="font-serif text-[36px] leading-none text-on-photo">{m.name}</h1>
+              <span className="text-2xl font-light text-on-photo/85">{m.age}</span>
               {m.photoVerified && <VerifiedBadge className="size-6" />}
             </div>
-            {m.pronouns && <p className="mt-1 text-sm text-muted">{m.pronouns}</p>}
-            <p className="mt-2 text-[15px] text-text/90">{headline}</p>
+            {m.pronouns && <p className="mt-1 text-sm text-on-photo/80">{m.pronouns}</p>}
+            <p className="mt-2 text-[15px] text-on-photo/90">{headline}</p>
           </div>
           <MatchRing pct={card.matchPct} size={64} />
         </div>
@@ -111,7 +111,7 @@ export default function MemberProfile() {
                 await like(m.id);
               }}
             >
-              <Heart className="size-5 fill-current" /> {liked ? 'Liked' : 'Like'}
+              <Plus className="size-5" strokeWidth={2.25} /> {liked ? 'Requested' : 'Connect'}
             </Button>
           </div>
         )}

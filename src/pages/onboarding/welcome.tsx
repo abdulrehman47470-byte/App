@@ -33,7 +33,7 @@ export default function Welcome() {
 
         {/* Everything centered in the middle of the page */}
         <main className="rise relative z-10 flex w-full max-w-[340px] flex-col items-center text-center">
-          <LogoMark className="size-32" priority />
+          <LogoMark className="size-40" priority />
           <Wordmark className="mt-6 text-[40px]" />
           <p className="mt-4 font-serif text-lg italic text-text/90">Find your circle. Share the smoke.</p>
           <CigarBand label="Members only" className="mt-6 w-56" />

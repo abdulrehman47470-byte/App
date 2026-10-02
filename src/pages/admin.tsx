@@ -75,7 +75,7 @@ function PhotoReview() {
       {data.map((p) => (
         <Card key={p.id} className="overflow-hidden">
           <div className="aspect-[4/3]">
-            <PortraitArt name={p.member.name} hue={p.member.photoHue} />
+            <PortraitArt name={p.member.name} hue={p.member.photoHue} src={p.member.photo} />
           </div>
           <div className="p-4">
             <p className="font-medium text-text">
@@ -111,7 +111,7 @@ function Reports() {
       {data.map((r) => (
         <li key={r.id}>
           <Card className="flex flex-wrap items-center gap-4 p-4">
-            <Avatar name={r.reported.name} hue={r.reported.photoHue} size={48} />
+            <Avatar name={r.reported.name} hue={r.reported.photoHue} src={r.reported.photo} size={48} />
             <div className="min-w-40 flex-1">
               <p className="font-medium text-text">{r.reported.name}</p>
               <p className="text-sm text-muted">
@@ -167,7 +167,7 @@ function Users() {
                 <tr key={m.id}>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <Avatar name={m.name} hue={m.photoHue} size={36} />
+                      <Avatar name={m.name} hue={m.photoHue} src={m.photo} size={36} />
                       <span className="text-text">
                         {m.name}, {m.age}
                       </span>

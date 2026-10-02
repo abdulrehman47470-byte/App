@@ -13,6 +13,7 @@ import {
   USER_TYPES,
 } from '@/data/options';
 import { ageFromDob, MIN_AGE } from '@/lib/utils';
+import { PhotoEditor } from './photo-editor';
 import type { MyProfile } from '@/types';
 
 export const ZIP_PATTERNS: Record<string, RegExp> = {
@@ -22,6 +23,7 @@ export const ZIP_PATTERNS: Record<string, RegExp> = {
 
 export function demographicsErrors(d: MyProfile) {
   const e: Partial<Record<keyof MyProfile, string>> = {};
+  if (!d.photoUrl) e.photoUrl = 'Add a profile photo to continue.';
   if (!d.name.trim()) e.name = 'Name is required.';
   if (!d.userType) e.userType = 'Choose your cigar knowledge level.';
   if (!d.country) e.country = 'Choose a country.';
@@ -49,6 +51,7 @@ export function StepDemographics({
 
   return (
     <div className="space-y-5">
+      <PhotoEditor name={d.name} photoUrl={d.photoUrl} status={d.photoStatus} error={errors.photoUrl} onChange={(photoUrl) => patch({ photoUrl, photoStatus: 'pending' })} />
       <Field label="Name" error={errors.name} hint="Prefilled from sign-up. Only your first name shows on cards.">
         {(id, desc) => <Input id={id} aria-describedby={desc} value={d.name} onChange={(e) => patch({ name: e.target.value })} autoComplete="name" />}
       </Field>

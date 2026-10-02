@@ -42,8 +42,8 @@ export default defineConfig({
         name: 'Daily Stogie',
         short_name: 'Daily Stogie',
         description: 'A members-only network for adult (21+) cigar enthusiasts.',
-        theme_color: '#0d0a08',
-        background_color: '#0d0a08',
+        theme_color: '#ffffff',
+        background_color: '#ffffff',
         display: 'standalone',
         start_url: '/',
         icons: [
@@ -54,9 +54,16 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2}'],
+        globIgnores: ['members/**'],
         navigateFallback: '/index.html',
         cleanupOutdatedCaches: true,
         runtimeCaching: [
+          {
+            // Member photos: cached on first view, then instant.
+            urlPattern: ({ url }) => url.pathname.startsWith('/members/'),
+            handler: 'CacheFirst',
+            options: { cacheName: 'member-photos', expiration: { maxEntries: 200, maxAgeSeconds: 30 * 24 * 3600 } },
+          },
           {
             // Map tiles: cache what members have already seen.
             urlPattern: /^https:\/\/tile\.openstreetmap\.org\//,

@@ -33,7 +33,7 @@ export function Sheet({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="sheet-overlay fixed inset-0 z-50 bg-black/75" />
+        <Dialog.Overlay className="sheet-overlay fixed inset-0 z-50 bg-scrim" />
         <Dialog.Content
           className={cn(
             'sheet-content surface fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[88dvh] w-full max-w-[430px] flex-col rounded-t-[24px] pb-[env(safe-area-inset-bottom)] focus:outline-none sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 sm:rounded-[24px]',

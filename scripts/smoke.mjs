@@ -140,12 +140,12 @@ await step('pass via keyboard, then undo', async () => {
 });
 await step('match -> say hello -> send message', async () => {
   await page.goto(B + '/member/m1');
-  await page.getByRole('button', { name: /^Like$/ }).click();
+  await page.getByRole('button', { name: /^Connect$/ }).click();
   await page.getByRole('button', { name: 'Say hello' }).click(); await page.waitForURL('**/messages/m1');
   await page.getByLabel('Message').fill('Hey Marcus!'); await page.keyboard.press('Enter');
   await page.getByText('Hey Marcus!').waitFor();
 });
-await step('non-match cannot chat', async () => { await page.goto(B + '/messages/m6'); await page.getByText('Only matched members can message').waitFor(); });
+await step('non-match cannot chat', async () => { await page.goto(B + '/messages/m6'); await page.getByText('Only connected members can message').waitFor(); });
 await step('block removes from matches', async () => {
   await page.goto(B + '/messages/m1');
   await page.getByRole('button', { name: 'Report or block' }).click();

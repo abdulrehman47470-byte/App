@@ -1,4 +1,4 @@
-import { Compass, GraduationCap, Heart, House, Map as MapIcon, MessageCircle, UserRound } from 'lucide-react';
+import { Compass, GraduationCap, House, Map as MapIcon, MessageCircle, UserRound, UsersRound } from 'lucide-react';
 import { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { KeepAliveOutlet } from './keep-alive';
@@ -21,7 +21,7 @@ import { Frame } from './frame';
 export const TABS = [
   FEATURES.feed ? { to: '/feed', label: 'Home', icon: House } : { to: '/mentors', label: 'Mentors', icon: GraduationCap },
   { to: '/discover', label: 'Discover', icon: Compass },
-  FEATURES.memberMap ? { to: '/map', label: 'Map', icon: MapIcon } : { to: '/matches', label: 'Matches', icon: Heart },
+  FEATURES.memberMap ? { to: '/map', label: 'Map', icon: MapIcon } : { to: '/matches', label: 'Connections', icon: UsersRound },
   { to: '/messages', label: 'Messages', icon: MessageCircle },
   { to: '/profile', label: 'Profile', icon: UserRound },
 ];
@@ -76,7 +76,7 @@ function TabLink({ to, label, icon: Icon, badge }: (typeof TABS)[number] & { bad
           <span className="relative">
             <Icon className="size-[22px]" strokeWidth={1.5} aria-hidden />
             {badge > 0 && (
-              <span className="absolute -right-2 -top-1.5 grid min-w-4 place-items-center rounded-full bg-ember px-1 text-[10px] font-bold text-text">
+              <span className="absolute -right-2 -top-1.5 grid min-w-4 place-items-center rounded-full bg-ember px-1 text-[10px] font-bold text-white">
                 {badge}
               </span>
             )}
@@ -114,7 +114,7 @@ function SideRail({ unread }: { unread: number }) {
           <Icon className="size-5" strokeWidth={1.5} aria-hidden />
           {label}
           {to === '/messages' && unread > 0 && (
-            <span className="ml-auto rounded-full bg-ember px-1.5 text-[10px] font-bold text-text">{unread}</span>
+            <span className="ml-auto rounded-full bg-ember px-1.5 text-[10px] font-bold text-white">{unread}</span>
           )}
         </NavLink>
       ))}

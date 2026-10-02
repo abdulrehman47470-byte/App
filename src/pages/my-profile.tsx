@@ -1,4 +1,4 @@
-import { Clock, Pencil, Settings } from 'lucide-react';
+import { Camera, Clock, Pencil, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { CigarBand, CompletenessAvatar, VerifiedBadge } from '@/components/brand/ornaments';
 import { PageBody, PageHeader } from '@/components/layout/page';
@@ -44,7 +44,12 @@ export default function MyProfile() {
       />
       <PageBody className="space-y-5">
         <div className="flex flex-col items-center text-center">
-          <CompletenessAvatar name={me.name || 'You'} hue={me.photoHue} src={me.photoUrl} pct={pct} size={104} />
+          <Link to="/profile/edit/1" aria-label="Change profile photo" className="relative rounded-full">
+            <CompletenessAvatar name={me.name || 'You'} hue={me.photoHue} src={me.photoUrl} pct={pct} size={104} />
+            <span className="gold-gradient absolute bottom-3 right-1 grid size-9 place-items-center rounded-full border-2 border-bg text-gold-ink shadow-[var(--shadow-glow)]">
+              <Camera className="size-4" />
+            </span>
+          </Link>
           <div className="mt-4 flex items-center gap-2">
             <h2 className="font-serif text-[28px] text-text">{me.name || 'Your name'}</h2>
             {me.age > 0 && <span className="text-xl font-light text-muted">{me.age}</span>}

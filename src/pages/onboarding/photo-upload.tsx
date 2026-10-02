@@ -50,7 +50,7 @@ export default function PhotoUpload() {
             <Camera className="size-5" />
           </span>
         </button>
-        <input ref={input} type="file" accept="image/*" capture="user" className="sr-only" onChange={(e) => onFile(e.target.files?.[0])} tabIndex={-1} />
+        <input ref={input} type="file" accept="image/*" className="sr-only" onChange={(e) => onFile(e.target.files?.[0])} tabIndex={-1} />
 
         <p className="mx-auto mt-5 max-w-xs text-center text-sm text-muted">
           A clear, recent photo of you is required. It is used on your profile and for matching.

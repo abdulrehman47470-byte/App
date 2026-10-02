@@ -61,9 +61,9 @@ export default function Chat() {
     return (
       <div className="px-6 py-20 text-center">
         <h1 className="font-serif text-2xl text-text">Conversation unavailable</h1>
-        <p className="mt-2 text-sm text-muted">Only matched members can message each other.</p>
+        <p className="mt-2 text-sm text-muted">Only connected members can message each other.</p>
         <Link to="/matches" className="mt-6 inline-block text-gold hover:underline">
-          Go to Matches
+          Go to Connections
         </Link>
       </div>
     );
@@ -75,7 +75,7 @@ export default function Chat() {
         <BackButton to="/messages" />
         {m ? (
           <Link to={`/member/${m.id}`} className="flex min-w-0 flex-1 items-center gap-3">
-            <Avatar name={m.name} hue={m.photoHue} size={40} />
+            <Avatar name={m.name} hue={m.photoHue} src={m.photo} size={40} />
             <div className="min-w-0">
               <p className="flex items-center gap-1 truncate text-[15px] font-semibold text-text">
                 {m.name} {m.photoVerified && <VerifiedBadge className="size-4" />}
@@ -102,8 +102,8 @@ export default function Chat() {
           </div>
         ) : !messages?.length ? (
           <div className="py-10 text-center">
-            {m && <Avatar name={m.name} hue={m.photoHue} size={88} ring className="mx-auto" />}
-            <p className="mt-4 font-serif text-xl text-text">You matched with {m?.name}</p>
+            {m && <Avatar name={m.name} hue={m.photoHue} src={m.photo} size={88} ring className="mx-auto" />}
+            <p className="mt-4 font-serif text-xl text-text">You and {m?.name} are connected</p>
             <p className="mt-1 text-sm text-muted">Break the ice: ask about their favorite smoke.</p>
           </div>
         ) : (

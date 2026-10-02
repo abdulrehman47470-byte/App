@@ -1,29 +1,39 @@
 @import 'tailwindcss';
 
 /* ---------- Design tokens (single source of truth; never hardcode hex in components) ---------- */
+/* Brand palette taken from the client's logo: gold #F3AA3B / #CC8229, deep gold-brown #9F5516, black.
+   Text colours are checked for WCAG AA contrast on white (body text >= 4.5:1). */
 :root {
-  --bg: #0d0a08;
-  --bg-elevated: #14100d;
-  --surface: #1b1611;
-  --surface-2: #241c15;
-  --line: rgba(217, 164, 65, 0.22);
-  --line-strong: rgba(217, 164, 65, 0.45);
-  --gold: #d9a441;
-  --gold-light: #ebc475;
-  --gold-deep: #b07a28;
-  --gold-ink: #1a1208;
-  --gold-fill: rgba(217, 164, 65, 0.14);
-  --text: #f3e9d6;
-  --text-muted: #a89b88;
-  --text-faint: #7a6e60;
-  --ember: #c8642b;
-  --leaf: #6b7f4e;
-  --success: #4c9f70;
-  --danger: #e5484d;
-  --warning: #e0a030;
-  --info: #6c8ebf;
-  --overlay: rgba(13, 10, 8, 0.92);
-  color-scheme: dark;
+  --bg: #ffffff;
+  --bg-elevated: #fffcf7;
+  --surface: #ffffff;
+  --surface-2: #faf4ea;
+  --line: rgba(159, 85, 22, 0.2);
+  --line-strong: rgba(159, 85, 22, 0.42);
+  /* gold used for text and icons (deepened from the logo gold so it reads on white: 4.9:1) */
+  --gold: #a85e18;
+  /* emphasised gold text (logo deep gold, 5.6:1) */
+  --gold-light: #9f5516;
+  --gold-deep: #7d430f;
+  /* the logo's own golds, for fills, gradients and rings */
+  --brand-gold-1: #f3aa3b;
+  --brand-gold-2: #e09830;
+  --brand-gold-3: #cc8229;
+  --gold-ink: #2b1606;
+  --gold-fill: rgba(243, 170, 59, 0.16);
+  --text: #3b2412;
+  --text-muted: #6e4b2e;
+  --text-faint: #86654a;
+  --on-photo: #fff8ee;
+  --ember: #c4571c;
+  --leaf: #55703a;
+  --success: #2e7d4f;
+  --danger: #c62828;
+  --warning: #9a5b00;
+  --info: #2f5f95;
+  --overlay: rgba(28, 16, 7, 0.9);
+  --scrim: rgba(59, 36, 18, 0.42);
+  color-scheme: light;
 }
 
 @theme inline {
@@ -62,8 +72,15 @@
   --radius-card: 20px;
   --radius-control: 14px;
 
-  --shadow-glow: 0 6px 24px -6px rgba(217, 164, 65, 0.45);
-  --shadow-card: 0 1px 0 0 rgba(255, 235, 200, 0.05) inset, 0 12px 32px -12px rgba(0, 0, 0, 0.7);
+  --color-brand-gold: var(--brand-gold-3);
+  --color-on-photo: var(--on-photo);
+  --color-scrim: var(--scrim);
+
+  --shadow-glow: 0 6px 20px -6px rgba(204, 130, 41, 0.5);
+  --shadow-glow-strong: 0 8px 26px -6px rgba(204, 130, 41, 0.6);
+  --shadow-card: 0 1px 2px rgba(59, 36, 18, 0.05), 0 10px 28px -14px rgba(59, 36, 18, 0.22);
+  --shadow-chip: 0 0 0 1px rgba(204, 130, 41, 0.25), 0 4px 12px -4px rgba(204, 130, 41, 0.35);
+  --shadow-danger: 0 6px 20px -8px rgba(198, 40, 40, 0.45);
 }
 
 @layer base {
@@ -112,14 +129,14 @@
 @layer components {
   /* Subtle wood-grain / leather texture: gradients + tiny SVG noise, well under 5% opacity */
   .texture {
-    background-color: var(--bg);
+    background-color: #f7f0e4;
     background-image:
-      radial-gradient(120% 60% at 50% 0%, rgba(176, 122, 40, 0.1), transparent 60%),
+      radial-gradient(120% 60% at 50% 0%, rgba(243, 170, 59, 0.14), transparent 60%),
       repeating-linear-gradient(
         93deg,
-        rgba(255, 220, 170, 0.012) 0 2px,
+        rgba(159, 85, 22, 0.018) 0 2px,
         transparent 2px 7px,
-        rgba(0, 0, 0, 0.03) 7px 9px,
+        rgba(159, 85, 22, 0.03) 7px 9px,
         transparent 9px 16px
       ),
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
@@ -130,10 +147,10 @@
     box-shadow: var(--shadow-card);
   }
   .gold-gradient {
-    background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 45%, var(--gold-deep) 100%);
+    background: linear-gradient(180deg, var(--brand-gold-1) 0%, var(--brand-gold-2) 50%, var(--brand-gold-3) 100%);
   }
   .gold-text {
-    background: linear-gradient(180deg, var(--gold-light), var(--gold-deep));
+    background: linear-gradient(180deg, var(--brand-gold-3), var(--gold-deep));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -146,7 +163,7 @@
     font-weight: 600;
   }
   .photo-fade {
-    background: linear-gradient(180deg, transparent 35%, rgba(13, 10, 8, 0.55) 60%, var(--overlay) 100%);
+    background: linear-gradient(180deg, transparent 38%, rgba(28, 16, 7, 0.5) 62%, var(--overlay) 100%);
   }
   .scrollbar-none {
     scrollbar-width: none;
@@ -162,7 +179,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(110deg, transparent 30%, rgba(255, 245, 220, 0.35) 50%, transparent 70%);
+    background: linear-gradient(110deg, transparent 30%, rgba(255, 250, 240, 0.45) 50%, transparent 70%);
     transform: translateX(-120%);
     transition: transform 0.7s ease;
     pointer-events: none;
@@ -192,10 +209,9 @@
   position: absolute;
   inset: -20%;
   background:
-    radial-gradient(40% 30% at 30% 40%, rgba(235, 220, 200, 0.07), transparent 70%),
-    radial-gradient(35% 25% at 70% 30%, rgba(235, 220, 200, 0.05), transparent 70%),
-    radial-gradient(50% 35% at 50% 70%, rgba(200, 100, 43, 0.06), transparent 70%);
-  filter: blur(20px);
+    radial-gradient(40% 30% at 30% 40%, rgba(159, 85, 22, 0.05), transparent 70%),
+    radial-gradient(35% 25% at 70% 30%, rgba(243, 170, 59, 0.08), transparent 70%),
+    radial-gradient(50% 35% at 50% 70%, rgba(204, 130, 41, 0.06), transparent 70%);
   animation: smoke-drift 18s ease-in-out infinite;
   pointer-events: none;
 }
@@ -221,17 +237,16 @@
 
 /* ---------- Map (Leaflet) ---------- */
 .ds-map .leaflet-container {
-  background: #15110d;
+  background: #f3ece0;
   font-family: var(--font-sans);
 }
 /* warm the dark tiles toward the lounge palette */
 .ds-map .leaflet-tile {
-  /* invert the light OSM tiles into a dark map, then warm them toward the lounge palette.
-     Applied per tile (filtered once) rather than to the whole pane (re-filtered on every pan frame). */
-  filter: invert(1) hue-rotate(180deg) brightness(0.8) contrast(0.9) sepia(0.45) saturate(0.8);
+  /* light OpenStreetMap tiles, gently warmed toward the brand palette (filtered once per tile) */
+  filter: sepia(0.18) saturate(0.95);
 }
 .ds-map .leaflet-control-attribution {
-  background: rgba(13, 10, 8, 0.75);
+  background: rgba(255, 252, 247, 0.85);
   color: var(--text-faint);
   font-size: 9px;
 }
@@ -256,8 +271,8 @@
   height: 44px;
   border-radius: 999px;
   padding: 2px;
-  background: linear-gradient(180deg, var(--gold-light), var(--gold-deep));
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(180deg, var(--brand-gold-1), var(--brand-gold-3));
+  box-shadow: 0 4px 12px rgba(59, 36, 18, 0.35);
   transition: transform 0.15s ease;
 }
 .ds-pin-member span,
@@ -274,23 +289,23 @@
 }
 .ds-pin-member.is-active {
   transform: scale(1.22);
-  box-shadow: 0 0 0 4px rgba(217, 164, 65, 0.35), 0 8px 20px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 0 0 4px rgba(243, 170, 59, 0.4), 0 6px 16px rgba(59, 36, 18, 0.4);
 }
 .ds-pin-lounge svg {
   width: 30px;
   height: 38px;
-  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.7));
+  filter: drop-shadow(0 3px 5px rgba(59, 36, 18, 0.45));
 }
 .ds-pin-lounge path {
   fill: var(--ember);
-  stroke: var(--bg);
+  stroke: #ffffff;
   stroke-width: 1.5;
 }
 .ds-pin-lounge rect {
-  fill: var(--text);
+  fill: #ffffff;
 }
 .ds-pin-lounge.is-active path {
-  fill: var(--gold);
+  fill: var(--brand-gold-3);
 }
 @keyframes ds-pulse {
   0% { box-shadow: 0 0 0 0 rgba(108, 142, 191, 0.6); }
@@ -301,7 +316,7 @@
   height: 22px;
   border-radius: 999px;
   background: var(--info);
-  border: 3px solid var(--text);
+  border: 3px solid #ffffff;
   animation: ds-pulse 1.8s ease-out infinite;
 }
 
@@ -329,19 +344,17 @@
 .logo-medallion {
   background: radial-gradient(circle at 50% 38%, #f6eddc 0%, #ecdcbc 60%, #e0c89c 100%);
   box-shadow:
-    0 0 0 2px var(--gold),
-    0 0 0 5px rgba(217, 164, 65, 0.18),
-    0 10px 30px -8px rgba(0, 0, 0, 0.8),
-    0 0 40px -6px rgba(217, 164, 65, 0.35);
+    0 0 0 2px var(--brand-gold-3),
+    0 0 0 6px rgba(243, 170, 59, 0.18),
+    0 12px 30px -10px rgba(59, 36, 18, 0.35);
 }
 
 /* ---------- Welcome background ---------- */
 .welcome-bg {
   background:
-    radial-gradient(60% 38% at 50% 42%, rgba(217, 164, 65, 0.22), transparent 70%),
-    radial-gradient(90% 60% at 50% 115%, rgba(200, 100, 43, 0.28), transparent 70%),
-    radial-gradient(70% 50% at 50% -10%, rgba(107, 127, 78, 0.12), transparent 70%),
-    var(--bg);
+    radial-gradient(55% 34% at 50% 34%, rgba(243, 170, 59, 0.22), transparent 70%),
+    radial-gradient(90% 55% at 50% 112%, rgba(204, 130, 41, 0.16), transparent 70%),
+    linear-gradient(180deg, #ffffff 0%, #fffaf2 60%, #fbf1e2 100%);
 }
 /* slow-turning shafts of lounge light behind the logo */
 @keyframes rays-turn {
@@ -356,7 +369,7 @@
   width: 160vmax;
   height: 160vmax;
   transform: translate(-50%, -50%);
-  background: repeating-conic-gradient(from 0deg, rgba(235, 196, 117, 0.07) 0deg 6deg, transparent 6deg 22deg);
+  background: repeating-conic-gradient(from 0deg, rgba(243, 170, 59, 0.12) 0deg 6deg, transparent 6deg 22deg);
   -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 42%);
   mask-image: radial-gradient(circle, #000 0%, transparent 42%);
   animation: rays-turn 120s linear infinite;
@@ -365,7 +378,7 @@
 .welcome-vignette {
   position: absolute;
   inset: 0;
-  background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.65) 100%);
+  background: radial-gradient(120% 90% at 50% 40%, transparent 60%, rgba(159, 85, 22, 0.1) 100%);
   pointer-events: none;
 }
 /* embers drifting up from the bottom */
@@ -391,8 +404,8 @@
   width: 4px;
   height: 4px;
   border-radius: 999px;
-  background: radial-gradient(circle, #ffd28a 0%, var(--ember) 60%, transparent 100%);
-  box-shadow: 0 0 8px 2px rgba(200, 100, 43, 0.55);
+  background: radial-gradient(circle, #ffd28a 0%, var(--brand-gold-3) 60%, transparent 100%);
+  box-shadow: 0 0 8px 2px rgba(243, 170, 59, 0.5);
   animation: ember-rise 12s linear infinite both;
 }
 
@@ -558,4 +571,9 @@
 .cv-auto {
   content-visibility: auto;
   contain-intrinsic-size: auto 520px;
+}
+
+/* Placeholder shown wherever a member has no photo yet: the client's logo on warm cream */
+.logo-placeholder {
+  background: radial-gradient(circle at 50% 40%, #fffaf1 0%, #f6ead6 65%, #ecd9ba 100%);
 }

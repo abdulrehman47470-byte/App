@@ -27,7 +27,7 @@ export const DEMO_PROFILE: MyProfile = {
   ...EMPTY_PROFILE,
   name: 'Alex Morgan', dob: '1989-04-18', age: 37, pronouns: 'they/them', city: 'Chicago', state: 'Illinois', zip: '60614',
   userType: 'intermediate', bio: 'Weekend lounge regular. Nicaraguan puros, bourbon and long conversations.',
-  instagram: '@alex.smokes', visibility: { ethnicity: false, religion: false, political: false, map: true }, photoHue: 2, photoStatus: 'approved', photoVerified: true,
+  instagram: '@alex.smokes', visibility: { ethnicity: false, religion: false, political: false, map: true }, photoHue: 2, photoUrl: '/members/me.webp', photoStatus: 'approved', photoVerified: true,
   preferences: {
     strength: ['Medium', 'Medium-Full'], flavors: ['Leather', 'Coffee', 'Cocoa', 'Cedar'], wrapper: ['Maduro', 'Habano'],
     origin: ['Nicaragua'], vitola: ['Robusto', 'Toro'], brands: ['Padrón', 'Liga Privada', 'My Father'],
@@ -42,7 +42,7 @@ const ME_KEY = STORAGE_KEYS.me;
 const MOCK_STATE_KEY = STORAGE_KEYS.mock;
 
 const authorOf = (m: Member): PostAuthor => ({
-  id: m.id, name: m.name, hue: m.photoHue, userType: m.userType, city: m.city, state: m.state, verified: m.photoVerified,
+  id: m.id, name: m.name, hue: m.photoHue, photoUrl: m.photo, userType: m.userType, city: m.city, state: m.state, verified: m.photoVerified,
 });
 
 function initialFeed() {

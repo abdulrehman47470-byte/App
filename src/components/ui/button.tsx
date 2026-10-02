@@ -9,7 +9,7 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          'shimmer gold-gradient text-gold-ink shadow-[var(--shadow-glow)] hover:shadow-[0_8px_30px_-6px_rgba(217,164,65,0.6)]',
+          'shimmer gold-gradient text-gold-ink shadow-[var(--shadow-glow)] hover:shadow-[var(--shadow-glow-strong)]',
         secondary: 'bg-surface-2 text-text border border-line hover:border-line-strong',
         outline: 'border border-line-strong text-gold hover:bg-gold-fill',
         ghost: 'text-muted hover:text-text hover:bg-surface-2',

@@ -15,7 +15,7 @@ export default function Matches() {
 
   return (
     <>
-      <PageHeader title="Matches" large subtitle={data ? `${data.length} mutual likes` : undefined} />
+      <PageHeader title="Connections" large subtitle={data ? `${data.length} mutual connections` : undefined} />
       <PageBody className="space-y-7">
         {isLoading ? (
           <>
@@ -31,8 +31,8 @@ export default function Matches() {
         ) : !data?.length ? (
           <EmptyState
             illustration="chair"
-            title="No matches yet"
-            body="When someone you liked likes you back, they will show up here."
+            title="No connections yet"
+            body="When someone you asked to connect connects back, they will show up here."
             action={
               <Button asChild>
                 <Link to="/discover">Start discovering</Link>
@@ -42,15 +42,15 @@ export default function Matches() {
         ) : (
           <>
             <section>
-              <SectionTitle>New matches</SectionTitle>
+              <SectionTitle>New connections</SectionTitle>
               {fresh.length ? (
                 <ul className="scrollbar-none -mx-4 flex gap-4 overflow-x-auto px-4 pb-1">
                   {fresh.map((m) => (
                     <li key={m.id}>
                       <Link to={`/messages/${m.id}`} className="flex w-20 flex-col items-center gap-2 text-center">
                         <span className="relative rounded-full p-[3px] gold-gradient shadow-[var(--shadow-glow)]">
-                          <Avatar name={m.member.name} hue={m.member.photoHue} size={70} className="border-2 border-bg" />
-                          <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full bg-ember px-1.5 text-[10px] font-bold text-text">NEW</span>
+                          <Avatar name={m.member.name} hue={m.member.photoHue} src={m.member.photo} size={70} className="border-2 border-bg" />
+                          <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full bg-ember px-1.5 text-[10px] font-bold text-white">NEW</span>
                         </span>
                         <span className="truncate text-sm text-text">{m.member.name}</span>
                       </Link>
@@ -58,17 +58,17 @@ export default function Matches() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-muted">You have said hello to all your matches.</p>
+                <p className="text-sm text-muted">You have said hello to all your connections.</p>
               )}
             </section>
 
             <section>
-              <SectionTitle>All matches</SectionTitle>
+              <SectionTitle>All connections</SectionTitle>
               <ul className="divide-y divide-line/60 overflow-hidden rounded-[20px] border border-line bg-surface">
                 {data.map((m) => (
                   <li key={m.id}>
                     <Link to={`/member/${m.id}`} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-surface-2">
-                      <Avatar name={m.member.name} hue={m.member.photoHue} size={52} ring={!m.hasMessages} />
+                      <Avatar name={m.member.name} hue={m.member.photoHue} src={m.member.photo} size={52} ring={!m.hasMessages} />
                       <div className="min-w-0 flex-1">
                         <p className="flex items-center gap-2 text-[15px] font-medium text-text">
                           {m.member.name}, {m.member.age}
@@ -76,7 +76,7 @@ export default function Matches() {
                         </p>
                         <p className="mt-0.5 flex items-center gap-2 text-xs text-muted">
                           <UserTypeBadge type={m.member.userType} className="!py-0 text-[10px]" />
-                          Matched {timeAgo(m.matchedAt)} ago
+                          Connected {timeAgo(m.matchedAt)} ago
                         </p>
                       </div>
                       <ChevronRight className="size-5 text-faint" strokeWidth={1.5} />

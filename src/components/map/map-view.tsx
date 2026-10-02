@@ -36,7 +36,7 @@ function icon(m: MapMarker, active: boolean) {
     return L.divIcon({ className: '', iconSize: [22, 22], iconAnchor: [11, 11], html: '<div class="ds-pin-me"></div>' });
   }
   const face = m.photoUrl
-    ? `<img src="${esc(m.photoUrl)}" alt="" />`
+    ? `<img src="${esc(m.photoUrl.startsWith('/members/') ? m.photoUrl.replace(/\.webp$/, '-sm.webp') : m.photoUrl)}" alt="" />`
     : `<span style="background:radial-gradient(circle at 35% 30%, hsl(${m.hue ?? 30} 55% 40%), hsl(${m.hue ?? 30} 45% 14%))">${esc(initials(m.label))}</span>`;
   return L.divIcon({
     className: '',
@@ -123,7 +123,7 @@ export function MapView({
           <Circle
             center={[area.lat, area.lng]}
             radius={area.radiusM}
-            pathOptions={{ color: '#d9a441', weight: 1.5, fillColor: '#d9a441', fillOpacity: 0.15, dashArray: '4 4' }}
+            pathOptions={{ color: '#cc8229', weight: 1.5, fillColor: '#f3aa3b', fillOpacity: 0.2, dashArray: '4 4' }}
           />
         )}
         {markers.map((m) => (

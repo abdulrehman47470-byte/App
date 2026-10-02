@@ -29,7 +29,7 @@ through the whole sign-up flow.
 | `npm run preview` then `npm run perf` | Measure load and tab-switch speed on the production build (simulated phone on 4G) |
 | `npm run preview` then `npm run smooth` | Measure smoothness (frames per second, stutters) while scrolling, swiping, opening sheets, panning the map |
 | `npm run preview` then `npm run forms` | Measure how fast every form reacts to typing and tapping (sign-up, profile, checkout, composer) |
-| `npm run icons` | Regenerate the app icons from `public/icon.svg` |
+| `npm run icons` | Regenerate favicon and app icons from the client logo (`docs/logo-original.png`) |
 
 ## Where things live
 
@@ -41,6 +41,19 @@ through the whole sign-up flow.
 - `src/lib/api/`: the data layer. Screens only talk to it through `src/features/queries.ts`, so Phase 1
   can swap the mock for Supabase without touching the screens.
 - `docs/`: design reference, requirements checklist, open questions, screenshots
+
+## Brand palette
+
+Taken from the client's logo (`docs/logo-original.png`) and checked for WCAG AA contrast on white.
+All colours are tokens in `src/styles/index.css`; components never hard-code them.
+
+| Role | Colour |
+|---|---|
+| Background | white `#FFFFFF`, warm white `#FFFCF7`, cream `#FAF4EA` |
+| Lines | logo brown `#9F5516` at 20% / 42% |
+| Text | `#3B2412` (14.5:1), muted `#6E4B2E` (7.8:1), faint `#86654A` (5.3:1) |
+| Gold accents (buttons, rings, selections) | logo golds `#F3AA3B` → `#E09830` → `#CC8229` |
+| Gold text and icons | `#A85E18` (4.9:1), emphasis `#9F5516` (5.6:1) |
 
 ## Mock sign-in and payment (Phase 0)
 

@@ -6,7 +6,7 @@ import { api } from '@/lib/api';
 import type { Member } from '@/types';
 import { MatchOverlay } from './match-overlay';
 
-/** Shared Like flow (Discover, Mentors, full profile): like, and celebrate on a mutual match. */
+/** Shared Connect flow (Discover, Mentors, map, full profile): send a request; celebrate when it is mutual. */
 export function useLikeFlow() {
   const qc = useQueryClient();
   const navigate = useNavigate();

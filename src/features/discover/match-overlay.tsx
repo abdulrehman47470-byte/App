@@ -37,9 +37,9 @@ export function MatchOverlay({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[70] flex flex-col items-center justify-center overflow-hidden bg-bg/95 px-6"
+          className="fixed inset-0 z-[70] flex flex-col items-center justify-center overflow-hidden bg-bg px-6"
         >
-          <div aria-hidden className="absolute inset-0 bg-[radial-gradient(50%_40%_at_50%_42%,rgba(217,164,65,0.25),transparent_70%)]" />
+          <div aria-hidden className="absolute inset-0 bg-[radial-gradient(50%_40%_at_50%_42%,rgba(243,170,59,0.28),transparent_70%)]" />
           {!reduce && (
             <div aria-hidden className="absolute left-1/2 top-[42%]">
               {particles.map((p, i) => (
@@ -60,16 +60,16 @@ export function MatchOverlay({
               <Avatar name={me?.name || 'You'} hue={me?.photoHue ?? 30} src={me?.photoUrl} size={128} ring className="border-2 shadow-[var(--shadow-glow)]" />
             </m.div>
             <m.div initial={{ x: 120, rotate: 14, opacity: 0 }} animate={{ x: -14, rotate: 8, opacity: 1 }} transition={{ type: 'spring', stiffness: 160, damping: 14 }}>
-              <Avatar name={member.name} hue={member.photoHue} size={128} ring className="border-2 shadow-[var(--shadow-glow)]" />
+              <Avatar name={member.name} hue={member.photoHue} src={member.photo} size={128} ring className="border-2 shadow-[var(--shadow-glow)]" />
             </m.div>
           </div>
 
           <m.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.35 }} className="relative mt-10 text-center">
-            <p className="micro-label !text-gold">Mutual like</p>
+            <p className="micro-label !text-gold">Mutual connection</p>
             <h2 id="match-title" className="gold-text mt-2 font-serif text-[44px] italic leading-tight">
-              It’s a match!
+              You’re connected!
             </h2>
-            <p className="mt-2 text-[15px] text-muted">You and {member.name} liked each other.</p>
+            <p className="mt-2 text-[15px] text-muted">You and {member.name} both want to connect.</p>
           </m.div>
 
           <m.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }} className="relative mt-10 w-full max-w-sm space-y-3">

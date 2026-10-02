@@ -134,7 +134,7 @@ export function CameraCapture({
                 <ellipse cx="50" cy="47" rx="30" ry="38" fill="black" />
               </mask>
             </defs>
-            <rect width="100" height="100" fill="rgba(13,10,8,0.55)" mask="url(#cam-oval)" />
+            <rect width="100" height="100" fill="rgba(28,16,7,0.55)" mask="url(#cam-oval)" />
             <ellipse cx="50" cy="47" rx="30" ry="38" fill="none" stroke="var(--gold)" strokeWidth="0.8" strokeDasharray="2 1.5" />
           </svg>
         )}

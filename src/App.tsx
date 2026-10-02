@@ -1,10 +1,9 @@
 import { Suspense, useEffect, type ReactNode } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
-import { Frame } from '@/components/layout/frame';
-import { Skeleton } from '@/components/ui/misc';
 import { FEATURES, HOME } from '@/config/features';
 import { nextStep, useSession } from '@/lib/session';
 import Welcome from '@/pages/onboarding/welcome';
+import { hideSplash, LogoLoader } from '@/components/brand/logo-loader';
 import { lazyPage } from '@/lib/lazy-page';
 import { pages, prefetchWhenIdle } from '@/routes';
 import { Discover, Feed, Matches, MemberMap, Mentors, Messages, MyProfile } from '@/pages/tab-pages';
@@ -64,25 +63,20 @@ function RequireComplete() {
   return <Outlet />;
 }
 
-const PageFallback = () => (
-  <div className="space-y-3 p-4">
-    <Skeleton className="h-10 w-1/2" />
-    <Skeleton className="h-40" />
-    <Skeleton className="h-24" />
-  </div>
-);
+/** Fades the logo splash out once the first real screen is on screen. */
+function SplashGate() {
+  useEffect(() => {
+    requestAnimationFrame(hideSplash);
+  }, []);
+  return null;
+}
 
 export default function App() {
   return (
     <>
     <Prefetcher />
-    <Suspense
-      fallback={
-        <Frame>
-          <PageFallback />
-        </Frame>
-      }
-    >
+    <Suspense fallback={<LogoLoader />}>
+      <SplashGate />
       <Routes>
         <Route path="/" element={<Welcome />} />
         <Route path="/signin" element={<SignIn />} />

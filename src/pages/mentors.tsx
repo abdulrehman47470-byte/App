@@ -1,4 +1,4 @@
-import { Heart } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '@/components/brand/empty-state';
@@ -44,8 +44,8 @@ export default function Mentors() {
           ))}
         </div>
         <p className="text-sm text-muted">
-          {segment === 'find' ? 'Experienced members happy to guide newcomers.' : 'Newer members looking for a guide.'} Like
-          someone to match, then chat.
+          {segment === 'find' ? 'Experienced members happy to guide newcomers.' : 'Newer members looking for a guide.'} Connect
+          with someone, then chat.
         </p>
 
         {isLoading ? (
@@ -62,7 +62,7 @@ export default function Mentors() {
                   <Card className="p-4">
                     <div className="flex gap-4">
                       <Link to={`/member/${m.id}`} className="shrink-0" aria-label={`View ${m.name}'s profile`}>
-                        <Avatar name={m.name} hue={m.photoHue} size={72} />
+                        <Avatar name={m.name} hue={m.photoHue} src={m.photo} size={72} />
                       </Link>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
@@ -101,7 +101,7 @@ export default function Mentors() {
                             await like(m.id);
                           }}
                         >
-                          <Heart className="size-4 fill-current" /> {isLiked ? 'Liked' : 'Like'}
+                          <Plus className="size-4" strokeWidth={2.25} /> {isLiked ? 'Requested' : 'Connect'}
                         </Button>
                       )}
                     </div>

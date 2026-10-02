@@ -16,7 +16,7 @@ export const PLANS: { id: Plan; name: string; price: string; per: string; amount
   { id: 'yearly', name: 'Yearly', price: '$19.99', per: 'per year', amount: 19.99, note: 'Save 16%' },
 ];
 
-const PERKS = ['Profile-based matching', 'Instant messaging with your matches', 'Stogie Search lounge locator', 'Stogie Sessions videos and the Blog'];
+const PERKS = ['Profile-based matching', 'Instant messaging with your connections', 'Stogie Search lounge locator', 'Stogie Sessions videos and the Blog'];
 
 export function PlanPicker({ value, onChange }: { value: Plan; onChange: (p: Plan) => void }) {
   return (

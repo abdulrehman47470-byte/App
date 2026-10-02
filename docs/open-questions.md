@@ -53,11 +53,24 @@ These are from the concept board. In each case Phase 0 followed the client rules
 | "Message" button on Discover cards | Only matched members can message | Pass / Undo / Like only; Message appears after a match |
 | Refer a Friend "Your Rewards: 1 month premium per friend" | No rewards requested | Plain invite link + copy + share; TODO to confirm rewards |
 
+## Client revisions (2026-10-02)
+
+1. Too dark → white background, brown lines and letters, gold accents (palette from the logo). Done.
+2. Loading screen → branded logo splash shown instantly while the app loads; larger logo on the landing page. Done.
+3. No generic silhouettes → the logo is shown wherever a photo is missing; a photo is required at sign-up and
+   in the profile (cannot continue without one). Mock members show stock photos (see `docs/photo-credits.md`;
+   private previews only, replace before launch). Done.
+4. Heart → plus sign ("Connect"); mutual connections say "You're connected!" and Matches are now Connections,
+   since this is not a dating platform. Feed post likes keep the heart (a reaction to a post). Done.
+5. Edit Profile → change photo from the photo library or camera. The camera-only setting that hid the photo
+   library on iPhones was also removed from sign-up. Done.
+
 ## Mocks to replace
 
 - Mock Google sign-in (`src/features/auth/google-signin-mock.tsx`) → Supabase Auth Google OAuth (Phase 2)
 - Mock card checkout (`src/features/billing/checkout-sheet.tsx`) → Stripe Checkout (Phase 6)
 - On-device photo/video storage (`src/lib/media-store.ts`) → Supabase Storage with size limits (Phase 1)
+- Stock photos of mock members (`public/members/`) → real members' own photos (before any public launch)
 
 ## Other TODOs flagged in code
 

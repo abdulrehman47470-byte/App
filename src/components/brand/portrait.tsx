@@ -1,71 +1,49 @@
 import { cn } from '@/lib/utils';
 
-/** Head, neck and shoulders as one outline (viewBox 300x400). */
-const FIGURE =
-  'M150 70C186 70 204 98 204 136C204 162 196 184 184 198C176 208 172 214 172 226L172 238C176 250 196 258 222 266C258 278 282 310 290 400L10 400C18 310 42 278 78 266C104 258 124 250 128 238L128 226C128 214 124 208 116 198C104 184 96 162 96 136C96 98 114 70 150 70Z';
-
 /**
- * Builds the portrait as a standalone SVG image. Rendering it through <img> (instead of inline SVG)
- * lets the browser rasterise it once and reuse the bitmap, which keeps scrolling and card dragging
- * smooth. Cached per hue.
+ * Profile pictures. Members must upload a photo to use the app; until a photo is available
+ * (or while it is loading) the client's logo is shown in its place, never a generic silhouette.
+ * `hue` is kept in the props for callers but is no longer used.
  */
-const cache = new Map<number, string>();
-export function portraitUrl(h: number): string {
-  const hit = cache.get(h);
-  if (hit) return hit;
-  const bokeh = [0, 1, 2, 3, 4, 5, 6]
-    .map((i) => {
-      const cx = (h * 7 + i * 71) % 300;
-      const cy = 30 + ((h * 5 + i * 43) % 200);
-      const r = (10 + ((h + i * 13) % 22)) * 1.4;
-      const o = (0.1 + ((i * 7) % 5) / 30) * 1.6;
-      return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#k)" opacity="${o.toFixed(2)}"/>`;
-    })
-    .join('');
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice">
-<defs>
-<linearGradient id="b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="hsl(${h} 35% 16%)"/><stop offset="1" stop-color="hsl(25 30% 5%)"/></linearGradient>
-<radialGradient id="g" cx="${0.42 + (h % 10) / 100}" cy="0.34" r="0.55"><stop offset="0" stop-color="hsl(${h + 6} 70% 48%)" stop-opacity=".95"/><stop offset="0.45" stop-color="hsl(${h} 60% 30%)" stop-opacity=".55"/><stop offset="1" stop-color="hsl(${h} 50% 12%)" stop-opacity="0"/></radialGradient>
-<linearGradient id="f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="hsl(${h} 22% 13%)"/><stop offset="1" stop-color="hsl(${h} 25% 8%)"/></linearGradient>
-<linearGradient id="r" x1="0" y1="0" x2="1" y2="0.3"><stop offset="0" stop-color="hsl(${h + 12} 85% 72%)" stop-opacity=".9"/><stop offset=".45" stop-color="hsl(${h + 6} 80% 60%)" stop-opacity=".15"/><stop offset="1" stop-color="hsl(${h} 80% 60%)" stop-opacity="0"/></linearGradient>
-<radialGradient id="k"><stop offset="0" stop-color="hsl(${h + 14} 90% 72%)"/><stop offset="1" stop-color="hsl(${h + 14} 90% 72%)" stop-opacity="0"/></radialGradient>
-</defs>
-<rect width="300" height="400" fill="url(#b)"/><rect width="300" height="400" fill="url(#g)"/>${bokeh}
-<path d="${FIGURE}" fill="url(#f)"/><path d="${FIGURE}" fill="none" stroke="url(#r)" stroke-width="2.5"/>
-<path d="M${222 + (h % 24)} 330c-14-28 16-42 4-72s18-46 4-82" stroke="hsl(35 30% 88%)" stroke-opacity=".07" stroke-width="10" fill="none" stroke-linecap="round"/>
-</svg>`;
-  const url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-  cache.set(h, url);
-  return url;
+
+/** Small square version of a bundled member photo, for avatars (keeps lists light). */
+const thumbOf = (src: string) => (src.startsWith('/members/') ? src.replace(/\.webp$/, '-sm.webp') : src);
+
+function LogoPlaceholder({ className, label }: { className?: string; label?: string }) {
+  return (
+    <div
+      className={cn('logo-placeholder grid size-full place-items-center', className)}
+      role={label ? 'img' : undefined}
+      aria-label={label}
+    >
+      <img src="/logo-mark.webp" srcSet="/logo-mark.webp 1x, /logo-mark@2x.webp 2x" alt="" draggable={false} decoding="async" className="size-[62%] select-none object-contain opacity-90" />
+    </div>
+  );
 }
 
-/**
- * Generated placeholder portrait (mock data never uses real photos): a rim-lit head-and-shoulders
- * silhouette against warm lounge backlight, soft bokeh and a wisp of smoke. Each member gets a
- * stable variation from `hue`.
- */
-export function PortraitArt({ name, hue, className }: { name: string; hue: number; className?: string }) {
+/** Large photo (Discover cards, profile headers). */
+export function PortraitArt({ name, src, className }: { name: string; hue?: number; src?: string; className?: string }) {
+  if (!src) return <LogoPlaceholder className={className} label={`${name} has not added a photo yet`} />;
   return (
     <img
-      src={portraitUrl(hue)}
-      alt={`Placeholder portrait for ${name}`}
+      src={src}
+      alt={`Photo of ${name}`}
       draggable={false}
       decoding="async"
-      className={cn('block size-full select-none object-cover', className)}
+      className={cn('block size-full select-none object-cover object-[50%_30%]', className)}
     />
   );
 }
 
-// `name` stays in the props for callers and future photos; avatars are decorative (alt="").
+/** Round avatar. Decorative (alt=""): the member's name is always shown next to it. */
 export function Avatar({
-  hue,
   size = 48,
   className,
   ring,
   src,
 }: {
   name: string;
-  hue: number;
+  hue?: number;
   size?: number;
   className?: string;
   ring?: boolean;
@@ -73,13 +51,13 @@ export function Avatar({
 }) {
   return (
     <div
-      className={cn('relative shrink-0 overflow-hidden rounded-full border', ring ? 'border-gold' : 'border-line-strong', className)}
+      className={cn('relative shrink-0 overflow-hidden rounded-full border bg-surface-2', ring ? 'border-brand-gold' : 'border-line-strong', className)}
       style={{ width: size, height: size }}
     >
       {src ? (
-        <img src={src} alt="" decoding="async" className="size-full object-cover" />
+        <img src={size <= 192 ? thumbOf(src) : src} alt="" decoding="async" loading="lazy" draggable={false} className="size-full select-none object-cover object-[50%_25%]" />
       ) : (
-        <img src={portraitUrl(hue)} alt="" draggable={false} decoding="async" className="size-full scale-110 select-none object-cover" />
+        <LogoPlaceholder />
       )}
     </div>
   );

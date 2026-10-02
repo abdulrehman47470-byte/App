@@ -7,7 +7,7 @@ export function Frame({ children, wide }: { children: ReactNode; wide?: boolean 
     <div className="texture min-h-dvh">
       <div
         className={cn(
-          'relative mx-auto min-h-dvh w-full bg-bg lg:border-x lg:border-line lg:shadow-[0_0_80px_rgba(0,0,0,0.6)]',
+          'relative mx-auto min-h-dvh w-full bg-bg lg:border-x lg:border-line lg:shadow-[0_0_60px_rgba(59,36,18,0.12)]',
           wide ? 'max-w-[1100px]' : 'max-w-[430px]',
         )}
       >

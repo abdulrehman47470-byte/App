@@ -1,5 +1,5 @@
 import { animate, AnimatePresence, m, useMotionValue, useTransform, type MotionValue, type PanInfo } from 'framer-motion';
-import { Heart, RotateCcw, X } from 'lucide-react';
+import { Plus, RotateCcw, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DiscoverTabs } from '@/features/discover/discover-tabs';
@@ -48,7 +48,7 @@ export default function Discover() {
         await api.pass(top.member.id);
       } else {
         setLastPassed(null);
-        setAnnounce(`Liked ${top.member.name}.`);
+        setAnnounce(`Connection request sent to ${top.member.name}.`);
         await like(top.member.id);
       }
     },
@@ -106,7 +106,7 @@ export default function Discover() {
         {announce}
       </p>
 
-      <section aria-label="Member cards. Use the left and right arrow keys to pass or like, U to undo." className="px-4 pt-4">
+      <section aria-label="Member cards. Use the left and right arrow keys to pass or connect, U to undo." className="px-4 pt-4">
         <div className="relative mx-auto h-[clamp(340px,calc(100dvh-330px),560px)]">
           {isLoading || !data ? (
             <Skeleton className="absolute inset-0 rounded-[24px]" />
@@ -139,11 +139,11 @@ export default function Discover() {
           <ActionButton label="Undo last pass" onClick={undo} disabled={!lastPassed} small>
             <RotateCcw className="size-5" strokeWidth={1.75} />
           </ActionButton>
-          <ActionButton label="Like" onClick={() => fling('like')} disabled={!top} tone="gold">
-            <Heart className="size-7 fill-current" strokeWidth={1.5} />
+          <ActionButton label="Connect" onClick={() => fling('like')} disabled={!top} tone="gold">
+            <Plus className="size-8" strokeWidth={2.25} />
           </ActionButton>
         </div>
-        <p className="mt-3 hidden text-center text-xs text-faint sm:block">Tip: use ← and → to pass or like</p>
+        <p className="mt-3 hidden text-center text-xs text-faint sm:block">Tip: use ← and → to pass or connect</p>
       </section>
 
       {safetyFor && (
@@ -213,7 +213,7 @@ function TopCard({
     >
       <MemberCardFace card={card} onMore={onMore} />
       <m.div style={{ opacity: likeOpacity }} className="pointer-events-none absolute left-6 top-24 -rotate-12 rounded-[10px] border-4 border-success px-3 py-1 font-serif text-3xl font-bold tracking-widest text-success" aria-hidden>
-        LIKE
+        CONNECT
       </m.div>
       <m.div style={{ opacity: passOpacity }} className="pointer-events-none absolute right-6 top-24 rotate-12 rounded-[10px] border-4 border-danger px-3 py-1 font-serif text-3xl font-bold tracking-widest text-danger" aria-hidden>
         PASS
@@ -264,7 +264,7 @@ function ActionButton({
         className={cn(
           'grid place-items-center rounded-full border transition-opacity disabled:opacity-35',
           small ? 'size-12 border-line-strong bg-surface text-muted' : 'size-16',
-          tone === 'danger' && 'border-danger/60 bg-surface text-danger shadow-[0_6px_24px_-8px_rgba(229,72,77,0.5)]',
+          tone === 'danger' && 'border-danger/60 bg-surface text-danger shadow-[var(--shadow-danger)]',
           tone === 'gold' && 'gold-gradient border-transparent text-gold-ink shadow-[var(--shadow-glow)]',
         )}
       >
