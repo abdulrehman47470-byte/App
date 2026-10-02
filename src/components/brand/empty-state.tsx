@@ -1,3 +1,4 @@
+import { LogoMark } from './logo';
 import type { ReactNode } from 'react';
 
 const stroke = { stroke: 'var(--gold)', strokeWidth: 1.5, fill: 'none', strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
@@ -42,7 +43,10 @@ export function EmptyState({
 }) {
   return (
     <div className="flex flex-col items-center px-6 py-14 text-center">
-      <div className="mb-5 grid size-32 place-items-center rounded-full border border-line bg-surface/60">{art[illustration]}</div>
+      <div className="relative mb-5 grid size-32 place-items-center rounded-full border border-line bg-surface/60">
+        {art[illustration]}
+        <LogoMark className="absolute -bottom-1 -right-1 size-10 ring-4 ring-bg" />
+      </div>
       <h3 className="font-serif text-xl text-text">{title}</h3>
       <p className="mt-2 max-w-72 text-sm text-muted">{body}</p>
       {action && <div className="mt-6">{action}</div>}

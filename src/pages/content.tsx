@@ -1,3 +1,4 @@
+import { LogoDivider } from '@/components/brand/logo';
 import { Clock, GraduationCap, PenLine, Play, Trash2, TriangleAlert, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -285,6 +286,7 @@ export function BlogPostPage() {
             ) : (
               <BlogBlocks blocks={p.body.map((text) => ({ type: 'p' as const, text }))} />
             )}
+            <LogoDivider label="Daily Stogie Journal" className="mt-6" />
             {p.author && !mine && (
               <Card className="mt-8 flex items-center gap-3 p-4">
                 <Avatar name={p.author.name} src={p.author.photoUrl} size={48} />

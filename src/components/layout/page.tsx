@@ -1,3 +1,4 @@
+import { LogoMark } from '@/components/brand/logo';
 import { ChevronLeft } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -36,7 +37,7 @@ export function PageHeader({
   return (
     <header className="sticky top-0 z-30 border-b border-line/60 bg-bg/[0.97] px-4 pb-3 pt-[max(12px,env(safe-area-inset-top))]">
       <div className="flex min-h-11 items-center gap-1">
-        {back || backTo ? <BackButton to={backTo} /> : null}
+        {back || backTo ? <BackButton to={backTo} /> : large ? <LogoMark className="mr-2 size-10" /> : null}
         <div className={cn('min-w-0 flex-1', (back || backTo) && !large && 'text-center')}>
           <h1 className={cn('truncate font-serif text-text', large ? 'text-[28px]' : 'text-xl')}>{title}</h1>
           {subtitle && <p className="truncate text-xs text-muted">{subtitle}</p>}

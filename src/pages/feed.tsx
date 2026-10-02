@@ -1,3 +1,4 @@
+import { LogoDivider } from '@/components/brand/logo';
 import { Search } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -89,6 +90,7 @@ export default function Feed() {
             ))}
           </ul>
         )}
+        {!!data?.length && <LogoDivider label="You're all caught up" />}
         <SafetyBanner />
       </PageBody>
     </>

@@ -39,3 +39,17 @@ export function Logo({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
     </div>
   );
 }
+
+/** Small logo between two fading gold lines, used to close a list or an article. */
+export function LogoDivider({ label, className }: { label?: string; className?: string }) {
+  return (
+    <div className={cn('flex flex-col items-center gap-2 py-4 text-center', className)}>
+      <div className="flex w-full items-center gap-3" aria-hidden>
+        <span className="h-px flex-1 bg-gradient-to-r from-transparent to-line-strong" />
+        <LogoMark className="size-10" />
+        <span className="h-px flex-1 bg-gradient-to-l from-transparent to-line-strong" />
+      </div>
+      {label && <p className="font-serif text-sm italic text-faint">{label}</p>}
+    </div>
+  );
+}
