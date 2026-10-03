@@ -36,7 +36,7 @@ const GROUPS: { title: string; items: Item[] }[] = [
       { to: '/search', label: 'Stogie Search', icon: MapPin },
       { to: '/sessions', label: 'Stogie Sessions', icon: PlayCircle },
       { to: '/blog', label: 'Stogie Blog', icon: BookOpen },
-      { to: '/refer', label: 'Refer a Friend', icon: Gift },
+      { to: '/refer', label: 'Refer A Friend', icon: Gift },
     ],
   },
   {

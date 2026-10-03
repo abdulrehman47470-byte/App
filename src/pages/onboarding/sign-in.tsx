@@ -79,7 +79,7 @@ export default function SignIn() {
         <div className="mx-auto w-full max-w-[380px] flex-1">
           <div className="mt-4 text-center">
             <LogoMark className="mx-auto size-14" />
-            <h1 className="mt-4 font-serif text-[30px] leading-tight text-text">{step === 'email' ? (signup ? 'Sign up with email' : 'Sign in with email') : 'Create your account'}</h1>
+            <h1 className="mt-4 font-serif text-[30px] leading-tight text-text">{step === 'email' ? (signup ? 'Sign Up With Email' : 'Sign in with email') : 'Create your account'}</h1>
             <p className="mt-1 text-sm text-muted">
               {step === 'email' ? (signup ? 'Enter your email to create your account.' : 'Welcome back. Enter your email to continue.') : (
                 <>
@@ -94,7 +94,7 @@ export default function SignIn() {
 
           {step === 'email' ? (
             <form key="email" onSubmit={submitEmail} className="page-enter mt-8 space-y-4" noValidate>
-              <Field label="Email address" error={error}>
+              <Field label="Email Address" error={error}>
                 {(id, d) => (
                   <Input
                     id={id}

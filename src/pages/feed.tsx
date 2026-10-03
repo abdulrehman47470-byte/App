@@ -44,7 +44,7 @@ export default function Feed() {
   return (
     <>
       <PageHeader
-        title="The Lounge"
+        title="Stogie Lounge"
         large
         subtitle="What members are smoking and sharing"
         action={

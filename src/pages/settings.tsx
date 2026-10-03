@@ -118,7 +118,7 @@ export function ReferPage() {
 
   return (
     <>
-      <PageHeader title="Refer a Friend" back />
+      <PageHeader title="Refer A Friend" back />
       <PageBody className="space-y-6">
         <div className="pt-4 text-center">
           <div className="mx-auto grid size-20 place-items-center rounded-full border border-line-strong bg-gold-fill">
