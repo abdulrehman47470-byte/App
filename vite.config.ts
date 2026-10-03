@@ -36,7 +36,8 @@ export default defineConfig({
     // so repeat visits open instantly and work offline. The page itself is always fetched from the
     // network first (cache only when offline), so a new deploy shows on the very next open.
     VitePWA({
-      registerType: 'autoUpdate',
+      // New versions install at once (skipWaiting) and sw-reload.js moves open windows onto them.
+      registerType: 'prompt',
       injectRegister: false, // registered in main.tsx, which also checks for updates on return to the tab
       includeAssets: ['favicon.png', 'apple-touch-icon.png', 'logo-mark.webp', 'logo-mark@2x.webp'],
       manifest: {
@@ -60,6 +61,7 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
+        importScripts: ['/sw-reload.js'],
         runtimeCaching: [
           {
             // App pages: newest version from the network; the saved copy only when offline.

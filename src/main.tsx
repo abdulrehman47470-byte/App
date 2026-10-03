@@ -18,6 +18,9 @@ import { SessionProvider } from './lib/session';
 
 // Service worker: installs new versions straight away and checks for one whenever the member
 // comes back to the app (and hourly), so a deploy is never stuck behind an old saved copy.
+navigator.serviceWorker?.addEventListener('message', (e) => {
+  if (e.data?.type === 'reload') window.location.reload();
+});
 registerSW({
   immediate: true,
   onRegisteredSW(_url, reg) {
