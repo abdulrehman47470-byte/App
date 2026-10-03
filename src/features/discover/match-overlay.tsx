@@ -66,15 +66,15 @@ export function MatchOverlay({
 
           <m.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.35 }} className="relative mt-10 text-center">
             <p className="micro-label !text-gold">Connected By The Leaf</p>
-            <h2 id="match-title" className="gold-text mt-2 font-serif text-[34px] italic leading-tight">
-              You’re Connected to Bonded by the Left!
+            <h2 id="match-title" className="gold-text mt-2 px-2 font-serif text-[34px] italic leading-tight">
+              Bonded By The Leaf
             </h2>
             <p className="mt-2 text-[15px] text-muted">You and {member.name} both want to connect.</p>
           </m.div>
 
           <m.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }} className="relative mt-10 w-full max-w-sm space-y-3">
             <Button size="lg" block onClick={onMessage} autoFocus>
-              <MessageCircle className="size-5" /> Say Hello to Light Up A Convo
+              <MessageCircle className="size-5" /> Just Light Up A Convo
             </Button>
             <Button size="lg" variant="ghost" block onClick={onClose}>
               Keep Browsing
