@@ -1,4 +1,4 @@
-import { BookOpen, ChevronRight, Clapperboard, Info, MapPin, MessageSquareText, Navigation, Phone, Search, UsersRound } from 'lucide-react';
+import { ChevronRight, Info, MapPin, MessageSquareText, Navigation, Phone, Search, UsersRound } from 'lucide-react';
 import { useDeferredValue, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { EmptyState } from '@/components/brand/empty-state';
@@ -50,7 +50,7 @@ export default function StogieSearch() {
 
   return (
     <>
-      <PageHeader title="Stogie Search" back subtitle="Members, lounges, posts, blogs and sessions" />
+      <PageHeader title="Stogie Search" back subtitle="Members, Lounges, Posts, Blogs and Sessions" />
       <div className="sticky top-[76px] z-20 space-y-2 border-b border-line/60 bg-bg px-4 pb-2 pt-3">
         <SearchInput
           value={q}
@@ -92,10 +92,8 @@ export default function StogieSearch() {
 
 function Explore({ onPick, onTab }: { onPick: (q: string) => void; onTab: (t: Tab) => void }) {
   const shortcuts: { label: string; body: string; icon: typeof MapPin; onClick?: () => void; to?: string }[] = [
-    { label: 'Find a lounge', body: 'Map, hours and directions', icon: MapPin, onClick: () => onTab('lounges') },
-    { label: 'Discover members', body: 'People near you', icon: UsersRound, to: '/discover' },
-    { label: 'Stogie Sessions', body: 'Short video lessons', icon: Clapperboard, to: '/sessions' },
-    { label: 'Stogie Blog', body: 'Guides, reviews, culture', icon: BookOpen, to: '/blog' },
+    { label: 'Find A Lounge', body: 'Map, hours and directions', icon: MapPin, onClick: () => onTab('lounges') },
+    { label: 'Discover Members', body: 'People near you', icon: UsersRound, to: '/discover' },
   ];
   return (
     <>

@@ -35,7 +35,7 @@ export function SafetySheet({
     <Sheet
       open={open}
       onOpenChange={close}
-      title={mode === 'report' ? `Report ${name}` : mode === 'block' ? `Block ${name}?` : 'Safety'}
+      title={mode === 'report' ? `Report ${name}` : mode === 'block' ? `Block ${name}?` : 'Report'}
       description={
         mode === 'report'
           ? 'Reports are private. Our team reviews every one against the Code of Ethics.'

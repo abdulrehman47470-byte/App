@@ -56,7 +56,7 @@ export default function MemberMap() {
 
   return (
     <>
-      <PageHeader title="Member Map" large subtitle="See where the community smokes" />
+      <PageHeader title="Member Map" large subtitle="See where the stogie community relaxes" />
       <PageBody className="space-y-4">
         <div className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4" role="group" aria-label="Map layers and filters">
           <Chip size="sm" label="Members" selected={showMembers} onToggle={() => setShowMembers((v) => !v)} />

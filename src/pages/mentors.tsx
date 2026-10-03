@@ -21,7 +21,7 @@ export default function Mentors() {
 
   return (
     <>
-      <PageHeader title={FEATURES.feed ? 'Discover' : 'Mentors'} large subtitle="Learn the leaf, or pass it on" />
+      <PageHeader title={FEATURES.feed ? 'Discover' : 'Mentors'} large subtitle="Discover to Find Stogie Enthusiasts" />
       <DiscoverTabs />
       <PageBody className="space-y-4">
         <Segmented
@@ -29,8 +29,8 @@ export default function Mentors() {
           value={segment}
           onChange={setSegment}
           options={[
-            { value: 'find', label: 'Find a mentor' },
-            { value: 'guide', label: 'Guide beginners' },
+            { value: 'find', label: 'Find A Mentor' },
+            { value: 'guide', label: 'Guide Beginners' },
           ]}
         />
         <div className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4" role="group" aria-label="Topic">
@@ -40,8 +40,9 @@ export default function Mentors() {
           ))}
         </div>
         <p className="text-sm text-muted">
-          {segment === 'find' ? 'Experienced members happy to guide newcomers.' : 'Newer members looking for a guide.'} Connect
-          with someone, then chat.
+          {segment === 'find'
+            ? 'Experienced stogie aficionados willing to guide newcomers. Connect with a member.'
+            : 'Newer members looking for a guide. Connect with someone, then chat.'}
         </p>
 
         {isLoading ? (

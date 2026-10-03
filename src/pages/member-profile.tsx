@@ -2,7 +2,7 @@ import { Ban, ChevronLeft, Flag, MoreHorizontal, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { EmptyState } from '@/components/brand/empty-state';
-import { CigarBand, MatchRing, SafetyBanner, VerifiedBadge } from '@/components/brand/ornaments';
+import { MatchRing, SafetyBanner, VerifiedBadge } from '@/components/brand/ornaments';
 import { PortraitArt } from '@/components/brand/portrait';
 import { Button } from '@/components/ui/button';
 import { Card, Skeleton } from '@/components/ui/misc';
@@ -141,7 +141,6 @@ export default function MemberProfile() {
         {FEATURES.feed && <ActivitySection memberId={m.id} name={m.name} />}
         <MemberBlogs memberId={m.id} name={m.name} />
 
-        <CigarBand label="Stay safe" />
         <SafetyBanner />
         <div className="grid grid-cols-2 gap-3">
           <Button variant="danger" onClick={() => setSafety(true)}>

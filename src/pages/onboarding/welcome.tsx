@@ -6,7 +6,6 @@ import { TrustNote } from '@/components/brand/ornaments';
 import { Frame } from '@/components/layout/frame';
 import { Button } from '@/components/ui/button';
 import { Sheet } from '@/components/ui/sheet';
-import { DEMO_ENABLED, HOME } from '@/config/features';
 import { AppleLogo } from '@/features/auth/apple-signin-mock';
 import { GoogleG } from '@/features/auth/google-signin-mock';
 import { useSignIn } from '@/features/auth/use-social-sign-in';
@@ -15,7 +14,7 @@ import { nextStep, useSession } from '@/lib/session';
 type Mode = 'signup' | 'login';
 
 export default function Welcome() {
-  const { session, loadDemo } = useSession();
+  const { session } = useSession();
   const navigate = useNavigate();
   const auth = useSignIn();
   const [mode, setMode] = useState<Mode | null>(null);
@@ -48,7 +47,7 @@ export default function Welcome() {
             <span className="size-1 rotate-45 bg-current opacity-80" />
             <span className="h-px w-8 bg-gradient-to-l from-transparent to-current opacity-60" />
           </div>
-          <p className="mt-3 font-serif text-lg italic text-text/85">Good cigars. Better company.</p>
+          <p className="mt-3 font-serif text-lg italic text-text/85">Good Cigars. Better Company.</p>
 
           <div className="mt-10 w-full space-y-3 [@media(max-height:700px)]:mt-7">
             <Button size="lg" block className="h-[52px] rounded-[14px] text-[15px]" onClick={() => openSheet('signup')}>
@@ -60,25 +59,13 @@ export default function Welcome() {
           </div>
 
           <TrustNote className="mt-6">Members only · Adults 21+</TrustNote>
-          {DEMO_ENABLED && (
-            <button
-              type="button"
-              className="mt-4 text-xs text-faint underline decoration-dotted underline-offset-4 hover:text-gold"
-              onClick={async () => {
-                await loadDemo();
-                navigate(HOME);
-              }}
-            >
-              Just looking? Explore with a demo member
-            </button>
-          )}
         </main>
       </div>
 
       <Sheet
         open={mode !== null}
         onOpenChange={(v) => !v && setMode(null)}
-        title={signup ? 'Create your account' : 'Welcome back'}
+        title={signup ? 'Create Your Account' : 'Welcome back'}
         description={signup ? 'Choose how you’d like to join Daily Stogie.' : 'Sign in to your account.'}
       >
         <div className="space-y-3 pb-2">

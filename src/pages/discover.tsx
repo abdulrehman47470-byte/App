@@ -147,7 +147,7 @@ export default function Discover() {
             <div className="surface absolute inset-0 grid place-items-center rounded-[24px]">
               <EmptyState
                 illustration="humidor"
-                title="You're all caught up"
+                title="Your All Caught Up!"
                 body="No more members match your filters right now. Widen your filters or check back soon."
                 action={
                   <FiltersButton value={filters} onApply={applyFilters} variant="empty" />
