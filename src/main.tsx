@@ -16,20 +16,43 @@ import App from './App';
 import { ToastProvider } from './components/ui/toast';
 import { SessionProvider } from './lib/session';
 
-// Service worker: installs new versions straight away and checks for one whenever the member
-// comes back to the app (and hourly), so a deploy is never stuck behind an old saved copy.
+// Always show the newest version, on computers and phones. The service worker installs new versions
+// straight away; on top of that, whenever the app opens or comes back to the screen (phones resume
+// apps rather than reopening them) it compares its build id with /version.json and reloads if a
+// newer version is live.
 navigator.serviceWorker?.addEventListener('message', (e) => {
   if (e.data?.type === 'reload') window.location.reload();
 });
+let swReg: ServiceWorkerRegistration | undefined;
 registerSW({
   immediate: true,
   onRegisteredSW(_url, reg) {
-    if (!reg) return;
-    const check = () => void reg.update().catch(() => {});
-    document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && check());
-    setInterval(check, 60 * 60_000);
+    swReg = reg;
   },
 });
+let lastCheck = 0;
+async function checkForNewVersion() {
+  if (import.meta.env.DEV || Date.now() - lastCheck < 5_000) return;
+  lastCheck = Date.now();
+  swReg?.update().catch(() => {});
+  try {
+    const res = await fetch('/version.json', { cache: 'no-store' });
+    const { id } = (await res.json()) as { id?: string };
+    // Reload once per new version (guards against a loop if the network hands back an old page).
+    if (id && id !== __BUILD_ID__ && sessionStorage.getItem('ds.reloaded-for') !== id) {
+      sessionStorage.setItem('ds.reloaded-for', id);
+      window.location.reload();
+    }
+  } catch {
+    // offline: keep the version we have
+  }
+}
+document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && checkForNewVersion());
+window.addEventListener('pageshow', (e) => e.persisted && checkForNewVersion());
+window.addEventListener('focus', checkForNewVersion);
+window.addEventListener('online', checkForNewVersion);
+setInterval(checkForNewVersion, 30 * 60_000);
+checkForNewVersion();
 
 const queryClient = new QueryClient({
   defaultOptions: {

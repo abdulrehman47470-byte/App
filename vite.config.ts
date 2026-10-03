@@ -24,8 +24,26 @@ function preloadFonts(patterns: RegExp[]): Plugin {
   };
 }
 
+/**
+ * Every build gets an id, baked into the app and written to /version.json. The app compares the two
+ * when it comes back to the screen (phones resume apps instead of reopening them) and reloads if a
+ * newer version is live.
+ */
+const BUILD_ID = Date.now().toString(36);
+function versionFile(): Plugin {
+  return {
+    name: 'version-file',
+    apply: 'build',
+    generateBundle() {
+      this.emitFile({ type: 'asset', fileName: 'version.json', source: JSON.stringify({ id: BUILD_ID }) });
+    },
+  };
+}
+
 export default defineConfig({
+  define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
   plugins: [
+    versionFile(),
     react(),
     // React Compiler: automatically skips re-rendering parts of the screen that did not change,
     // which keeps typing and tapping in long forms (e.g. hundreds of preference chips) instant.
