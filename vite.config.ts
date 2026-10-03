@@ -33,10 +33,11 @@ export default defineConfig({
     tailwindcss(),
     preloadFonts([/inter-latin-400-normal/, /inter-latin-600-normal/, /playfair-display-latin-600-normal/]),
     // Service worker: after the first visit the app shell loads straight from the device,
-    // so repeat visits open instantly and work offline. New versions update automatically.
+    // so repeat visits open instantly and work offline. The page itself is always fetched from the
+    // network first (cache only when offline), so a new deploy shows on the very next open.
     VitePWA({
       registerType: 'autoUpdate',
-      injectRegister: 'script-defer',
+      injectRegister: false, // registered in main.tsx, which also checks for updates on return to the tab
       includeAssets: ['favicon.png', 'apple-touch-icon.png', 'logo-mark.webp', 'logo-mark@2x.webp'],
       manifest: {
         name: 'Daily Stogie',
@@ -53,11 +54,19 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2}'],
+        globPatterns: ['**/*.{js,css,svg,png,webp,woff2}'],
         globIgnores: ['members/**'],
-        navigateFallback: '/index.html',
+        navigateFallback: null,
         cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
+          {
+            // App pages: newest version from the network; the saved copy only when offline.
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: { cacheName: 'pages', networkTimeoutSeconds: 4, expiration: { maxEntries: 20 } },
+          },
           {
             // Member photos: cached on first view, then instant.
             urlPattern: ({ url }) => url.pathname.startsWith('/members/'),

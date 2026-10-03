@@ -11,9 +11,22 @@ import { LazyMotion, MotionConfig } from 'framer-motion';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
+import { registerSW } from 'virtual:pwa-register';
 import App from './App';
 import { ToastProvider } from './components/ui/toast';
 import { SessionProvider } from './lib/session';
+
+// Service worker: installs new versions straight away and checks for one whenever the member
+// comes back to the app (and hourly), so a deploy is never stuck behind an old saved copy.
+registerSW({
+  immediate: true,
+  onRegisteredSW(_url, reg) {
+    if (!reg) return;
+    const check = () => void reg.update().catch(() => {});
+    document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && check());
+    setInterval(check, 60 * 60_000);
+  },
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {
