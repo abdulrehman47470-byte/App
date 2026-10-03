@@ -74,7 +74,7 @@ export function MatchOverlay({
 
           <m.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }} className="relative mt-10 w-full max-w-sm space-y-3">
             <Button size="lg" block onClick={onMessage} autoFocus>
-              <MessageCircle className="size-5" /> Just Light Up A Convo
+              <MessageCircle className="size-5" /> Light Up A Convo
             </Button>
             <Button size="lg" variant="ghost" block onClick={onClose}>
               Keep Browsing
